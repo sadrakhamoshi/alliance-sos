@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "688735100332",
+    "firebase_url": "https://alliance-sos.firebaseio.com",
+    "project_id": "alliance-sos",
+    "storage_bucket": "alliance-sos.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:688735100332:android:3e9d815d81676a70b42e09",
+        "android_client_info": {
+          "package_name": "com.example.alliancesos"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "688735100332-002cf71n1kqiueosvafok9avnsd6q08o.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.alliancesos",
+            "certificate_hash": "91041653b076d9cca5a1478dc70914b0370f5adf"
+          }
+        },
+        {
+          "client_id": "688735100332-a5a9ipcij7nrj6ro104rditckhodedba.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBlLF1xUz6Dr7yE1VCaa9uPkq2VTgPgPcM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "688735100332-a5a9ipcij7nrj6ro104rditckhodedba.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
