@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Alliance SOS</string>
+    <string name="login_btn">LogIn</string>
+    <string name="signup_btn">Sign Up</string>
+    <string name="password_hint">Password</string>
+    <string name="email_hint">Email</string>
 </resources>
