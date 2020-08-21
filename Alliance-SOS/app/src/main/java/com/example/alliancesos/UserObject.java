@@ -1,6 +1,6 @@
 package com.example.alliancesos;
 
-public class User {
+public class UserObject {
     private String userId;
     private String userName;
     private String email;
