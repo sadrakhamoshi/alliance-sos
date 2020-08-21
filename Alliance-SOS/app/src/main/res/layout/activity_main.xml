@@ -1,16 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <TextView
+    <Button
+        android:id="@+id/log_out_btn"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="sadarar"
-        android:textSize="200dp"/>
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:text="LogOut" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycle_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="10" />
+
+    <Button
+        android:id="@+id/create_group_btn"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:text="Create Group" />
 
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>
