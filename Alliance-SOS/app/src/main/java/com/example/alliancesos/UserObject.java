@@ -1,13 +1,14 @@
 package com.example.alliancesos;
 
 public class UserObject {
-    private String userId;
     private String userName;
     private String email;
     private String password;
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public UserObject(String user, String mail, String pass) {
+        password = pass;
+        email = mail;
+        userName = user;
     }
 
     public String getEmail() {
