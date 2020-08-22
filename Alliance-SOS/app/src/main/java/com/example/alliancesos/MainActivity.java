@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -25,6 +26,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.security.acl.Group;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -37,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
     //database
     private DatabaseReference mRoot, mGroupsRef, mUsersRef;
 
-    private ListView groups;
+    private ListView groups_listView;
     private ArrayList<String> listOfAllGroups;
     private ArrayAdapter<String> arrayAdapter;
 
@@ -63,10 +65,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void InitializeUI() {
-        groups = findViewById(R.id.list_view);
+        groups_listView = findViewById(R.id.list_view);
         listOfAllGroups = new ArrayList<>();
         arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, listOfAllGroups);
-        groups.setAdapter(arrayAdapter);
+        groups_listView.setAdapter(arrayAdapter);
 
         Button logOut = findViewById(R.id.log_out_btn);
         Button createGroup = findViewById(R.id.create_group_btn);
@@ -86,6 +88,15 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
                 finish();
                 return;
+            }
+        });
+        groups_listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String groupName=listOfAllGroups.get(position);
+                Intent toGroupActivity=new Intent(getApplicationContext(), GroupActivity.class);
+                toGroupActivity.putExtra("groupName",groupName);
+                startActivity(toGroupActivity);
             }
         });
     }
