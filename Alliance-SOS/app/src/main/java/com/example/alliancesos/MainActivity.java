@@ -34,7 +34,7 @@ import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
 
-    private String mCurrentUserId;
+    private String mCurrentUserId, currentUserName;
 
     //database
     private DatabaseReference mRoot, mGroupsRef, mUsersRef;
@@ -60,8 +60,27 @@ public class MainActivity extends AppCompatActivity {
         mGroupsRef = mRoot.child("groups");
         mUsersRef = mRoot.child("users");
 
+        getCurrentUserName();
+
         InitializeUI();
 
+    }
+
+    private void getCurrentUserName() {
+        mUsersRef.child(mCurrentUserId).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    currentUserName = snapshot.child("userName").getValue().toString();
+                    Toast.makeText(MainActivity.this, "Current User Name Is " + currentUserName, Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void InitializeUI() {
@@ -93,9 +112,9 @@ public class MainActivity extends AppCompatActivity {
         groups_listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String groupName=listOfAllGroups.get(position);
-                Intent toGroupActivity=new Intent(getApplicationContext(), GroupActivity.class);
-                toGroupActivity.putExtra("groupName",groupName);
+                String groupName = listOfAllGroups.get(position);
+                Intent toGroupActivity = new Intent(getApplicationContext(), GroupActivity.class);
+                toGroupActivity.putExtra("groupName", groupName);
                 startActivity(toGroupActivity);
             }
         });
@@ -174,7 +193,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void CreateNewGroup(final String groupName, final String groupId) {
 
-        Groups groups = new Groups(groupName, groupId);
+        Groups groups = new Groups(groupName, groupId, currentUserName);
 
         mGroupsRef.child(groupId).setValue(groups).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
