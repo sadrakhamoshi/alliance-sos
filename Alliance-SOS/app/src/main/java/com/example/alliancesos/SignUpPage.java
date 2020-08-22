@@ -51,7 +51,7 @@ public class SignUpPage extends AppCompatActivity {
     private void InitializeComp() {
         //database
         mFirebaseDatabase = FirebaseDatabase.getInstance();
-        mRootDatabase=mFirebaseDatabase.getReference();
+        mRootDatabase = mFirebaseDatabase.getReference();
         mUserDatabaseRef = mRootDatabase.child("users");
 
 
@@ -77,9 +77,16 @@ public class SignUpPage extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
+
                             FirebaseUser user = mFirebaseAuth.getCurrentUser();
+
                             UserObject userObject = new UserObject(mUsername.getText().toString(), mEmail.getText().toString(), mPassword.getText().toString());
-                            mUserDatabaseRef.push().setValue(userObject);
+
+                            String key = mFirebaseAuth.getCurrentUser().getUid();
+
+                            mUserDatabaseRef.child(key).setValue(userObject);
+
+                            Toast.makeText(SignUpPage.this, key, Toast.LENGTH_SHORT).show();
 
                             Toast.makeText(getApplicationContext(), "Signed in " + user.getEmail(), Toast.LENGTH_LONG).show();
                         } else {

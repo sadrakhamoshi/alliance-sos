@@ -49,6 +49,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void Initialize() {
+
+        //auth
         mCurrentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         //database
@@ -114,7 +116,11 @@ public class MainActivity extends AppCompatActivity {
                 if (TextUtils.isEmpty(groupName) || TextUtils.isEmpty(groupId)) {
                     Toast.makeText(MainActivity.this, "None of them should not be Empty...", Toast.LENGTH_SHORT).show();
                 } else {
+
                     CreateNewGroup(groupName, groupId);
+
+                    RefToCurrentUser(groupId);
+
                     showGroups();
                 }
             }
@@ -167,6 +173,20 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     String message = task.getException().toString();
                     Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    private void RefToCurrentUser(String groupId) {
+        Toast.makeText(this, mCurrentUserId, Toast.LENGTH_SHORT).show();
+        mUsersRef.child(mCurrentUserId).child("Groups").push().setValue(groupId).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    Toast.makeText(MainActivity.this, "add to users Groups", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(MainActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                 }
             }
         });
