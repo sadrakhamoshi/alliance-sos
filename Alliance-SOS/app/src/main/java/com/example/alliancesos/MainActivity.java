@@ -26,7 +26,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.security.acl.Group;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -34,7 +33,7 @@ import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
 
-    private String mCurrentUserId, currentUserName;
+    private String mCurrentUserId, mCurrentUserName;
 
     //database
     private DatabaseReference mRoot, mGroupsRef, mUsersRef;
@@ -71,8 +70,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    currentUserName = snapshot.child("userName").getValue().toString();
-                    Toast.makeText(MainActivity.this, "Current User Name Is " + currentUserName, Toast.LENGTH_SHORT).show();
+                    mCurrentUserName = snapshot.child("userName").getValue().toString();
+                    Toast.makeText(MainActivity.this, "Current User Name Is " + mCurrentUserName, Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -85,9 +84,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void InitializeUI() {
         groups_listView = findViewById(R.id.list_view);
-        listOfAllGroups = new ArrayList<>();
+        //listOfAllGroups = new ArrayList<>();
         listOfGroupId = new ArrayList<>();
-        arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, listOfAllGroups);
+        arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, listOfGroupId);
         groups_listView.setAdapter(arrayAdapter);
 
         Button logOut = findViewById(R.id.log_out_btn);
@@ -113,9 +112,9 @@ public class MainActivity extends AppCompatActivity {
         groups_listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String groupName = listOfAllGroups.get(position);
+                //String groupName = listOfAllGroups.get(position);
                 Intent toGroupActivity = new Intent(getApplicationContext(), GroupActivity.class);
-                toGroupActivity.putExtra("groupName", groupName);
+                //toGroupActivity.putExtra("groupName", groupName);
                 toGroupActivity.putExtra("groupId", listOfGroupId.get(position));
                 startActivity(toGroupActivity);
             }
@@ -153,7 +152,7 @@ public class MainActivity extends AppCompatActivity {
 
                     RefToCurrentUser(groupId);
 
-                    showGroups();
+//                    showCurrentUserGroups();
                 }
             }
         });
@@ -166,27 +165,27 @@ public class MainActivity extends AppCompatActivity {
         builder.show();
     }
 
-    private void showGroups() {
-        mRoot.child("groups").addValueEventListener(new ValueEventListener() {
+    private void showCurrentUserGroups() {
+        mUsersRef.child(mCurrentUserId).child("Groups").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 Iterator iterator = snapshot.getChildren().iterator();
 
-                Set<String> all_groups = new HashSet<>();
+                //Set<String> all_groups = new HashSet<>();
                 Set<String> all_groups_id = new HashSet<>();
                 while (iterator.hasNext()) {
 
                     DataSnapshot dataSnapshot = ((DataSnapshot) iterator.next());
-                    String name = dataSnapshot.child("groupName").getValue().toString();
-                    String id = dataSnapshot.child("id").getValue().toString();
+                    //String name = dataSnapshot.child("groupName").getValue().toString();
+                    String id = dataSnapshot.getValue().toString();
 
-                    all_groups.add(name);
+                    //all_groups.add(name);
                     all_groups_id.add(id);
                 }
-                listOfAllGroups.clear();
+                //listOfAllGroups.clear();
                 listOfGroupId.clear();
                 listOfGroupId.addAll(all_groups_id);
-                listOfAllGroups.addAll(all_groups);
+                //listOfAllGroups.addAll(all_groups);
                 arrayAdapter.notifyDataSetChanged();
             }
 
@@ -201,7 +200,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void CreateNewGroup(final String groupName, final String groupId) {
 
-        Groups groups = new Groups(groupName, groupId, currentUserName);
+        Groups groups = new Groups(groupName, groupId, mCurrentUserName);
 
         mGroupsRef.child(groupId).setValue(groups).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
@@ -233,6 +232,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        showGroups();
+        showCurrentUserGroups();
     }
 }
