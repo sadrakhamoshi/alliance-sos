@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private DatabaseReference mRoot, mGroupsRef, mUsersRef;
 
     private ListView groups_listView;
-    private ArrayList<String> listOfAllGroups;
+    private ArrayList<String> listOfAllGroups, listOfGroupId;
     private ArrayAdapter<String> arrayAdapter;
 
     @Override
@@ -86,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
     private void InitializeUI() {
         groups_listView = findViewById(R.id.list_view);
         listOfAllGroups = new ArrayList<>();
+        listOfGroupId = new ArrayList<>();
         arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, listOfAllGroups);
         groups_listView.setAdapter(arrayAdapter);
 
@@ -115,6 +116,7 @@ public class MainActivity extends AppCompatActivity {
                 String groupName = listOfAllGroups.get(position);
                 Intent toGroupActivity = new Intent(getApplicationContext(), GroupActivity.class);
                 toGroupActivity.putExtra("groupName", groupName);
+                toGroupActivity.putExtra("groupId", listOfGroupId.get(position));
                 startActivity(toGroupActivity);
             }
         });
@@ -171,13 +173,19 @@ public class MainActivity extends AppCompatActivity {
                 Iterator iterator = snapshot.getChildren().iterator();
 
                 Set<String> all_groups = new HashSet<>();
+                Set<String> all_groups_id = new HashSet<>();
                 while (iterator.hasNext()) {
 
-                    String name = ((DataSnapshot) iterator.next()).child("groupName").getValue().toString();
+                    DataSnapshot dataSnapshot = ((DataSnapshot) iterator.next());
+                    String name = dataSnapshot.child("groupName").getValue().toString();
+                    String id = dataSnapshot.child("id").getValue().toString();
 
                     all_groups.add(name);
+                    all_groups_id.add(id);
                 }
                 listOfAllGroups.clear();
+                listOfGroupId.clear();
+                listOfGroupId.addAll(all_groups_id);
                 listOfAllGroups.addAll(all_groups);
                 arrayAdapter.notifyDataSetChanged();
             }
