@@ -149,10 +149,8 @@ public class MainActivity extends AppCompatActivity {
                 } else {
 
                     CreateNewGroup(groupName, groupId);
-
                     RefToCurrentUser(groupId);
 
-//                    showCurrentUserGroups();
                 }
             }
         });

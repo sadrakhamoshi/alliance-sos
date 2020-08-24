@@ -11,6 +11,8 @@ import android.widget.Toast;
 
 public class GroupActivity extends AppCompatActivity {
 
+    private String mCurrentGroupId;
+
     private Button mMembersList;
     private Button mGroupList;
 
@@ -21,13 +23,14 @@ public class GroupActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_group);
         //String groupName = getIntent().getStringExtra("groupName");
-        String groupId = getIntent().getStringExtra("groupId");
-        InitializeUI(groupId);
+        mCurrentGroupId = getIntent().getStringExtra("groupId");
+
+        InitializeUI();
     }
 
-    private void InitializeUI(final String groupId) {
+    private void InitializeUI() {
         TextView nameGroup = findViewById(R.id.group_name_txt);
-        nameGroup.setText(groupId);
+        nameGroup.setText(mCurrentGroupId);
 
         mSchedule = findViewById(R.id.schedule_event);
         mSchedule.setOnClickListener(new View.OnClickListener() {
@@ -36,7 +39,6 @@ public class GroupActivity extends AppCompatActivity {
                 goToSetScheduleEvent();
             }
         });
-
 
         Button b1 = findViewById(R.id.help_us_btn);
         Button b2 = findViewById(R.id.user_setting_btn);
@@ -60,7 +62,7 @@ public class GroupActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent toMember = new Intent(getApplicationContext(), MemberActivity.class);
-                toMember.putExtra("groupId", groupId);
+                toMember.putExtra("groupId", mCurrentGroupId);
                 startActivity(toMember);
             }
         });
@@ -79,6 +81,8 @@ public class GroupActivity extends AppCompatActivity {
     }
 
     private void goToSetScheduleEvent() {
-
+        Intent intent = new Intent(getApplicationContext(), SetScheduleActivity.class);
+        intent.putExtra("groupId", mCurrentGroupId);
+        startActivity(intent);
     }
 }

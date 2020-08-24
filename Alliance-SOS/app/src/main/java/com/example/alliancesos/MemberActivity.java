@@ -3,6 +3,7 @@ package com.example.alliancesos;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -45,7 +46,10 @@ public class MemberActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_member);
-        mGroupId = getIntent().getStringExtra("groupId");
+        Intent intent = getIntent();
+        if (intent != null) {
+            mGroupId = intent.getStringExtra("groupId");
+        }
 
         initialize();
     }
