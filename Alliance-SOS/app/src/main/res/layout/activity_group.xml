@@ -86,6 +86,7 @@
         android:layout_below="@id/schedule_event"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"
+        android:textDirection="ltr"
         android:layoutDirection="ltr" />
 
     <Button

@@ -25,6 +25,7 @@
                 android:id="@+id/schedule_title"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:ems="6"
                 android:hint="@string/schedule_title" />
 
         </com.google.android.material.textfield.TextInputLayout>
@@ -38,7 +39,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:focusable="false"
-                android:hint="@string/schedule_date" />
+                android:hint="@string/schedule_date"
+                android:textDirection="ltr" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -51,7 +53,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:focusable="false"
-                android:hint="@string/schedule_time" />
+                android:hint="@string/schedule_time"
+                android:textDirection="ltr" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -68,7 +71,6 @@
                 android:inputType="textAutoComplete" />
 
         </com.google.android.material.textfield.TextInputLayout>
-
 
         <Button
             android:id="@+id/set_schedule_btn"
