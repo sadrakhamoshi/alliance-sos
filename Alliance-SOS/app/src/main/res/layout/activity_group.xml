@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="10dp"
+    tools:context=".GroupActivity">
+
+    <Button
+        android:id="@+id/member_list_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:text="members list" />
+
+    <TextView
+        android:id="@+id/group_name_txt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:minWidth="100dp"
+        android:layout_alignTop="@id/member_list_btn"
+        android:layout_alignBottom="@id/member_list_btn"
+        android:background="@color/yellow"
+        android:gravity="center"
+        android:textSize="20sp"
+        tools:text="groupName" />
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/profile_image"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:layout_below="@id/member_list_btn"
+        android:layout_marginTop="30dp"
+        android:layout_toLeftOf="@id/member_list_btn"
+        android:layout_toRightOf="@id/group_name_txt"
+        android:src="@drawable/facebook"
+        app:civ_border_color="@color/colorPrimaryDark"
+        app:civ_border_width="2dp" />
+
+    <Button
+        android:id="@+id/sos_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/schedule_event"
+        android:layout_below="@id/profile_image"
+        android:layout_centerInParent="true"
+        android:layout_margin="15dp"
+        android:layout_toLeftOf="@id/member_list_btn"
+        android:layout_toRightOf="@id/group_name_txt"
+        android:background="@drawable/sos_back_ground"
+        android:text="sos" />
+
+    <Button
+        android:id="@+id/groups_list_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@id/group_name_txt"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentBottom="true"
+        android:text="Groups" />
+
+    <Button
+        android:id="@+id/user_setting_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@id/member_list_btn"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:text="User setting" />
+
+    <TextView
+        android:id="@+id/schedule_event"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="Schedule Event"
+        android:textSize="25sp" />
+
+    <ListView
+        android:id="@+id/schedule_list_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/groups_list_btn"
+        android:layout_below="@id/schedule_event"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:textDirection="ltr"
+        android:layoutDirection="ltr" />
+
+    <Button
+        android:id="@+id/help_us_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="help us"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"/>
+
+
+</RelativeLayout>

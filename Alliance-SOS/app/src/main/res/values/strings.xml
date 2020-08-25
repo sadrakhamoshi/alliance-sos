@@ -4,6 +4,11 @@
     <string name="username_hint">Username</string>
     <string name="signup_btn">Sign Up</string>
     <string name="password_hint">Password</string>
+    <string name="schedule_title">Title of Schedule ...</string>
+    <string name="schedule_button">Set schedule and send Notification </string>
+    <string name="schedule_describe">More Description ...</string>
+    <string name="schedule_date">Pick a Date ...</string>
+    <string name="schedule_time">Pick a Time ...</string>
     <string name="email_hint">Email</string>
     <string name="signUpwithgoogel">SginUp Via Google</string>
 </resources>
