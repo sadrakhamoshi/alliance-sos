@@ -59,7 +59,6 @@ public class SignUpPage extends AppCompatActivity {
         mRootDatabase = FirebaseDatabase.getInstance().getReference();
         mUserDatabaseRef = mRootDatabase.child("users");
 
-
         //auth
         mFirebaseAuth = FirebaseAuth.getInstance();
 
@@ -103,11 +102,12 @@ public class SignUpPage extends AppCompatActivity {
                 if (task.isSuccessful()) {
                     Toast.makeText(SignUpPage.this, "Token successfully added ...", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(SignUpPage.this, "Erorr in addTokenToDatabase ...", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(SignUpPage.this, "Error in addTokenToDatabase ...", Toast.LENGTH_SHORT).show();
                 }
             }
         });
     }
+
 
     private void getTokenAndSignUp() {
         FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(SignUpPage.this, new OnSuccessListener<InstanceIdResult>() {
@@ -117,15 +117,13 @@ public class SignUpPage extends AppCompatActivity {
 
                 mToken = new Token(newToken);
 
-                UserObject userObject = new UserObject(mUsername.getText().toString(), mEmail.getText().toString(), mPassword.getText().toString(), mToken.getToken());
-
                 Toast.makeText(getApplicationContext(), "Token is " + mToken.getToken(), Toast.LENGTH_SHORT).show();
 
                 String key = mFirebaseAuth.getCurrentUser().getUid();
 
-                mUserDatabaseRef.child(key).setValue(userObject);
+                UserObject userObject = new UserObject(key, mUsername.getText().toString(), mEmail.getText().toString(), mPassword.getText().toString(), mToken.getToken());
 
-                addTokenToDatabase(key);
+                mUserDatabaseRef.child(key).setValue(userObject);
             }
         });
     }

@@ -162,14 +162,8 @@ public class MemberActivity extends AppCompatActivity {
         });
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        showAllMembers();
-    }
-
     private void showAllMembers() {
-        mGroupRef.child(mGroupId).child("member").addValueEventListener(new ValueEventListener() {
+        mGroupRef.child(mGroupId).child("members").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
@@ -193,5 +187,11 @@ public class MemberActivity extends AppCompatActivity {
                 Toast.makeText(MemberActivity.this, "Error On showAllMembers Func " + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        showAllMembers();
     }
 }

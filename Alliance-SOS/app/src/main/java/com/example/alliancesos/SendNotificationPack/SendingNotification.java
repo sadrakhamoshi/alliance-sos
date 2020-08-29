@@ -40,7 +40,7 @@ public class SendingNotification {
 
     public void Send() {
 
-        mGroupRef.child(this.mGroupId).child("members").addListenerForSingleValueEvent(new ValueEventListener() {
+        mGroupRef.child(this.mGroupId).child("members").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 Iterator iterator = snapshot.getChildren().iterator();
@@ -51,7 +51,7 @@ public class SendingNotification {
 
                     String token = member.getToken();
 
-                    sendNotif(token);
+                    sendNotif(token, member.getName());
                 }
             }
 
@@ -62,8 +62,8 @@ public class SendingNotification {
         });
     }
 
-    private void sendNotif(String token) {
-        DataToSend data = new DataToSend("newNotification", "Just For Testing...");
+    private void sendNotif(String token, String name) {
+        DataToSend data = new DataToSend("newNotification for " + name, "Just For Testing...");
         NotificationSender sender = new NotificationSender(data, token);
         mApiService.sendNotification(sender).enqueue(new Callback<MyResponse>() {
             @Override

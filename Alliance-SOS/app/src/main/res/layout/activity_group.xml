@@ -35,7 +35,7 @@
         android:layout_marginTop="30dp"
         android:layout_toLeftOf="@id/member_list_btn"
         android:layout_toRightOf="@id/group_name_txt"
-        android:src="@drawable/facebook"
+        android:src="@drawable/un_known"
         app:civ_border_color="@color/colorPrimaryDark"
         app:civ_border_width="2dp" />
 

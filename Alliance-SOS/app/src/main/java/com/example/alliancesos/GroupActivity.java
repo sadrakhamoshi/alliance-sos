@@ -25,6 +25,8 @@ import java.util.Set;
 
 public class GroupActivity extends AppCompatActivity {
 
+    private String mCurrentUserName, mCurrentUserId;
+
     //database
     private DatabaseReference mGroupRef;
 
@@ -43,8 +45,9 @@ public class GroupActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_group);
-        //String groupName = getIntent().getStringExtra("groupName");
         mCurrentGroupId = getIntent().getStringExtra("groupId");
+        mCurrentUserId = getIntent().getStringExtra("currUserId");
+        mCurrentUserName = getIntent().getStringExtra("currUserName");
 
         InitializeUI();
     }
@@ -111,7 +114,11 @@ public class GroupActivity extends AppCompatActivity {
 
     private void goToSetScheduleEvent() {
         Intent intent = new Intent(getApplicationContext(), SetScheduleActivity.class);
+
         intent.putExtra("groupId", mCurrentGroupId);
+        intent.putExtra("currUserName",mCurrentUserName);
+        intent.putExtra("currUserId",mCurrentUserId);
+
         startActivity(intent);
     }
 
@@ -136,7 +143,7 @@ public class GroupActivity extends AppCompatActivity {
                                 tmp += message.getScheduleObject().getTitle() + "\n";
                                 tmp += message.getScheduleObject().getDescription() + "\n";
                                 tmp += message.getCreatedBy() + "\n";
-                                tmp += message.getCreatedTime() ;
+                                tmp += message.getCreatedTime();
                                 set.add(tmp);
                             }
                         } catch (Exception e) {
