@@ -18,6 +18,7 @@ import android.widget.EditText;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.example.alliancesos.SendNotificationPack.SendingNotification;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -181,7 +182,8 @@ public class SetScheduleActivity extends AppCompatActivity {
     }
 
     private void sendNotificationToOtherDevice() {
-
+        SendingNotification sendingNotification = new SendingNotification(mCurrentGroupID, getApplicationContext());
+        sendingNotification.Send();
     }
 
     private void InitializeUI() {

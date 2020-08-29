@@ -3,6 +3,8 @@ package com.example.alliancesos;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -149,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
                 } else {
 
                     CreateNewGroup(groupName, groupId);
-                    RefToCurrentUser(groupId);
+                    addGroupToUserSubset(groupId);
 
                 }
             }
@@ -213,7 +215,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void RefToCurrentUser(String groupId) {
+    private void addGroupToUserSubset(String groupId) {
         Toast.makeText(this, mCurrentUserId, Toast.LENGTH_SHORT).show();
         mUsersRef.child(mCurrentUserId).child("Groups").push().setValue(groupId).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
@@ -230,6 +232,5 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        showCurrentUserGroups();
     }
 }

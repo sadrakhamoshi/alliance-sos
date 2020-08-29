@@ -4,11 +4,21 @@ public class UserObject {
     private String userName;
     private String email;
     private String password;
+    private String token;
 
-    public UserObject(String user, String mail, String pass) {
+    public UserObject(String user, String mail, String pass, String tok) {
         password = pass;
         email = mail;
         userName = user;
+        token = tok;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 
     public String getEmail() {
