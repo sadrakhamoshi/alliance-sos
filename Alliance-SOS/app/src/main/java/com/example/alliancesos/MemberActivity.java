@@ -20,6 +20,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -87,8 +88,10 @@ public class MemberActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
                 if (snapshot.exists()) {
-                    boolean mIsFoundUsername = false;
-                    String mFoundedUserId = null;
+                    boolean isFoundUsername = false;
+                    String foundedUserId = null;
+                    String foundedUserToken = null;
+
                     Iterator iterator = snapshot.getChildren().iterator();
 
                     try {
@@ -98,14 +101,15 @@ public class MemberActivity extends AppCompatActivity {
                             String userName = dataSnapshot.child("userName").getValue().toString();
 
                             if (userName.equals(addition_member)) {
-                                mIsFoundUsername = true;
-                                mFoundedUserId = dataSnapshot.getKey();
+                                isFoundUsername = true;
+                                foundedUserId = dataSnapshot.getKey();
+                                foundedUserToken = dataSnapshot.child("token").getValue().toString();
                                 break;
                             }
                         }
-                        if (mIsFoundUsername) {
+                        if (isFoundUsername) {
 
-                            addingMemberFunc(mFoundedUserId, addition_member);
+                            addingMemberFunc(foundedUserId, addition_member, foundedUserToken);
 
                         } else {
                             Toast.makeText(MemberActivity.this, addition_member + " not Valid Username", Toast.LENGTH_LONG).show();
@@ -125,21 +129,21 @@ public class MemberActivity extends AppCompatActivity {
         });
     }
 
-
-    private void addingMemberFunc(String foundedUserId, String addition_member) {
-        addToUsersGroups(foundedUserId);
-        addMemberToGroups(addition_member);
+    private void addingMemberFunc(String newMemberId, String newMemberName, String newMemberToken) {
+        addToUsersGroups(newMemberId);
+        addMemberToGroups(newMemberName, newMemberId, newMemberToken);
     }
 
-    private void addMemberToGroups(final String addition_member) {
-        mGroupRef.child(mGroupId).child("member").push().setValue(addition_member).addOnCompleteListener(new OnCompleteListener<Void>() {
+    private void addMemberToGroups(final String newMemberName, String newMemberId, String newMemberToken) {
+        Member member = new Member(newMemberToken, newMemberName, newMemberId);
+
+        mGroupRef.child(mGroupId).child("members").push().setValue(member).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
-                    Toast.makeText(MemberActivity.this, addition_member + " added to member " + mGroupId + " Successfully", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MemberActivity.this, newMemberName + " added to member " + mGroupId + " Successfully", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(MemberActivity.this, addition_member + " Can't added to member " + mGroupId, Toast.LENGTH_SHORT).show();
-
+                    Toast.makeText(MemberActivity.this, newMemberName + " Can't added to member " + mGroupId, Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -158,14 +162,8 @@ public class MemberActivity extends AppCompatActivity {
         });
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        showAllMembers();
-    }
-
     private void showAllMembers() {
-        mGroupRef.child(mGroupId).child("member").addValueEventListener(new ValueEventListener() {
+        mGroupRef.child(mGroupId).child("members").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
@@ -174,7 +172,8 @@ public class MemberActivity extends AppCompatActivity {
                     Set<String> memberName = new HashSet<>();
 
                     while (iterator.hasNext()) {
-                        String name = ((DataSnapshot) iterator.next()).getValue().toString();
+                        Member member = ((DataSnapshot) iterator.next()).getValue(Member.class);
+                        String name = member.getName();
                         memberName.add(name);
                     }
                     mMembersList.clear();
@@ -188,5 +187,11 @@ public class MemberActivity extends AppCompatActivity {
                 Toast.makeText(MemberActivity.this, "Error On showAllMembers Func " + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        showAllMembers();
     }
 }

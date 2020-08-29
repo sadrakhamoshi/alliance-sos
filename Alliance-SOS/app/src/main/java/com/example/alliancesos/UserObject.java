@@ -1,14 +1,39 @@
 package com.example.alliancesos;
 
 public class UserObject {
+    private String id;
     private String userName;
     private String email;
     private String password;
+    private String token;
 
-    public UserObject(String user, String mail, String pass) {
+    public UserObject(String id, String user, String mail, String pass, String tok) {
+        this.id = id;
         password = pass;
         email = mail;
         userName = user;
+        token = tok;
+    }
+
+    public UserObject() {
+    }
+
+    ;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 
     public String getEmail() {

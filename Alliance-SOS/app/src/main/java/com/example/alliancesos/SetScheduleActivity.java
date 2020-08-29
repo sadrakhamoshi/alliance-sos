@@ -18,6 +18,7 @@ import android.widget.EditText;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.example.alliancesos.SendNotificationPack.SendingNotification;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -32,11 +33,11 @@ import java.util.Locale;
 public class SetScheduleActivity extends AppCompatActivity {
 
     private String mYear, mMonth, mDay, mHour, mMinute;
-    private String mAuthor;
+
+    private String mAuthorUserName, mAuthorId;
 
     private Message mMessage;
 
-    private String mCurrentUser;
     private String mCurrentGroupID;
 
 
@@ -65,6 +66,8 @@ public class SetScheduleActivity extends AppCompatActivity {
         Intent fromGroupAct = getIntent();
         if (fromGroupAct != null) {
             mCurrentGroupID = fromGroupAct.getStringExtra("groupId");
+            mAuthorId = fromGroupAct.getStringExtra("currUserId");
+            mAuthorUserName = fromGroupAct.getStringExtra("currUserName");
         }
 
         Initialize();
@@ -73,15 +76,11 @@ public class SetScheduleActivity extends AppCompatActivity {
 
     private void Initialize() {
 
-        //auth
-        mCurrentUser = FirebaseAuth.getInstance().getCurrentUser().getUid();
-
         //database
         mGroupsRef = FirebaseDatabase.getInstance().getReference().child("groups");
 
         mCalendar = Calendar.getInstance();
         mTime = Calendar.getInstance();
-
 
         //ui
         InitializeUI();
@@ -146,7 +145,7 @@ public class SetScheduleActivity extends AppCompatActivity {
 
                 mMessage = new Message("", formattedDate, scheduleObject);
 
-                sendNotification();
+                sendMessage();
 
             }
         });
@@ -159,14 +158,14 @@ public class SetScheduleActivity extends AppCompatActivity {
         builder.show();
     }
 
-    private void sendNotification() {
+    private void sendMessage() {
 
         sendMessageToDB();
         sendNotificationToOtherDevice();
     }
 
     private void sendMessageToDB() {
-        mMessage.setCreatedBy(mCurrentUser);
+        mMessage.setCreatedBy(mAuthorUserName);
 
         mGroupsRef.child(mCurrentGroupID).child("events").push().setValue(mMessage).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
@@ -181,7 +180,8 @@ public class SetScheduleActivity extends AppCompatActivity {
     }
 
     private void sendNotificationToOtherDevice() {
-
+        SendingNotification sendingNotification = new SendingNotification(mCurrentGroupID, getApplicationContext());
+        sendingNotification.Send();
     }
 
     private void InitializeUI() {

@@ -3,6 +3,8 @@ package com.example.alliancesos;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -34,6 +36,8 @@ import java.util.Set;
 public class MainActivity extends AppCompatActivity {
 
     private String mCurrentUserId, mCurrentUserName;
+
+    private UserObject mCurrentUser;
 
     //database
     private DatabaseReference mRoot, mGroupsRef, mUsersRef;
@@ -84,7 +88,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void InitializeUI() {
         groups_listView = findViewById(R.id.list_view);
-        //listOfAllGroups = new ArrayList<>();
         listOfGroupId = new ArrayList<>();
         arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, listOfGroupId);
         groups_listView.setAdapter(arrayAdapter);
@@ -112,10 +115,10 @@ public class MainActivity extends AppCompatActivity {
         groups_listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                //String groupName = listOfAllGroups.get(position);
                 Intent toGroupActivity = new Intent(getApplicationContext(), GroupActivity.class);
-                //toGroupActivity.putExtra("groupName", groupName);
                 toGroupActivity.putExtra("groupId", listOfGroupId.get(position));
+                toGroupActivity.putExtra("currUserName", mCurrentUserName);
+                toGroupActivity.putExtra("currUserId", mCurrentUserId);
                 startActivity(toGroupActivity);
             }
         });
@@ -149,7 +152,7 @@ public class MainActivity extends AppCompatActivity {
                 } else {
 
                     CreateNewGroup(groupName, groupId);
-                    RefToCurrentUser(groupId);
+                    addGroupToUserSubset(groupId);
 
                 }
             }
@@ -213,7 +216,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void RefToCurrentUser(String groupId) {
+    private void addGroupToUserSubset(String groupId) {
         Toast.makeText(this, mCurrentUserId, Toast.LENGTH_SHORT).show();
         mUsersRef.child(mCurrentUserId).child("Groups").push().setValue(groupId).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
@@ -227,9 +230,33 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void getCurrentUserInfo() {
+        mUsersRef.child(mCurrentUserId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    String id = snapshot.child("id").getValue().toString();
+                    String userName = snapshot.child("userName").getValue().toString();
+                    String email = snapshot.child("email").getValue().toString();
+                    String token = snapshot.child("token").getValue().toString();
+                    String pass = snapshot.child("password").getValue().toString();
+                    mCurrentUser = new UserObject(id, userName, email, pass, token);
+                } else {
+                    Toast.makeText(MainActivity.this, "Main activity not exist...", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(MainActivity.this, "Main activity " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
         showCurrentUserGroups();
+        //getCurrentUserInfo();
     }
 }
