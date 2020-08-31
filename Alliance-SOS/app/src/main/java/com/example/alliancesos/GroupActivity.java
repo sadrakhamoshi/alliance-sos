@@ -38,7 +38,7 @@ public class GroupActivity extends AppCompatActivity {
     //database
     private DatabaseReference mGroupRef;
 
-    private String mCurrentGroupId;
+    private String mCurrentGroupId, mCurrentGroupName;
 
     private Button mMembersList;
     private Button mGroupList;
@@ -57,6 +57,7 @@ public class GroupActivity extends AppCompatActivity {
         mCurrentGroupId = getIntent().getStringExtra("groupId");
         mCurrentUserId = getIntent().getStringExtra("currUserId");
         mCurrentUserName = getIntent().getStringExtra("currUserName");
+        mCurrentGroupName = getIntent().getStringExtra("groupName");
 
         InitializeUI();
     }
@@ -71,7 +72,7 @@ public class GroupActivity extends AppCompatActivity {
 
 
         TextView nameGroup = findViewById(R.id.group_name_txt);
-        nameGroup.setText(mCurrentGroupId);
+        nameGroup.setText(mCurrentGroupName);
 
         mSchedule = findViewById(R.id.schedule_event);
         mSchedule.setOnClickListener(new View.OnClickListener() {
@@ -81,25 +82,21 @@ public class GroupActivity extends AppCompatActivity {
             }
         });
 
-        Button b1 = findViewById(R.id.help_us_btn);
-        Button b2 = findViewById(R.id.user_setting_btn);
-
-
         mSOS_btn = findViewById(R.id.sos_btn);
         mSOS_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Calendar calNow = Calendar.getInstance();
-                calNow.setTimeInMillis(System.currentTimeMillis());
-                calNow.set(Calendar.SECOND, 8
-                );
                 Intent intent = new Intent(getBaseContext(), MyAlarmService.class);
                 PendingIntent pendingIntent = PendingIntent.getBroadcast(getBaseContext(), RQS_1, intent, 0);
                 AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-                alarmManager.set(AlarmManager.RTC_WAKEUP, calNow.getTimeInMillis(), pendingIntent);
+                alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, calNow.getTimeInMillis() + 8000, pendingIntent);
             }
         });
 
+
+        Button b1 = findViewById(R.id.help_us_btn);
+        Button b2 = findViewById(R.id.user_setting_btn);
         b1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -112,7 +109,6 @@ public class GroupActivity extends AppCompatActivity {
                 Toast.makeText(GroupActivity.this, "Will go to Users Setting Activity ...", Toast.LENGTH_SHORT).show();
             }
         });
-
 
         mMembersList = findViewById(R.id.member_list_btn);
         mMembersList.setOnClickListener(new View.OnClickListener() {
