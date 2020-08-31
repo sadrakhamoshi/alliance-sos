@@ -90,6 +90,7 @@ public class GroupActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Calendar calNow = Calendar.getInstance();
+                calNow.setTimeInMillis(System.currentTimeMillis());
                 calNow.set(Calendar.SECOND, 8
                 );
                 Intent intent = new Intent(getBaseContext(), MyAlarmService.class);

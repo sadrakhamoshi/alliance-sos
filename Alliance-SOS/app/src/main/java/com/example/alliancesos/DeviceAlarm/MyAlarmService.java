@@ -9,24 +9,38 @@ import android.net.Uri;
 import android.os.Vibrator;
 import android.widget.Toast;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class MyAlarmService extends BroadcastReceiver {
 
     Vibrator mVibrator;
     Context mContext;
-    Ringtone ringtone;
-    String title;
+    Ringtone mRingtone;
+
 
     @Override
     public void onReceive(Context context, Intent intent) {
         mContext = context;
-        Uri alert = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-        ringtone = RingtoneManager.getRingtone(mContext, alert);
-        ringtone.play();
-        title = "title";
+        playRingtone();
         Toast.makeText(context, "OnReceive alarm test", Toast.LENGTH_SHORT).show();
-
         mVibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
-        mVibrator.vibrate(300);
-        Toast.makeText(context, title, Toast.LENGTH_LONG).show();
+        mVibrator.vibrate(1000);
+    }
+
+    private void playRingtone() {
+        Uri alert = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+        mRingtone = RingtoneManager.getRingtone(mContext, alert);
+        mRingtone.play();
+        TimerTask task=new TimerTask() {
+            @Override
+            public void run() {
+                if(mRingtone.isPlaying()){
+                    mRingtone.stop();
+                }
+            }
+        };
+        Timer timer=new Timer();
+        timer.schedule(task,4000);
     }
 }
