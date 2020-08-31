@@ -28,11 +28,13 @@ public class SendingNotification {
     private Context mContext;
 
     private String mGroupId;
+    private String mFrom;
 
     DatabaseReference mGroupRef;
 
-    public SendingNotification(String groupId, Context context) {
+    public SendingNotification(String groupId, String from, Context context) {
         mGroupId = groupId;
+        mFrom = from;
         mContext = context;
         mApiService = Client.getClient(BASE_URL).create(APIService.class);
         mGroupRef = FirebaseDatabase.getInstance().getReference().child("groups");
@@ -62,9 +64,9 @@ public class SendingNotification {
         });
     }
 
-    private void sendNotif(String token, String name) {
-        DataToSend data = new DataToSend("newNotification for " + name, "Just For Testing...");
-        NotificationSender sender = new NotificationSender(data, token);
+    private void sendNotif(String target_token, String name) {
+        DataToSend data = new DataToSend("newNotification from " + mFrom + "to " + name, "Just For Testing...");
+        NotificationSender sender = new NotificationSender(data, target_token);
         mApiService.sendNotification(sender).enqueue(new Callback<MyResponse>() {
             @Override
             public void onResponse(Call<MyResponse> call, Response<MyResponse> response) {

@@ -158,7 +158,7 @@ public class GroupActivity extends AppCompatActivity {
                     Set<String> set = new HashSet<>();
                     while (iterator.hasNext()) {
                         try {
-                            Message message = ((DataSnapshot) (iterator.next())).getValue(Message.class);
+                            Event message = ((DataSnapshot) (iterator.next())).getValue(Event.class);
                             if (message != null) {
                                 String tmp = "";
                                 tmp += message.getScheduleObject().getTitle() + "\n";

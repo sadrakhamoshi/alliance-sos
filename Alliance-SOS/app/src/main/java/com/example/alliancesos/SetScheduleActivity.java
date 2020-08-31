@@ -21,7 +21,6 @@ import android.widget.Toast;
 import com.example.alliancesos.SendNotificationPack.SendingNotification;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -36,7 +35,7 @@ public class SetScheduleActivity extends AppCompatActivity {
 
     private String mAuthorUserName, mAuthorId;
 
-    private Message mMessage;
+    private Event mMessage;
 
     private String mCurrentGroupID;
 
@@ -143,7 +142,7 @@ public class SetScheduleActivity extends AppCompatActivity {
                 SimpleDateFormat df = new SimpleDateFormat("dd-MMM-yyyy", Locale.getDefault());
                 String formattedDate = df.format(c);
 
-                mMessage = new Message("", formattedDate, scheduleObject);
+                mMessage = new Event("", formattedDate, scheduleObject);
 
                 sendMessage();
 
@@ -180,7 +179,7 @@ public class SetScheduleActivity extends AppCompatActivity {
     }
 
     private void sendNotificationToOtherDevice() {
-        SendingNotification sendingNotification = new SendingNotification(mCurrentGroupID, getApplicationContext());
+        SendingNotification sendingNotification = new SendingNotification(mCurrentGroupID, mAuthorUserName, getApplicationContext());
         sendingNotification.Send();
     }
 

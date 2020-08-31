@@ -1,17 +1,17 @@
 package com.example.alliancesos;
 
-public class Message {
+public class Event {
     private String createdBy;
     private String createdTime;
     private ScheduleObject scheduleObject;
 
-    public Message(String writer, String created, ScheduleObject sch) {
+    public Event(String writer, String created, ScheduleObject sch) {
         scheduleObject = sch;
         createdBy = writer;
         createdTime = created;
     }
 
-    public Message() {
+    public Event() {
     }
 
     public ScheduleObject getScheduleObject() {

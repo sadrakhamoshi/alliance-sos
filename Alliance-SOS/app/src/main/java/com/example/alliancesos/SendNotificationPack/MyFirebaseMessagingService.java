@@ -1,16 +1,12 @@
 package com.example.alliancesos.SendNotificationPack;
 
-import android.app.NotificationManager;
-import android.content.Context;
 import android.graphics.Color;
-import android.media.Ringtone;
 import android.media.RingtoneManager;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
-import com.example.alliancesos.Message;
 import com.example.alliancesos.R;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
