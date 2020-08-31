@@ -3,6 +3,9 @@ package com.example.alliancesos;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -12,6 +15,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.alliancesos.DeviceAlarm.MyAlarmService;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -19,11 +23,15 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
 public class GroupActivity extends AppCompatActivity {
+
+    private PendingIntent pendingIntent;
+    final static int RQS_1 = 1;
 
     private String mCurrentUserName, mCurrentUserId;
 
@@ -34,6 +42,7 @@ public class GroupActivity extends AppCompatActivity {
 
     private Button mMembersList;
     private Button mGroupList;
+    private Button mSOS_btn;
 
     private TextView mSchedule;
 
@@ -74,6 +83,21 @@ public class GroupActivity extends AppCompatActivity {
 
         Button b1 = findViewById(R.id.help_us_btn);
         Button b2 = findViewById(R.id.user_setting_btn);
+
+
+        mSOS_btn = findViewById(R.id.sos_btn);
+        mSOS_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Calendar calNow = Calendar.getInstance();
+                calNow.set(Calendar.SECOND, 8
+                );
+                Intent intent = new Intent(getBaseContext(), MyAlarmService.class);
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(getBaseContext(), RQS_1, intent, 0);
+                AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+                alarmManager.set(AlarmManager.RTC_WAKEUP, calNow.getTimeInMillis(), pendingIntent);
+            }
+        });
 
         b1.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -116,8 +140,8 @@ public class GroupActivity extends AppCompatActivity {
         Intent intent = new Intent(getApplicationContext(), SetScheduleActivity.class);
 
         intent.putExtra("groupId", mCurrentGroupId);
-        intent.putExtra("currUserName",mCurrentUserName);
-        intent.putExtra("currUserId",mCurrentUserId);
+        intent.putExtra("currUserName", mCurrentUserName);
+        intent.putExtra("currUserId", mCurrentUserId);
 
         startActivity(intent);
     }
