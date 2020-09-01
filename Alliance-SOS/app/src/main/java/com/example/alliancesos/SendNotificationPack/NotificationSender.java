@@ -2,9 +2,9 @@ package com.example.alliancesos.SendNotificationPack;
 
 public class NotificationSender {
     private String to;
-    private DataToSend data;
+    private DataToSendForSOS data;
 
-    public NotificationSender(DataToSend data, String to) {
+    public NotificationSender(DataToSendForSOS data, String to) {
         this.data = data;
         this.to = to;
     }

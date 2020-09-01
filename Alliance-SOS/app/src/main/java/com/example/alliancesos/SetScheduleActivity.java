@@ -18,6 +18,7 @@ import android.widget.EditText;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.example.alliancesos.SendNotificationPack.DataToSendForSOS;
 import com.example.alliancesos.SendNotificationPack.SendingNotification;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -37,7 +38,7 @@ public class SetScheduleActivity extends AppCompatActivity {
 
     private Event mMessage;
 
-    private String mCurrentGroupID;
+    private String mGroupId, mGroupName;
 
 
     //database
@@ -64,9 +65,10 @@ public class SetScheduleActivity extends AppCompatActivity {
         setContentView(R.layout.activity_set_schedule);
         Intent fromGroupAct = getIntent();
         if (fromGroupAct != null) {
-            mCurrentGroupID = fromGroupAct.getStringExtra("groupId");
+            mGroupId = fromGroupAct.getStringExtra("groupId");
             mAuthorId = fromGroupAct.getStringExtra("currUserId");
             mAuthorUserName = fromGroupAct.getStringExtra("currUserName");
+            mGroupName = fromGroupAct.getStringExtra("groupName");
         }
 
         Initialize();
@@ -166,7 +168,8 @@ public class SetScheduleActivity extends AppCompatActivity {
     private void sendMessageToDB() {
         mMessage.setCreatedBy(mAuthorUserName);
 
-        mGroupsRef.child(mCurrentGroupID).child("events").push().setValue(mMessage).addOnCompleteListener(new OnCompleteListener<Void>() {
+
+        mGroupsRef.child(mGroupId).child("events").push().setValue(mMessage).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
@@ -179,7 +182,9 @@ public class SetScheduleActivity extends AppCompatActivity {
     }
 
     private void sendNotificationToOtherDevice() {
-        SendingNotification sendingNotification = new SendingNotification(mCurrentGroupID, mAuthorUserName, getApplicationContext());
+        DataToSendForSOS data = new DataToSendForSOS(mAuthorUserName, mGroupName);
+        SendingNotification sendingNotification = new SendingNotification(mGroupId, mGroupName
+                , mAuthorUserName, getApplicationContext(), data);
         sendingNotification.Send();
     }
 

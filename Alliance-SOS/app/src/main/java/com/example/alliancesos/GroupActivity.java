@@ -16,6 +16,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.alliancesos.DeviceAlarm.MyAlarmService;
+import com.example.alliancesos.SendNotificationPack.DataToSendForSOS;
+import com.example.alliancesos.SendNotificationPack.SendingNotification;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -86,11 +88,9 @@ public class GroupActivity extends AppCompatActivity {
         mSOS_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Calendar calNow = Calendar.getInstance();
-                Intent intent = new Intent(getBaseContext(), MyAlarmService.class);
-                PendingIntent pendingIntent = PendingIntent.getBroadcast(getBaseContext(), RQS_1, intent, 0);
-                AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-                alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, calNow.getTimeInMillis() + 8000, pendingIntent);
+                DataToSendForSOS data = new DataToSendForSOS(mCurrentUserName, mCurrentGroupName);
+                SendingNotification sender = new SendingNotification(mCurrentGroupId, mCurrentGroupName, mCurrentUserName, GroupActivity.this, data);
+                sender.Send();
             }
         });
 
@@ -139,6 +139,7 @@ public class GroupActivity extends AppCompatActivity {
         intent.putExtra("groupId", mCurrentGroupId);
         intent.putExtra("currUserName", mCurrentUserName);
         intent.putExtra("currUserId", mCurrentUserId);
+        intent.putExtra("groupName", mCurrentGroupName);
 
         startActivity(intent);
     }

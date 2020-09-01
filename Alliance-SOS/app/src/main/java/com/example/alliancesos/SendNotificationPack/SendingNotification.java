@@ -1,7 +1,6 @@
 package com.example.alliancesos.SendNotificationPack;
 
 import android.content.Context;
-import android.provider.ContactsContract;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -26,15 +25,18 @@ public class SendingNotification {
     private APIService mApiService;
 
     private Context mContext;
-
-    private String mGroupId;
+    private String mGroupId, mGroupName;
     private String mFrom;
+
+    private DataToSendForSOS data;
 
     DatabaseReference mGroupRef;
 
-    public SendingNotification(String groupId, String from, Context context) {
+    public SendingNotification(String groupId, String groupName, String from, Context context, DataToSendForSOS dataToSendForSOS) {
         mGroupId = groupId;
+        mGroupName = groupName;
         mFrom = from;
+        data = dataToSendForSOS;
         mContext = context;
         mApiService = Client.getClient(BASE_URL).create(APIService.class);
         mGroupRef = FirebaseDatabase.getInstance().getReference().child("groups");
@@ -65,7 +67,6 @@ public class SendingNotification {
     }
 
     private void sendNotif(String target_token, String name) {
-        DataToSend data = new DataToSend("newNotification from " + mFrom + "to " + name, "Just For Testing...");
         NotificationSender sender = new NotificationSender(data, target_token);
         mApiService.sendNotification(sender).enqueue(new Callback<MyResponse>() {
             @Override
