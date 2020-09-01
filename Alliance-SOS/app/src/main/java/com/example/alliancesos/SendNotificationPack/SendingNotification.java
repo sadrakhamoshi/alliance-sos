@@ -28,11 +28,11 @@ public class SendingNotification {
     private String mGroupId, mGroupName;
     private String mFrom;
 
-    private DataToSendForSOS data;
+    private DataToSend data;
 
     DatabaseReference mGroupRef;
 
-    public SendingNotification(String groupId, String groupName, String from, Context context, DataToSendForSOS dataToSendForSOS) {
+    public SendingNotification(String groupId, String groupName, String from, Context context, DataToSend dataToSendForSOS) {
         mGroupId = groupId;
         mGroupName = groupName;
         mFrom = from;

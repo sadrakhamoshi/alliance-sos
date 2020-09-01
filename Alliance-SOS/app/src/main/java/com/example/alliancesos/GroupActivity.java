@@ -3,9 +3,7 @@ package com.example.alliancesos;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.app.AlarmManager;
 import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -15,8 +13,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.alliancesos.DeviceAlarm.MyAlarmService;
-import com.example.alliancesos.SendNotificationPack.DataToSendForSOS;
+import com.example.alliancesos.SendNotificationPack.DataToSend;
 import com.example.alliancesos.SendNotificationPack.SendingNotification;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -25,7 +22,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -88,7 +84,7 @@ public class GroupActivity extends AppCompatActivity {
         mSOS_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DataToSendForSOS data = new DataToSendForSOS(mCurrentUserName, mCurrentGroupName);
+                DataToSend data = new DataToSend(mCurrentUserName, mCurrentGroupName);
                 SendingNotification sender = new SendingNotification(mCurrentGroupId, mCurrentGroupName, mCurrentUserName, GroupActivity.this, data);
                 sender.Send();
             }

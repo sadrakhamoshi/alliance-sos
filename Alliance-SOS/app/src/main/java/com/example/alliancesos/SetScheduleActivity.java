@@ -18,7 +18,7 @@ import android.widget.EditText;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import com.example.alliancesos.SendNotificationPack.DataToSendForSOS;
+import com.example.alliancesos.SendNotificationPack.DataToSend;
 import com.example.alliancesos.SendNotificationPack.SendingNotification;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -36,7 +36,7 @@ public class SetScheduleActivity extends AppCompatActivity {
 
     private String mAuthorUserName, mAuthorId;
 
-    private Event mMessage;
+    private Event mEvent;
 
     private String mGroupId, mGroupName;
 
@@ -144,7 +144,7 @@ public class SetScheduleActivity extends AppCompatActivity {
                 SimpleDateFormat df = new SimpleDateFormat("dd-MMM-yyyy", Locale.getDefault());
                 String formattedDate = df.format(c);
 
-                mMessage = new Event("", formattedDate, scheduleObject);
+                mEvent = new Event("", formattedDate, scheduleObject);
 
                 sendMessage();
 
@@ -166,10 +166,9 @@ public class SetScheduleActivity extends AppCompatActivity {
     }
 
     private void sendMessageToDB() {
-        mMessage.setCreatedBy(mAuthorUserName);
+        mEvent.setCreatedBy(mAuthorUserName);
 
-
-        mGroupsRef.child(mGroupId).child("events").push().setValue(mMessage).addOnCompleteListener(new OnCompleteListener<Void>() {
+        mGroupsRef.child(mGroupId).child("events").push().setValue(mEvent).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
@@ -182,9 +181,11 @@ public class SetScheduleActivity extends AppCompatActivity {
     }
 
     private void sendNotificationToOtherDevice() {
-        DataToSendForSOS data = new DataToSendForSOS(mAuthorUserName, mGroupName);
+        DataToSend<Event> data = new DataToSend<>(mAuthorUserName, mGroupName, mEvent);
+
         SendingNotification sendingNotification = new SendingNotification(mGroupId, mGroupName
                 , mAuthorUserName, getApplicationContext(), data);
+
         sendingNotification.Send();
     }
 

@@ -25,13 +25,16 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private Ringtone mRingtone;
 
     Integer type;
+    Integer notificationIcon;
+    Integer notificationColor;
     String title, message;
-    String groupName;
+    String groupName, makeBy;
 
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
         type = Integer.valueOf(remoteMessage.getData().get("type"));
+
         Initialize(remoteMessage);
 
         mVibrator = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
@@ -40,11 +43,13 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(getApplicationContext(), groupName)
                         .setContentTitle(title)
-                        .setSmallIcon(R.drawable.notif_icon)
+                        .setSmallIcon(notificationIcon)
                         .setColorized(true)
-                        .setColor(Color.RED)
+                        .setColor(notificationColor)
                         .setContentText(message)
-                        .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+                        .setStyle(new NotificationCompat.InboxStyle()
+                                .addLine(message)
+                                .addLine(message));
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
         notificationManager.notify(0, builder.build());
@@ -55,13 +60,29 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     }
 
     private void Initialize(RemoteMessage remoteMessage) {
+        groupName = remoteMessage.getData().get("groupName");
+        makeBy = remoteMessage.getData().get("makeBy");
+
         if (type == MessageType.SOS_TYPE) {
-            groupName = remoteMessage.getData().get("groupName");
+
+            notificationIcon = R.drawable.sos_icon;
+            notificationColor = Color.RED;
             title = "Emergency Moment !!!!";
-            message = "SOS button has clicked by " + remoteMessage.getData().get("makeBy") + "from " + groupName;
+            message = "SOS button has clicked by " + makeBy + " from " + groupName;
+
+        } else if (type == MessageType.NOTIFICATION_TYPE) {
+
+            notificationIcon = R.drawable.notif_icon;
+            notificationColor = Color.YELLOW;
+            title = "New Schedule ...";
+            message = makeBy + " Created New Schedule in " + groupName + ". "
+                    + "Are You going to join the group?";
+
         } else {
             title = "title";
             message = "message";
+            notificationColor = Color.GRAY;
+            notificationIcon = R.drawable.un_known;
         }
     }
 

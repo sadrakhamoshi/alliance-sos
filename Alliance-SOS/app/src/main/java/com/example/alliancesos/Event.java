@@ -1,17 +1,25 @@
 package com.example.alliancesos;
 
+import com.example.alliancesos.Utils.MessageType;
+
 public class Event {
     private String createdBy;
     private String createdTime;
     private ScheduleObject scheduleObject;
+    private Integer type;
 
     public Event(String writer, String created, ScheduleObject sch) {
         scheduleObject = sch;
+        type = MessageType.NOTIFICATION_TYPE;
         createdBy = writer;
         createdTime = created;
     }
 
     public Event() {
+    }
+
+    public Integer getType() {
+        return type;
     }
 
     public ScheduleObject getScheduleObject() {

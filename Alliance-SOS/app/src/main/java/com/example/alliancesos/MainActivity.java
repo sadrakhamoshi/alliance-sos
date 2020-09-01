@@ -276,6 +276,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         showCurrentUserGroups();
+
+        //permission
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (!Settings.System.canWrite(getApplicationContext())) {
 

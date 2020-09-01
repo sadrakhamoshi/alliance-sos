@@ -2,8 +2,9 @@ package com.example.alliancesos.SendNotificationPack;
 
 import com.example.alliancesos.Utils.MessageType;
 
-public class DataToSendForSOS {
+public class DataToSend<TypeOfNot> {
     private String makeBy, groupName;
+    private TypeOfNot content;
     private int type;
 
     public void setMakeBy(String makeBy) {
@@ -22,20 +23,31 @@ public class DataToSendForSOS {
         return type;
     }
 
-    public void setType(int type) {
-        this.type = type;
+    public TypeOfNot getContent() {
+        return content;
+    }
+
+    public void setContent(TypeOfNot content) {
+        this.content = content;
     }
 
     public void setGroupName(String groupName) {
         this.groupName = groupName;
     }
 
-    public DataToSendForSOS(String makeBy, String groupName) {
+    public DataToSend(String makeBy, String groupName) {
         this.groupName = groupName;
         this.makeBy = makeBy;
         type = MessageType.SOS_TYPE;
     }
 
-    public DataToSendForSOS() {
+    public DataToSend(String makeBy, String groupName, TypeOfNot data) {
+        this.content = data;
+        this.makeBy = makeBy;
+        this.groupName = groupName;
+        type = MessageType.NOTIFICATION_TYPE;
+    }
+
+    public DataToSend() {
     }
 }
