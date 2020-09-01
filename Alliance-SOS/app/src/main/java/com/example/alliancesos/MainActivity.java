@@ -212,7 +212,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
     private void CreateNewGroup(final String groupName, final String groupId) {
 
         Groups groups = new Groups(groupName, groupId, mCurrentUserName);

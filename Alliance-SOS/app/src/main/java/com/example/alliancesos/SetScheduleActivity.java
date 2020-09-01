@@ -97,7 +97,7 @@ public class SetScheduleActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 new TimePickerDialog(SetScheduleActivity.this, time, mTime
-                        .get(Calendar.HOUR_OF_DAY), mTime.get(Calendar.MINUTE), false).show();
+                        .get(Calendar.HOUR_OF_DAY), mTime.get(Calendar.MINUTE), true).show();
             }
         });
 
@@ -144,7 +144,7 @@ public class SetScheduleActivity extends AppCompatActivity {
                 SimpleDateFormat df = new SimpleDateFormat("dd-MMM-yyyy", Locale.getDefault());
                 String formattedDate = df.format(c);
 
-                mEvent = new Event("", formattedDate, scheduleObject);
+                mEvent = new Event("", "", formattedDate, scheduleObject);
 
                 sendMessage();
 
@@ -167,8 +167,9 @@ public class SetScheduleActivity extends AppCompatActivity {
 
     private void sendMessageToDB() {
         mEvent.setCreatedBy(mAuthorUserName);
-
-        mGroupsRef.child(mGroupId).child("events").push().setValue(mEvent).addOnCompleteListener(new OnCompleteListener<Void>() {
+        String key = mGroupsRef.child(mGroupId).child("events").push().getKey();
+        mEvent.setEventId(key);
+        mGroupsRef.child(mGroupId).child("events").child(key).setValue(mEvent).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
@@ -181,7 +182,7 @@ public class SetScheduleActivity extends AppCompatActivity {
     }
 
     private void sendNotificationToOtherDevice() {
-        DataToSend<Event> data = new DataToSend<>(mAuthorUserName, mGroupName, mEvent);
+        DataToSend<Event> data = new DataToSend<>(mAuthorUserName, mGroupName, mGroupId, mEvent.getEventId());
 
         SendingNotification sendingNotification = new SendingNotification(mGroupId, mGroupName
                 , mAuthorUserName, getApplicationContext(), data);

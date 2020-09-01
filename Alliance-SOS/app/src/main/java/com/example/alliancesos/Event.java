@@ -3,14 +3,14 @@ package com.example.alliancesos;
 import com.example.alliancesos.Utils.MessageType;
 
 public class Event {
+    private String eventId;
     private String createdBy;
     private String createdTime;
     private ScheduleObject scheduleObject;
-    private Integer type;
 
-    public Event(String writer, String created, ScheduleObject sch) {
+    public Event(String eventId, String writer, String created, ScheduleObject sch) {
         scheduleObject = sch;
-        type = MessageType.NOTIFICATION_TYPE;
+        this.eventId = eventId;
         createdBy = writer;
         createdTime = created;
     }
@@ -18,8 +18,12 @@ public class Event {
     public Event() {
     }
 
-    public Integer getType() {
-        return type;
+    public String getEventId() {
+        return eventId;
+    }
+
+    public void setEventId(String eventId) {
+        this.eventId = eventId;
     }
 
     public ScheduleObject getScheduleObject() {

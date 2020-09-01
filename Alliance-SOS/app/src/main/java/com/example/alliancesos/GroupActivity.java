@@ -84,7 +84,7 @@ public class GroupActivity extends AppCompatActivity {
         mSOS_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DataToSend data = new DataToSend(mCurrentUserName, mCurrentGroupName);
+                DataToSend data = new DataToSend(mCurrentUserName, mCurrentGroupName, mCurrentGroupId);
                 SendingNotification sender = new SendingNotification(mCurrentGroupId, mCurrentGroupName, mCurrentUserName, GroupActivity.this, data);
                 sender.Send();
             }
