@@ -1,8 +1,11 @@
 package com.example.alliancesos.SendNotificationPack;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -10,6 +13,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.example.alliancesos.MainActivity;
 import com.example.alliancesos.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -55,7 +59,6 @@ public class NotificationResponseActivity extends AppCompatActivity {
         InitUI();
     }
 
-
     private void getExtra() {
         Bundle bundle = getIntent().getExtras();
         mGroupId = bundle.getString("groupId");
@@ -69,6 +72,7 @@ public class NotificationResponseActivity extends AppCompatActivity {
         }
     }
 
+
     public void JoinEvent(View view) {
         HashMap<String, String> hashMap = new HashMap<>();
         hashMap.put("name", mCurrUsername);
@@ -78,11 +82,39 @@ public class NotificationResponseActivity extends AppCompatActivity {
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
                     Toast.makeText(NotificationResponseActivity.this, "Member added to event members", Toast.LENGTH_SHORT).show();
+                    AlertDialogToMainActivity();
                 } else {
                     Toast.makeText(NotificationResponseActivity.this, "error in joinEvent" + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                 }
             }
         });
+    }
+
+    private void AlertDialogToMainActivity() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialog);
+        builder.setTitle("Alert !");
+        builder.setMessage("Do you Want to go to the App ?");
+        builder.setCancelable(false);
+        builder.setIcon(R.drawable.sos_icon);
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Intent toMain = new Intent(NotificationResponseActivity.this, MainActivity.class);
+                startActivity(toMain);
+                finish();
+                return;
+            }
+        });
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+                finish();
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
     }
 
 
