@@ -36,6 +36,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     Integer type;
     Integer notificationIcon;
     Integer notificationColor;
+
+    String toName, toId;
     String title, message;
     String groupName, groupId, makeBy;
     String eventId;
@@ -56,7 +58,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         intent.putExtra("groupId", groupId);
         intent.putExtra("eventId", eventId);
-
+        intent.putExtra("toName", toName);
+        intent.putExtra("toId", toId);
 
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
@@ -90,7 +93,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     }
 
     private void Initialize(RemoteMessage remoteMessage) {
-        eventId = "";
+        eventId = toName = toId = "";
         groupName = remoteMessage.getData().get("groupName");
         groupId = remoteMessage.getData().get("groupId");
         makeBy = remoteMessage.getData().get("makeBy");
@@ -106,6 +109,10 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         } else if (type == MessageType.NOTIFICATION_TYPE) {
 
             eventId = remoteMessage.getData().get("eventId");
+            toId = remoteMessage.getData().get("toId");
+            toName = remoteMessage.getData().get("toName");
+
+
             notificationColor = Color.YELLOW;
             notificationIcon = R.drawable.notif_icon;
             title = "New Schedule ...";

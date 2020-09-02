@@ -54,8 +54,10 @@ public class SendingNotification {
                     Member member = ((DataSnapshot) iterator.next()).getValue(Member.class);
 
                     String token = member.getToken();
+                    String id = member.getId();
+                    String name = member.getName();
 
-                    sendNotif(token, member.getName());
+                    sendNotif(token, name, id);
                 }
             }
 
@@ -66,7 +68,9 @@ public class SendingNotification {
         });
     }
 
-    private void sendNotif(String target_token, String name) {
+    private void sendNotif(String target_token, String name, String id) {
+        data.setToId(id);
+        data.setToName(name);
         NotificationSender sender = new NotificationSender(data, target_token);
         mApiService.sendNotification(sender).enqueue(new Callback<MyResponse>() {
             @Override

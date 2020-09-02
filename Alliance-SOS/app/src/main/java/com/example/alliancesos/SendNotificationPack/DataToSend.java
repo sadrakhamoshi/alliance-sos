@@ -4,9 +4,26 @@ import com.example.alliancesos.Utils.MessageType;
 
 public class DataToSend<TypeOfNot> {
     private String makeBy, groupName;
+    private String toName, toId;
     private String groupId;
     private String eventId;
     private int type;
+
+    public String getToId() {
+        return toId;
+    }
+
+    public String getToName() {
+        return toName;
+    }
+
+    public void setToName(String toName) {
+        this.toName = toName;
+    }
+
+    public void setToId(String toId) {
+        this.toId = toId;
+    }
 
     public String getGroupId() {
         return groupId;
