@@ -6,6 +6,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
@@ -22,6 +24,8 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.example.alliancesos.DeviceAlarm.MyAlarmService;
+import com.example.alliancesos.SendNotificationPack.NotificationResponseActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -32,6 +36,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -51,10 +56,15 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<String> listOfGroupName, listOfGroupId;
     private ArrayAdapter<String> arrayAdapter;
 
+    EditText editText;
+    EditText editText2;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        editText = findViewById(R.id.time_edt);
+        editText2 = findViewById(R.id.time2_edt);
         Initialize();
     }
 
@@ -287,5 +297,20 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         //getCurrentUserInfo();
+    }
+
+    public void setAlarm(View view) {
+
+        AlarmManager alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
+        Intent intent = new Intent(this, MyAlarmService.class);
+        intent.setAction("com.example.helloandroid.alarms");
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 101, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.HOUR_OF_DAY, 15);
+        calendar.set(Calendar.MINUTE, Integer.valueOf(editText.getText().toString()));
+        calendar.set(Calendar.SECOND, Integer.valueOf(editText2.getText().toString()));
+        Toast.makeText(this, calendar.get(Calendar.HOUR_OF_DAY) + " " + calendar.get(Calendar.MINUTE) + " " + calendar.get(Calendar.SECOND), Toast.LENGTH_SHORT).show();
+        alarmManager.setExact(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
     }
 }

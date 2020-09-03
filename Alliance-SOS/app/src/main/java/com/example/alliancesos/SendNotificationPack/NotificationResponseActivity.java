@@ -4,6 +4,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,8 +15,10 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.example.alliancesos.DeviceAlarm.MyAlarmService;
 import com.example.alliancesos.MainActivity;
 import com.example.alliancesos.R;
+import com.example.alliancesos.ScheduleObject;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -25,6 +29,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -39,7 +44,9 @@ public class NotificationResponseActivity extends AppCompatActivity {
 
     private String mCurrUsername, mCurrUserId;
 
-    private DatabaseReference mGroupRef;
+    private ScheduleObject scheduleObject;
+
+    private DatabaseReference mGroupRef, mRootRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +59,8 @@ public class NotificationResponseActivity extends AppCompatActivity {
     private void Initialize() {
 
         //database
-        mGroupRef = FirebaseDatabase.getInstance().getReference().child("groups");
+        mRootRef = FirebaseDatabase.getInstance().getReference();
+        mGroupRef = mRootRef.child("groups");
 
         getExtra();
 
@@ -81,11 +89,39 @@ public class NotificationResponseActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
+
                     Toast.makeText(NotificationResponseActivity.this, "Member added to event members", Toast.LENGTH_SHORT).show();
+
+                    getEventFromDatabase();
+                    //setAlarm();
+
                     AlertDialogToMainActivity();
+
                 } else {
                     Toast.makeText(NotificationResponseActivity.this, "error in joinEvent" + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                 }
+            }
+        });
+    }
+
+    private void getEventFromDatabase() {
+        mGroupRef.child(mGroupId).child("events").child(mEventId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+
+                    try {
+                        scheduleObject = snapshot.child("scheduleObject").getValue(ScheduleObject.class);
+
+                    } catch (Exception e) {
+                        Toast.makeText(NotificationResponseActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(NotificationResponseActivity.this, "Error in getEventfromDatabase" + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -116,7 +152,6 @@ public class NotificationResponseActivity extends AppCompatActivity {
         dialog.show();
 
     }
-
 
     private void showAttendingMembers() {
         mGroupRef.child(mGroupId).child("events").child(mEventId).child("members").addValueEventListener(new ValueEventListener() {
@@ -160,6 +195,4 @@ public class NotificationResponseActivity extends AppCompatActivity {
         super.onStart();
         showAttendingMembers();
     }
-
-
 }
