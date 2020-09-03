@@ -232,6 +232,9 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+        mGroupsRef.child(groupId).child("members").push().setValue(new Member(mCurrentUser.getToken(), mCurrentUser.getUserName(), mCurrentUserId));
+        Toast.makeText(this, "admin added to group ... ", Toast.LENGTH_SHORT).show();
     }
 
     private void addGroupToUserSubset(String groupName, String groupId) {
@@ -264,6 +267,7 @@ public class MainActivity extends AppCompatActivity {
                     String token = snapshot.child("token").getValue().toString();
                     String pass = snapshot.child("password").getValue().toString();
                     mCurrentUser = new UserObject(id, userName, email, pass, token);
+                    Toast.makeText(MainActivity.this, "admin info gotten...", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(MainActivity.this, "Main activity not exist...", Toast.LENGTH_SHORT).show();
                 }
@@ -280,7 +284,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         showCurrentUserGroups();
-
+        getCurrentUserInfo();
         //permission
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (!Settings.System.canWrite(getApplicationContext())) {

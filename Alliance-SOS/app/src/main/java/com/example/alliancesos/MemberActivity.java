@@ -23,13 +23,14 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
 public class MemberActivity extends AppCompatActivity {
 
-    private String mGroupId;
+    private String mGroupId, mGroupName;
 
 
     private Button mAddToGroup;
@@ -50,6 +51,7 @@ public class MemberActivity extends AppCompatActivity {
         Intent intent = getIntent();
         if (intent != null) {
             mGroupId = intent.getStringExtra("groupId");
+            mGroupName = intent.getStringExtra("groupName");
         }
 
         initialize();
@@ -150,7 +152,10 @@ public class MemberActivity extends AppCompatActivity {
     }
 
     private void addToUsersGroups(final String foundedUserId) {
-        mUserRef.child(foundedUserId).child("Groups").push().setValue(mGroupId).addOnCompleteListener(new OnCompleteListener<Void>() {
+        HashMap<String, String> groupInfo = new HashMap<>();
+        groupInfo.put("groupName", mGroupName);
+        groupInfo.put("groupId", mGroupId);
+        mUserRef.child(foundedUserId).child("Groups").push().setValue(groupInfo).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {

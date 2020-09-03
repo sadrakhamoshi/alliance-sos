@@ -117,8 +117,6 @@ public class SignUpPage extends AppCompatActivity {
 
                 mToken = new Token(newToken);
 
-                Toast.makeText(getApplicationContext(), "Token is " + mToken.getToken(), Toast.LENGTH_SHORT).show();
-
                 String key = mFirebaseAuth.getCurrentUser().getUid();
 
                 UserObject userObject = new UserObject(key, mUsername.getText().toString(), mEmail.getText().toString(), mPassword.getText().toString(), mToken.getToken());

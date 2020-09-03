@@ -112,6 +112,7 @@ public class GroupActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent toMember = new Intent(getApplicationContext(), MemberActivity.class);
                 toMember.putExtra("groupId", mCurrentGroupId);
+                toMember.putExtra("groupName", mCurrentGroupName);
                 startActivity(toMember);
             }
         });

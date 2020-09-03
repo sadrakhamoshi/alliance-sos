@@ -52,12 +52,15 @@ public class SendingNotification {
                 while (iterator.hasNext()) {
 
                     Member member = ((DataSnapshot) iterator.next()).getValue(Member.class);
-
-                    String token = member.getToken();
-                    String id = member.getId();
                     String name = member.getName();
+                    if (!mFrom.equals(name)) {
+                        String token = member.getToken();
+                        String id = member.getId();
+                        sendNotif(token, name, id);
+                    } else {
+                        Toast.makeText(mContext, "not For Admin", Toast.LENGTH_SHORT).show();
+                    }
 
-                    sendNotif(token, name, id);
                 }
             }
 
