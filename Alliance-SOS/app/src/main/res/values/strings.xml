@@ -9,6 +9,7 @@
     <string name="schedule_describe">More Description ...</string>
     <string name="schedule_date">Pick a Date ...</string>
     <string name="schedule_time">Pick a Time ...</string>
+    <string name="question">Are you In or Not ?</string>
     <string name="email_hint">Email</string>
     <string name="signUpwithgoogel">SginUp Via Google</string>
 </resources>

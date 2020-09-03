@@ -1,7 +1,6 @@
 package com.example.alliancesos.SendNotificationPack;
 
 import android.content.Context;
-import android.provider.ContactsContract;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -26,13 +25,18 @@ public class SendingNotification {
     private APIService mApiService;
 
     private Context mContext;
+    private String mGroupId, mGroupName;
+    private String mFrom;
 
-    private String mGroupId;
+    private DataToSend data;
 
     DatabaseReference mGroupRef;
 
-    public SendingNotification(String groupId, Context context) {
+    public SendingNotification(String groupId, String groupName, String from, Context context, DataToSend dataToSendForSOS) {
         mGroupId = groupId;
+        mGroupName = groupName;
+        mFrom = from;
+        data = dataToSendForSOS;
         mContext = context;
         mApiService = Client.getClient(BASE_URL).create(APIService.class);
         mGroupRef = FirebaseDatabase.getInstance().getReference().child("groups");
@@ -50,8 +54,10 @@ public class SendingNotification {
                     Member member = ((DataSnapshot) iterator.next()).getValue(Member.class);
 
                     String token = member.getToken();
+                    String id = member.getId();
+                    String name = member.getName();
 
-                    sendNotif(token, member.getName());
+                    sendNotif(token, name, id);
                 }
             }
 
@@ -62,9 +68,10 @@ public class SendingNotification {
         });
     }
 
-    private void sendNotif(String token, String name) {
-        DataToSend data = new DataToSend("newNotification for " + name, "Just For Testing...");
-        NotificationSender sender = new NotificationSender(data, token);
+    private void sendNotif(String target_token, String name, String id) {
+        data.setToId(id);
+        data.setToName(name);
+        NotificationSender sender = new NotificationSender(data, target_token);
         mApiService.sendNotification(sender).enqueue(new Callback<MyResponse>() {
             @Override
             public void onResponse(Call<MyResponse> call, Response<MyResponse> response) {

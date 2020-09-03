@@ -6,9 +6,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.AdapterView;
@@ -19,6 +24,8 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.example.alliancesos.DeviceAlarm.MyAlarmService;
+import com.example.alliancesos.SendNotificationPack.NotificationResponseActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -29,8 +36,11 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
@@ -43,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
     private DatabaseReference mRoot, mGroupsRef, mUsersRef;
 
     private ListView groups_listView;
-    private ArrayList<String> listOfAllGroups, listOfGroupId;
+    private ArrayList<String> listOfGroupName, listOfGroupId;
     private ArrayAdapter<String> arrayAdapter;
 
     @Override
@@ -89,7 +99,10 @@ public class MainActivity extends AppCompatActivity {
     private void InitializeUI() {
         groups_listView = findViewById(R.id.list_view);
         listOfGroupId = new ArrayList<>();
-        arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, listOfGroupId);
+        listOfGroupName = new ArrayList<>();
+
+//        arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, listOfGroupId);
+        arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, listOfGroupName);
         groups_listView.setAdapter(arrayAdapter);
 
         Button logOut = findViewById(R.id.log_out_btn);
@@ -116,9 +129,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent toGroupActivity = new Intent(getApplicationContext(), GroupActivity.class);
+
+                toGroupActivity.putExtra("groupName", listOfGroupName.get(position));
                 toGroupActivity.putExtra("groupId", listOfGroupId.get(position));
                 toGroupActivity.putExtra("currUserName", mCurrentUserName);
                 toGroupActivity.putExtra("currUserId", mCurrentUserId);
+
                 startActivity(toGroupActivity);
             }
         });
@@ -152,7 +168,7 @@ public class MainActivity extends AppCompatActivity {
                 } else {
 
                     CreateNewGroup(groupName, groupId);
-                    addGroupToUserSubset(groupId);
+                    addGroupToUserSubset(groupName, groupId);
 
                 }
             }
@@ -172,21 +188,24 @@ public class MainActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 Iterator iterator = snapshot.getChildren().iterator();
 
-                //Set<String> all_groups = new HashSet<>();
-                Set<String> all_groups_id = new HashSet<>();
-                while (iterator.hasNext()) {
+                List<String> all_groups_name = new ArrayList<>();
+                List<String> all_groups_id = new ArrayList<>();
+                try {
+                    while (iterator.hasNext()) {
+                        DataSnapshot dataSnapshot = ((DataSnapshot) iterator.next());
+                        String name = dataSnapshot.child("groupName").getValue().toString();
+                        String id = dataSnapshot.child("groupId").getValue().toString();
 
-                    DataSnapshot dataSnapshot = ((DataSnapshot) iterator.next());
-                    //String name = dataSnapshot.child("groupName").getValue().toString();
-                    String id = dataSnapshot.getValue().toString();
-
-                    //all_groups.add(name);
-                    all_groups_id.add(id);
+                        all_groups_name.add(name);
+                        all_groups_id.add(id);
+                    }
+                } catch (Exception e) {
+                    Toast.makeText(MainActivity.this, "There is No group yet..." + "\n" + e.getMessage(), Toast.LENGTH_LONG).show();
                 }
-                //listOfAllGroups.clear();
+                listOfGroupName.clear();
                 listOfGroupId.clear();
                 listOfGroupId.addAll(all_groups_id);
-                //listOfAllGroups.addAll(all_groups);
+                listOfGroupName.addAll(all_groups_name);
                 arrayAdapter.notifyDataSetChanged();
             }
 
@@ -197,7 +216,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
-
 
     private void CreateNewGroup(final String groupName, final String groupId) {
 
@@ -216,9 +234,14 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void addGroupToUserSubset(String groupId) {
-        Toast.makeText(this, mCurrentUserId, Toast.LENGTH_SHORT).show();
-        mUsersRef.child(mCurrentUserId).child("Groups").push().setValue(groupId).addOnCompleteListener(new OnCompleteListener<Void>() {
+    private void addGroupToUserSubset(String groupName, String groupId) {
+        HashMap<String, String> groupInfo = new HashMap<>();
+        groupInfo.put("groupName", groupName);
+        groupInfo.put("groupId", groupId);
+
+        Toast.makeText(this, mCurrentUserName, Toast.LENGTH_SHORT).show();
+
+        mUsersRef.child(mCurrentUserId).child("Groups").push().setValue(groupInfo).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
@@ -257,6 +280,18 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         showCurrentUserGroups();
+
+        //permission
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (!Settings.System.canWrite(getApplicationContext())) {
+
+                Intent intent = new Intent(android.provider.Settings.ACTION_MANAGE_WRITE_SETTINGS);
+                intent.setData(Uri.parse("package:" + getPackageName()));
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivityForResult(intent, 200);
+            }
+        }
         //getCurrentUserInfo();
     }
+
 }

@@ -18,10 +18,10 @@ import android.widget.EditText;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.example.alliancesos.SendNotificationPack.DataToSend;
 import com.example.alliancesos.SendNotificationPack.SendingNotification;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -36,9 +36,9 @@ public class SetScheduleActivity extends AppCompatActivity {
 
     private String mAuthorUserName, mAuthorId;
 
-    private Message mMessage;
+    private Event mEvent;
 
-    private String mCurrentGroupID;
+    private String mGroupId, mGroupName;
 
 
     //database
@@ -65,9 +65,10 @@ public class SetScheduleActivity extends AppCompatActivity {
         setContentView(R.layout.activity_set_schedule);
         Intent fromGroupAct = getIntent();
         if (fromGroupAct != null) {
-            mCurrentGroupID = fromGroupAct.getStringExtra("groupId");
+            mGroupId = fromGroupAct.getStringExtra("groupId");
             mAuthorId = fromGroupAct.getStringExtra("currUserId");
             mAuthorUserName = fromGroupAct.getStringExtra("currUserName");
+            mGroupName = fromGroupAct.getStringExtra("groupName");
         }
 
         Initialize();
@@ -96,7 +97,7 @@ public class SetScheduleActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 new TimePickerDialog(SetScheduleActivity.this, time, mTime
-                        .get(Calendar.HOUR_OF_DAY), mTime.get(Calendar.MINUTE), false).show();
+                        .get(Calendar.HOUR_OF_DAY), mTime.get(Calendar.MINUTE), true).show();
             }
         });
 
@@ -143,7 +144,7 @@ public class SetScheduleActivity extends AppCompatActivity {
                 SimpleDateFormat df = new SimpleDateFormat("dd-MMM-yyyy", Locale.getDefault());
                 String formattedDate = df.format(c);
 
-                mMessage = new Message("", formattedDate, scheduleObject);
+                mEvent = new Event("", "", formattedDate, scheduleObject);
 
                 sendMessage();
 
@@ -165,9 +166,10 @@ public class SetScheduleActivity extends AppCompatActivity {
     }
 
     private void sendMessageToDB() {
-        mMessage.setCreatedBy(mAuthorUserName);
-
-        mGroupsRef.child(mCurrentGroupID).child("events").push().setValue(mMessage).addOnCompleteListener(new OnCompleteListener<Void>() {
+        mEvent.setCreatedBy(mAuthorUserName);
+        String key = mGroupsRef.child(mGroupId).child("events").push().getKey();
+        mEvent.setEventId(key);
+        mGroupsRef.child(mGroupId).child("events").child(key).setValue(mEvent).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
@@ -180,7 +182,11 @@ public class SetScheduleActivity extends AppCompatActivity {
     }
 
     private void sendNotificationToOtherDevice() {
-        SendingNotification sendingNotification = new SendingNotification(mCurrentGroupID, getApplicationContext());
+        DataToSend<Event> data = new DataToSend<>(mAuthorUserName, mGroupName, mGroupId, mEvent.getEventId());
+
+        SendingNotification sendingNotification = new SendingNotification(mGroupId, mGroupName
+                , mAuthorUserName, getApplicationContext(), data);
+
         sendingNotification.Send();
     }
 

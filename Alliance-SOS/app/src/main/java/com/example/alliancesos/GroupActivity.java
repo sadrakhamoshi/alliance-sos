@@ -3,6 +3,7 @@ package com.example.alliancesos;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -12,6 +13,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.alliancesos.SendNotificationPack.DataToSend;
+import com.example.alliancesos.SendNotificationPack.SendingNotification;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -25,15 +28,19 @@ import java.util.Set;
 
 public class GroupActivity extends AppCompatActivity {
 
+    private PendingIntent pendingIntent;
+    final static int RQS_1 = 1;
+
     private String mCurrentUserName, mCurrentUserId;
 
     //database
     private DatabaseReference mGroupRef;
 
-    private String mCurrentGroupId;
+    private String mCurrentGroupId, mCurrentGroupName;
 
     private Button mMembersList;
     private Button mGroupList;
+    private Button mSOS_btn;
 
     private TextView mSchedule;
 
@@ -48,6 +55,7 @@ public class GroupActivity extends AppCompatActivity {
         mCurrentGroupId = getIntent().getStringExtra("groupId");
         mCurrentUserId = getIntent().getStringExtra("currUserId");
         mCurrentUserName = getIntent().getStringExtra("currUserName");
+        mCurrentGroupName = getIntent().getStringExtra("groupName");
 
         InitializeUI();
     }
@@ -62,7 +70,7 @@ public class GroupActivity extends AppCompatActivity {
 
 
         TextView nameGroup = findViewById(R.id.group_name_txt);
-        nameGroup.setText(mCurrentGroupId);
+        nameGroup.setText(mCurrentGroupName);
 
         mSchedule = findViewById(R.id.schedule_event);
         mSchedule.setOnClickListener(new View.OnClickListener() {
@@ -72,9 +80,19 @@ public class GroupActivity extends AppCompatActivity {
             }
         });
 
+        mSOS_btn = findViewById(R.id.sos_btn);
+        mSOS_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DataToSend data = new DataToSend(mCurrentUserName, mCurrentGroupName, mCurrentGroupId);
+                SendingNotification sender = new SendingNotification(mCurrentGroupId, mCurrentGroupName, mCurrentUserName, GroupActivity.this, data);
+                sender.Send();
+            }
+        });
+
+
         Button b1 = findViewById(R.id.help_us_btn);
         Button b2 = findViewById(R.id.user_setting_btn);
-
         b1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -87,7 +105,6 @@ public class GroupActivity extends AppCompatActivity {
                 Toast.makeText(GroupActivity.this, "Will go to Users Setting Activity ...", Toast.LENGTH_SHORT).show();
             }
         });
-
 
         mMembersList = findViewById(R.id.member_list_btn);
         mMembersList.setOnClickListener(new View.OnClickListener() {
@@ -116,8 +133,9 @@ public class GroupActivity extends AppCompatActivity {
         Intent intent = new Intent(getApplicationContext(), SetScheduleActivity.class);
 
         intent.putExtra("groupId", mCurrentGroupId);
-        intent.putExtra("currUserName",mCurrentUserName);
-        intent.putExtra("currUserId",mCurrentUserId);
+        intent.putExtra("currUserName", mCurrentUserName);
+        intent.putExtra("currUserId", mCurrentUserId);
+        intent.putExtra("groupName", mCurrentGroupName);
 
         startActivity(intent);
     }
@@ -137,7 +155,7 @@ public class GroupActivity extends AppCompatActivity {
                     Set<String> set = new HashSet<>();
                     while (iterator.hasNext()) {
                         try {
-                            Message message = ((DataSnapshot) (iterator.next())).getValue(Message.class);
+                            Event message = ((DataSnapshot) (iterator.next())).getValue(Event.class);
                             if (message != null) {
                                 String tmp = "";
                                 tmp += message.getScheduleObject().getTitle() + "\n";

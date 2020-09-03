@@ -1,17 +1,29 @@
 package com.example.alliancesos;
 
-public class Message {
+import com.example.alliancesos.Utils.MessageType;
+
+public class Event {
+    private String eventId;
     private String createdBy;
     private String createdTime;
     private ScheduleObject scheduleObject;
 
-    public Message(String writer, String created, ScheduleObject sch) {
+    public Event(String eventId, String writer, String created, ScheduleObject sch) {
         scheduleObject = sch;
+        this.eventId = eventId;
         createdBy = writer;
         createdTime = created;
     }
 
-    public Message() {
+    public Event() {
+    }
+
+    public String getEventId() {
+        return eventId;
+    }
+
+    public void setEventId(String eventId) {
+        this.eventId = eventId;
     }
 
     public ScheduleObject getScheduleObject() {
