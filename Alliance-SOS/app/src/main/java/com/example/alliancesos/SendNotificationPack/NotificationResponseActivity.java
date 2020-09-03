@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -48,10 +49,15 @@ public class NotificationResponseActivity extends AppCompatActivity {
 
     private DatabaseReference mGroupRef, mRootRef;
 
+    EditText editText1;
+    EditText editText2;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notification_response);
+        editText1 = findViewById(R.id.time_edt);
+        editText2 = findViewById(R.id.time2_edt);
         Initialize();
 
     }
@@ -91,10 +97,7 @@ public class NotificationResponseActivity extends AppCompatActivity {
                 if (task.isSuccessful()) {
 
                     Toast.makeText(NotificationResponseActivity.this, "Member added to event members", Toast.LENGTH_SHORT).show();
-
-                    getEventFromDatabase();
-                    //setAlarm();
-
+                    setAlarm();
                     AlertDialogToMainActivity();
 
                 } else {
@@ -112,6 +115,7 @@ public class NotificationResponseActivity extends AppCompatActivity {
 
                     try {
                         scheduleObject = snapshot.child("scheduleObject").getValue(ScheduleObject.class);
+                        Toast.makeText(NotificationResponseActivity.this, "get schedule object", Toast.LENGTH_SHORT).show();
 
                     } catch (Exception e) {
                         Toast.makeText(NotificationResponseActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -193,6 +197,29 @@ public class NotificationResponseActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        getEventFromDatabase();
         showAttendingMembers();
+    }
+
+    public void setAlarm() {
+        if (scheduleObject != null) {
+            AlarmManager alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
+            Intent intent = new Intent(this, MyAlarmService.class);
+            intent.setAction("com.example.helloandroid.alarms");
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 101, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(Calendar.YEAR, Integer.parseInt(scheduleObject.getDateTime().getYear()));
+            calendar.set(Calendar.MONTH, Integer.parseInt(scheduleObject.getDateTime().getMonth()));
+            calendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(scheduleObject.getDateTime().getDay()));
+            calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(scheduleObject.getDateTime().getHour()));
+            calendar.set(Calendar.MINUTE, Integer.parseInt(scheduleObject.getDateTime().getMinute()));
+            calendar.set(Calendar.SECOND, Integer.parseInt(editText2.getText().toString()));
+            Toast.makeText(this, "Alarm set Successfully ....", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, calendar.get(Calendar.HOUR_OF_DAY) + " " + calendar.get(Calendar.MINUTE) + " " + calendar.get(Calendar.SECOND), Toast.LENGTH_SHORT).show();
+            alarmManager.setExact(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
+
+        } else {
+            Toast.makeText(this, "schedule object is null ", Toast.LENGTH_SHORT).show();
+        }
     }
 }

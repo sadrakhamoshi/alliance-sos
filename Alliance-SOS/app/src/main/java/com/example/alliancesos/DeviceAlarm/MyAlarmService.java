@@ -48,12 +48,14 @@ public class MyAlarmService extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        mContext = context;
         if (intent.getAction().equals("com.example.helloandroid.alarms")) {
-            Toast.makeText(context, "Don't panik but your time is up!!!!.",
+            Toast.makeText(context, "time is up!!!!.",
                     Toast.LENGTH_LONG).show();
             // Vibrate the mobile phone
             Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
             vibrator.vibrate(2000);
+            playRingtone();
         }
     }
 }
