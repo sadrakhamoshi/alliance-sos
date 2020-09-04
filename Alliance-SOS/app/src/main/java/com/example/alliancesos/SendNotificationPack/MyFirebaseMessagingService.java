@@ -1,6 +1,7 @@
 package com.example.alliancesos.SendNotificationPack;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -30,6 +31,9 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
+
+    public static final String NOTIFICATION_CHANNEL_ID = "10001";
+
     private Vibrator mVibrator;
     private Ringtone mRingtone;
 
@@ -50,10 +54,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         Context context = getApplicationContext();
         Initialize(remoteMessage);
 
-        mVibrator = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
-        mVibrator.vibrate(2000);
+//        mVibrator = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
+//        mVibrator.vibrate(2000);
 
-        NotificationManager notificationManager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
         Intent intent = new Intent(context, NotificationResponseActivity.class);
 
         intent.putExtra("groupId", groupId);
@@ -70,22 +73,33 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder builder =
-                new NotificationCompat.Builder(getApplicationContext(), groupName)
+                new NotificationCompat.Builder(getApplicationContext(), "CHANNEL_ID")
                         .setColorized(true)
                         .setColor(notificationColor)
                         .setContentTitle(title)
                         .setSmallIcon(notificationIcon)
                         .setContentText(message)
+                        .setVibrate(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400})
+                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                         .setContentIntent(pendingIntent)
                         .setStyle(new NotificationCompat.BigTextStyle().bigText(message));
+
         if (type == MessageType.NOTIFICATION_TYPE) {
             builder.setSound(alarmSound);
         }
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
-        Notification notification = builder.build();
-        notification.flags |= Notification.FLAG_AUTO_CANCEL;
-
-        notificationManager.notify(0, notification);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            int importance = NotificationManager.IMPORTANCE_HIGH;
+            NotificationChannel notificationChannel = new
+                    NotificationChannel(NOTIFICATION_CHANNEL_ID, getString(R.string.notificationChannel_name), importance);
+            notificationChannel.enableLights(true);
+            notificationChannel.setLightColor(Color.RED);
+            builder.setChannelId(NOTIFICATION_CHANNEL_ID);
+            assert notificationManager != null;
+            notificationManager.createNotificationChannel(notificationChannel);
+        }
+        notificationManager.notify(0, builder.build());
 
         if (type == MessageType.SOS_TYPE) {
             playRingtone();
