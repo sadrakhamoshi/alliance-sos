@@ -1,8 +1,10 @@
 package com.example.alliancesos;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -19,6 +21,17 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
+
+import java.sql.Time;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
 public class SignUpPage extends AppCompatActivity {
 
@@ -44,9 +57,12 @@ public class SignUpPage extends AppCompatActivity {
         setContentView(R.layout.activity_sign_up_page);
 
         findViewById(R.id.google_sign_up_btn).setOnClickListener(new View.OnClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onClick(View v) {
-                Toast.makeText(getApplicationContext(), "Not Working Yet", Toast.LENGTH_SHORT).show();
+
+                String[] tzIds = TimeZone.getAvailableIDs();
+                Toast.makeText(SignUpPage.this, tzIds.length + "", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -108,7 +124,6 @@ public class SignUpPage extends AppCompatActivity {
         });
     }
 
-
     private void getTokenAndSignUp() {
         FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(SignUpPage.this, new OnSuccessListener<InstanceIdResult>() {
             @Override
@@ -124,5 +139,10 @@ public class SignUpPage extends AppCompatActivity {
                 mUserDatabaseRef.child(key).setValue(userObject);
             }
         });
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
     }
 }

@@ -139,7 +139,7 @@ public class MemberActivity extends AppCompatActivity {
     private void addMemberToGroups(final String newMemberName, String newMemberId, String newMemberToken) {
         Member member = new Member(newMemberToken, newMemberName, newMemberId);
 
-        mGroupRef.child(mGroupId).child("members").push().setValue(member).addOnCompleteListener(new OnCompleteListener<Void>() {
+        mGroupRef.child(mGroupId).child("members").child(member.getId()).setValue(member).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {

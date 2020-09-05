@@ -31,7 +31,9 @@ import android.widget.Toast;
 
 import com.example.alliancesos.DeviceAlarm.MyAlarmService;
 import com.example.alliancesos.SendNotificationPack.NotificationResponseActivity;
+import com.example.alliancesos.SendNotificationPack.Token;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -39,6 +41,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -238,7 +242,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        mGroupsRef.child(groupId).child("members").push().setValue(new Member(mCurrentUser.getToken(), mCurrentUser.getUserName(), mCurrentUserId));
+        mGroupsRef.child(groupId).child("members").child(mCurrentUserId).setValue(new Member(mCurrentUser.getToken(), mCurrentUser.getUserName(), mCurrentUserId));
         Toast.makeText(this, "admin added to group ... ", Toast.LENGTH_SHORT).show();
     }
 
@@ -285,6 +289,45 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void UpdateToken() {
+        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(MainActivity.this, new OnSuccessListener<InstanceIdResult>() {
+            @Override
+            public void onSuccess(InstanceIdResult instanceIdResult) {
+                Token newToken = new Token(instanceIdResult.getToken());
+                mUsersRef.child(mCurrentUserId).setValue(newToken);
+
+                changeGroupMemberToken(newToken.getToken());
+            }
+        });
+    }
+
+    private void changeGroupMemberToken(final String s) {
+        mUsersRef.child(mCurrentUserId).child("Groups").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    Iterator iterator = snapshot.getChildren().iterator();
+                    while (iterator.hasNext()) {
+
+                        DataSnapshot dataSnapshot = (DataSnapshot) (iterator.next());
+                        String groupId = dataSnapshot.child("groupId").getValue().toString();
+                        groupMemberToken(s, groupId);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(MainActivity.this, "error in changeMessageMember " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void groupMemberToken(String s, String groupId) {
+        mGroupsRef.child(groupId).child("members").child(mCurrentUserId).child("token").setValue(s);
+    }
+
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -293,7 +336,6 @@ public class MainActivity extends AppCompatActivity {
         //permission
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (!Settings.System.canWrite(getApplicationContext())) {
-
                 Intent intent = new Intent(android.provider.Settings.ACTION_MANAGE_WRITE_SETTINGS);
                 intent.setData(Uri.parse("package:" + getPackageName()));
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
