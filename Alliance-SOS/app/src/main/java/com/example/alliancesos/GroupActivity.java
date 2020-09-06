@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import com.example.alliancesos.SendNotificationPack.DataToSend;
 import com.example.alliancesos.SendNotificationPack.SendingNotification;
+import com.example.alliancesos.Setting.UserSettingActivity;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -90,22 +91,6 @@ public class GroupActivity extends AppCompatActivity {
             }
         });
 
-
-        Button b1 = findViewById(R.id.help_us_btn);
-        Button b2 = findViewById(R.id.user_setting_btn);
-        b1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(GroupActivity.this, "Will go to Help Us Activity ...", Toast.LENGTH_SHORT).show();
-            }
-        });
-        b2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(GroupActivity.this, "Will go to Users Setting Activity ...", Toast.LENGTH_SHORT).show();
-            }
-        });
-
         mMembersList = findViewById(R.id.member_list_btn);
         mMembersList.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -129,6 +114,18 @@ public class GroupActivity extends AppCompatActivity {
         });
 
     }
+
+    public void goToHelpUs(View view) {
+        Toast.makeText(this, "will go to help us Activity", Toast.LENGTH_SHORT).show();
+
+    }
+
+    public void goToProfile(View view) {
+        Intent intent = new Intent(getApplicationContext(), UserSettingActivity.class);
+        intent.putExtra("userId", mCurrentUserId);
+        startActivity(intent);
+    }
+
 
     private void goToSetScheduleEvent() {
         Intent intent = new Intent(getApplicationContext(), SetScheduleActivity.class);
