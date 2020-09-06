@@ -10,7 +10,7 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="300dp">
+        android:layout_height="250dp">
 
         <ImageView
             android:layout_width="match_parent"
@@ -36,6 +36,7 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginTop="15dp"
         android:fillViewport="true"
         android:padding="10dp">
 
@@ -47,7 +48,8 @@
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
-                android:layout_height="60dp">
+                android:layout_height="60dp"
+                android:layout_marginTop="15dp">
 
                 <EditText
                     android:id="@+id/email_setting"
@@ -63,7 +65,8 @@
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
-                android:layout_height="60dp">
+                android:layout_height="60dp"
+                android:layout_marginTop="15dp">
 
                 <EditText
                     android:id="@+id/username_setting"
@@ -79,7 +82,8 @@
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
-                android:layout_height="60dp">
+                android:layout_height="60dp"
+                android:layout_marginTop="15dp">
 
                 <EditText
                     android:id="@+id/password_setting"
@@ -95,7 +99,8 @@
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
-                android:layout_height="60dp">
+                android:layout_height="60dp"
+                android:layout_marginTop="15dp">
 
                 <EditText
                     android:id="@+id/timeZone_setting"
@@ -104,20 +109,23 @@
                     android:background="#00000000"
                     android:drawableLeft="@drawable/time_zone_icon"
                     android:drawablePadding="10dp"
+                    android:focusable="false"
                     android:gravity="center_vertical"
-                    android:hint="TimeZone" />
+                    android:hint="TimeZone"
+                    android:onClick="getTimeZone" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="60dp">
+                android:layout_height="60dp"
+                android:layout_marginTop="15dp">
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:background="#00000000"
-                    android:drawableStart="@drawable/alarm_off_icon"
+                    android:drawableLeft="@drawable/alarm_off_icon"
                     android:drawablePadding="10dp"
                     android:gravity="center_vertical"
                     android:text="Do Not Disturb"
@@ -135,13 +143,14 @@
 
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="60dp">
+                android:layout_height="60dp"
+                android:layout_marginTop="15dp">
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:background="#00000000"
-                    android:drawableStart="@drawable/ring_event_icon"
+                    android:drawableLeft="@drawable/ring_event_icon"
                     android:drawablePadding="10dp"
                     android:gravity="center_vertical"
                     android:text="Ring Before Event"
@@ -159,13 +168,14 @@
 
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="60dp">
+                android:layout_height="60dp"
+                android:layout_marginTop="15dp">
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:background="#00000000"
-                    android:drawableStart="@drawable/chose_ring"
+                    android:drawableLeft="@drawable/chose_ring"
                     android:drawablePadding="10dp"
                     android:gravity="center_vertical"
                     android:text="Chose Ringtone"

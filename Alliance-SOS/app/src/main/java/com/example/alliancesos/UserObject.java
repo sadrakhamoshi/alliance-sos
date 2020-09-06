@@ -1,11 +1,15 @@
 package com.example.alliancesos;
 
+import java.util.TimeZone;
+
 public class UserObject {
     private String id;
     private String userName;
     private String email;
     private String password;
     private String token;
+    private String timeZone;
+    private boolean notDisturb;
 
     public UserObject(String id, String user, String mail, String pass, String tok) {
         this.id = id;
@@ -13,12 +17,28 @@ public class UserObject {
         email = mail;
         userName = user;
         token = tok;
+        timeZone = TimeZone.getDefault().getID();
+        notDisturb = false;
     }
 
     public UserObject() {
     }
 
-    ;
+    public boolean isNotDisturb() {
+        return notDisturb;
+    }
+
+    public void setNotDisturb(boolean notDisturb) {
+        this.notDisturb = notDisturb;
+    }
+
+    public String getTimeZone() {
+        return timeZone;
+    }
+
+    public void setTimeZone(String timeZone) {
+        this.timeZone = timeZone;
+    }
 
     public String getId() {
         return id;
