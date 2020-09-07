@@ -174,15 +174,15 @@ public class MemberActivity extends AppCompatActivity {
                 if (snapshot.exists()) {
                     Iterator iterator = snapshot.getChildren().iterator();
 
-                    Set<String> memberName = new HashSet<>();
+                    Set<String> membersName = new HashSet<>();
 
                     while (iterator.hasNext()) {
-                        Member member = ((DataSnapshot) iterator.next()).getValue(Member.class);
-                        String name = member.getName();
-                        memberName.add(name);
+                        String memberId = ((DataSnapshot) iterator.next()).child("id").getValue().toString();
+                        getUserByIdFromUsers(memberId, membersName);
+//                        membersName.add(name);
                     }
                     mMembersList.clear();
-                    mMembersList.addAll(memberName);
+                    mMembersList.addAll(membersName);
                     adapter.notifyDataSetChanged();
                 }
             }
@@ -190,6 +190,24 @@ public class MemberActivity extends AppCompatActivity {
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Toast.makeText(MemberActivity.this, "Error On showAllMembers Func " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void getUserByIdFromUsers(final String memberId, final Set<String> membersName) {
+        mUserRef.child(memberId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    String name = snapshot.child("userName").getValue().toString();
+                    Toast.makeText(MemberActivity.this, name, Toast.LENGTH_SHORT).show();
+                    //membersName.add(name);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(MemberActivity.this, error.getMessage() + error.getDetails(), Toast.LENGTH_SHORT).show();
             }
         });
     }
