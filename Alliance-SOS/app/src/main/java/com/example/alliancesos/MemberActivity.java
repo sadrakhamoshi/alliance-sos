@@ -139,7 +139,7 @@ public class MemberActivity extends AppCompatActivity {
     }
 
     private void addMemberToGroups(final String newMemberName, String newMemberId, String newMemberToken) {
-        Member member = new Member(newMemberToken, newMemberName, newMemberId);
+        Member member = new Member(newMemberId, newMemberName);
 
         mGroupRef.child(mGroupId).child("members").child(member.getId()).setValue(member).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
@@ -176,7 +176,7 @@ public class MemberActivity extends AppCompatActivity {
                 if (snapshot.exists()) {
                     Iterator iterator = snapshot.getChildren().iterator();
 
-//                    Set<String> membersName = new HashSet<>();
+//                  Set<String> membersName = new HashSet<>();
                     mMembersList.clear();
                     while (iterator.hasNext()) {
                         String memberId = ((DataSnapshot) iterator.next()).child("id").getValue().toString();

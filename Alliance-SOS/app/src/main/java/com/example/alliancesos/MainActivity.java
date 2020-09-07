@@ -243,7 +243,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        mGroupsRef.child(groupId).child("members").child(mCurrentUserId).setValue(new Member(mCurrentUser.getToken(), mCurrentUser.getUserName(), mCurrentUserId));
+        mGroupsRef.child(groupId).child("members").child(mCurrentUserId).setValue(new Member(mCurrentUserId, mCurrentUserName));
         Toast.makeText(this, "admin added to group ... ", Toast.LENGTH_SHORT).show();
     }
 
