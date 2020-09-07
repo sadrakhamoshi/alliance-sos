@@ -10,8 +10,10 @@ public class UserObject {
     private String email;
     private String password;
     private String token;
+    private String language;
     private String timeZone;
     private boolean notDisturb;
+    private boolean ringEnable;
 
     public UserObject(String id, String user, String mail, String pass, String tok) {
         this.id = id;
@@ -24,6 +26,22 @@ public class UserObject {
     }
 
     public UserObject() {
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
+    }
+
+    public void setRingEnable(boolean ringEnable) {
+        this.ringEnable = ringEnable;
+    }
+
+    public boolean isRingEnable() {
+        return ringEnable;
     }
 
     public boolean isNotDisturb() {
