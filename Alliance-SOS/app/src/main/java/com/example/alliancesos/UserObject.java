@@ -1,5 +1,7 @@
 package com.example.alliancesos;
 
+import com.firebase.ui.auth.data.model.User;
+
 import java.util.TimeZone;
 
 public class UserObject {
@@ -79,4 +81,5 @@ public class UserObject {
     public void setPassword(String password) {
         this.password = password;
     }
+
 }
