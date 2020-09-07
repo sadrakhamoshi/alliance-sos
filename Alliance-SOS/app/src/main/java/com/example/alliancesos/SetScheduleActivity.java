@@ -193,7 +193,7 @@ public class SetScheduleActivity extends AppCompatActivity {
         DataToSend<Event> data = new DataToSend<>(mAuthorUserName, mGroupName, mGroupId, mEvent.getEventId());
 
         SendingNotification sendingNotification = new SendingNotification(mGroupId, mGroupName
-                , mAuthorUserName, getApplicationContext(), data);
+                , mAuthorUserName, mAuthorId, getApplicationContext(), data);
 
         sendingNotification.Send();
     }

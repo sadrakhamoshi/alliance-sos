@@ -27,23 +27,26 @@ public class SendingNotification {
     private Context mContext;
     private String mGroupId, mGroupName;
     private String mFrom;
+    private String mFrom_id;
 
     private DataToSend data;
 
-    DatabaseReference mGroupRef;
+    private DatabaseReference mGroupRef, mUserRef;
 
-    public SendingNotification(String groupId, String groupName, String from, Context context, DataToSend dataToSendForSOS) {
+    public SendingNotification(String groupId, String groupName, String from_username, String mFrom_id, Context context, DataToSend dataToSendForSOS) {
         mGroupId = groupId;
         mGroupName = groupName;
-        mFrom = from;
+        this.mFrom_id = mFrom_id;
+        mFrom = from_username;
         data = dataToSendForSOS;
         mContext = context;
         mApiService = Client.getClient(BASE_URL).create(APIService.class);
-        mGroupRef = FirebaseDatabase.getInstance().getReference().child("groups");
+        DatabaseReference root = FirebaseDatabase.getInstance().getReference();
+        mGroupRef = root.child("groups");
+        mUserRef = root.child("users");
     }
 
     public void Send() {
-
         mGroupRef.child(this.mGroupId).child("members").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -52,13 +55,13 @@ public class SendingNotification {
                 while (iterator.hasNext()) {
 
                     Member member = ((DataSnapshot) iterator.next()).getValue(Member.class);
-                    String name = member.getName();
-                    if (!mFrom.equals(name)) {
-                        String token = member.getToken();
-                        String id = member.getId();
-                        sendNotif(token, name, id);
+                    String id = member.getId();
+                    if (!mFrom_id.equals(id)) {
+
+                        goToUsersRef(id);
+                        
                     } else {
-                        Toast.makeText(mContext, "not For Admin", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(mContext, "not For Your self..:)", Toast.LENGTH_SHORT).show();
                     }
 
                 }
@@ -67,6 +70,27 @@ public class SendingNotification {
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Toast.makeText(mContext, "error in sendNotification " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void goToUsersRef(final String userId) {
+        mUserRef.child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    String name = snapshot.child("userName").getValue().toString();
+                    String token = snapshot.child("token").getValue().toString();
+                    sendNotif(token, name, userId);
+
+                } else {
+                    Toast.makeText(mContext, "not exist for sending notifi....", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(mContext, error.getMessage() + "\n" + error.getDetails() + " error in gotouserref sendingnotificaiton", Toast.LENGTH_SHORT).show();
             }
         });
     }

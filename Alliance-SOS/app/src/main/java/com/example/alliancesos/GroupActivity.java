@@ -86,7 +86,8 @@ public class GroupActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 DataToSend data = new DataToSend(mCurrentUserName, mCurrentGroupName, mCurrentGroupId);
-                SendingNotification sender = new SendingNotification(mCurrentGroupId, mCurrentGroupName, mCurrentUserName, GroupActivity.this, data);
+                SendingNotification sender = new SendingNotification(mCurrentGroupId, mCurrentGroupName,
+                        mCurrentUserName, mCurrentUserId, GroupActivity.this, data);
                 sender.Send();
             }
         });
