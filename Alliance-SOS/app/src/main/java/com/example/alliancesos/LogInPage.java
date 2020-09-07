@@ -21,7 +21,6 @@ public class LogInPage extends AppCompatActivity {
     private EditText mEmail;
     private EditText mPass;
     private Button mLogIn;
-    private Button mSignUpPage;
 
     //authentication
     private FirebaseAuth mFirebaseAuth;
@@ -53,7 +52,6 @@ public class LogInPage extends AppCompatActivity {
         mEmail = findViewById(R.id.email_edt_text);
         mPass = findViewById(R.id.pass_edt_text);
         mLogIn = findViewById(R.id.login_btn);
-        mSignUpPage = findViewById(R.id.sign_up_page_btn);
         SetUpButtons();
     }
 
@@ -62,13 +60,6 @@ public class LogInPage extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 LogInWithEmail();
-            }
-        });
-
-        mSignUpPage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(getApplicationContext(), SignUpPage.class));
             }
         });
     }
@@ -96,5 +87,9 @@ public class LogInPage extends AppCompatActivity {
         Intent main = new Intent(getApplicationContext(), MainActivity.class);
         startActivity(main);
         finish();
+    }
+
+    public void goToSignUpPage(View view) {
+        startActivity(new Intent(getApplicationContext(), SignUpPage.class));
     }
 }
