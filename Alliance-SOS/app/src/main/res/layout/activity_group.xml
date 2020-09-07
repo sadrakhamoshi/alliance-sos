@@ -67,8 +67,9 @@
         android:layout_alignLeft="@id/member_list_btn"
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
-        android:onClick="goToProfile"
-        android:text="User setting" />
+        android:onClick="gotoGroupSetting"
+        android:text="group setting"
+        android:textAllCaps="false" />
 
     <TextView
         android:id="@+id/schedule_event"

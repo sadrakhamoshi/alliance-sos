@@ -33,6 +33,7 @@ import android.widget.Toast;
 import com.example.alliancesos.DeviceAlarm.MyAlarmService;
 import com.example.alliancesos.SendNotificationPack.NotificationResponseActivity;
 import com.example.alliancesos.SendNotificationPack.Token;
+import com.example.alliancesos.Setting.UserSettingActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -343,5 +344,11 @@ public class MainActivity extends AppCompatActivity {
                 startActivityForResult(intent, 200);
             }
         }
+    }
+
+    public void gotoUserProfile(View view) {
+        Intent intent = new Intent(getApplicationContext(), UserSettingActivity.class);
+        intent.putExtra("userId", mCurrentUserId);
+        startActivity(intent);
     }
 }

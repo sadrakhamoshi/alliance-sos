@@ -38,12 +38,29 @@
         android:layout_height="0dp"
         android:layout_weight="10" />
 
-    <Button
-        android:id="@+id/create_group_btn"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:backgroundTint="#FFFFFF"
-        android:text="Create Group" />
+        android:orientation="horizontal"
+        android:padding="5dp">
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:layout_weight="1"
+            android:backgroundTint="#FFFFFF"
+            android:onClick="gotoUserProfile"
+            android:text="Create Group" />
+
+        <Button
+            android:id="@+id/create_group_btn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:backgroundTint="#FFFFFF"
+            android:text="Create Group" />
+    </LinearLayout>
 
 
 </LinearLayout>

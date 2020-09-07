@@ -121,10 +121,9 @@ public class GroupActivity extends AppCompatActivity {
 
     }
 
-    public void goToProfile(View view) {
-        Intent intent = new Intent(getApplicationContext(), UserSettingActivity.class);
-        intent.putExtra("userId", mCurrentUserId);
-        startActivity(intent);
+    public void gotoGroupSetting(View view) {
+        Toast.makeText(this, "will go to groupSetting us Activity", Toast.LENGTH_SHORT).show();
+
     }
 
 

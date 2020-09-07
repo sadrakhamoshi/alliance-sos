@@ -23,6 +23,8 @@ public class UserObject {
         token = tok;
         timeZone = TimeZone.getDefault().getID();
         notDisturb = false;
+        ringEnable = true;
+        language = "English";
     }
 
     public UserObject() {
