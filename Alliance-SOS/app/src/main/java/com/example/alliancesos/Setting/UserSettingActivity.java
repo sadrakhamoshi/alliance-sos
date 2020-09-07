@@ -35,9 +35,8 @@ public class UserSettingActivity extends AppCompatActivity {
 
     private EditText mEmail, mPass, mUsername, mTime;
 
-
     private String mUserId;
-    private UserObject mUserInfo;
+    private UserObject mNewUserInfo, mOldUserInfo;
 
     private DatabaseReference mRootRef;
 
@@ -167,7 +166,7 @@ public class UserSettingActivity extends AppCompatActivity {
                         String email = snapshot.child("email").getValue().toString();
                         String token = snapshot.child("token").getValue().toString();
                         String pass = snapshot.child("password").getValue().toString();
-                        mUserInfo = new UserObject(id, userName, email, pass, token);
+                        mNewUserInfo = new UserObject(id, userName, email, pass, token);
                     } else {
                         successful = "no Snapshot";
                     }
@@ -183,10 +182,14 @@ public class UserSettingActivity extends AppCompatActivity {
     }
 
     private void setInfoToUi() {
-        mEmail.setText(mUserInfo.getEmail());
-        mPass.setText(mUserInfo.getPassword());
-        mUsername.setText(mUserInfo.getUserName());
-        mTime.setText("TimeZone");
+        mEmail.setText(mNewUserInfo.getEmail());
+        mPass.setText(mNewUserInfo.getPassword());
+        mUsername.setText(mNewUserInfo.getUserName());
+        mTime.setText(mNewUserInfo.getTimeZone());
+        if(mNewUserInfo.isNotDisturb())
+        {
+
+        }
     }
 
     private void UIInit() {
