@@ -102,6 +102,23 @@
                 android:layout_marginTop="15dp">
 
                 <EditText
+                    android:id="@+id/language_setting"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#00000000"
+                    android:drawableLeft="@drawable/language_icon"
+                    android:drawablePadding="10dp"
+                    android:gravity="center_vertical"
+                    android:hint="Language" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginTop="15dp">
+
+                <EditText
                     android:id="@+id/timeZone_setting"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -130,8 +147,34 @@
                     android:text="Do Not Disturb"
                     android:textSize="17sp" />
 
-                <CheckBox
+                <ImageView
                     android:id="@+id/disturb_setting"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/right_arrow" />
+
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginTop="15dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#00000000"
+                    android:drawableLeft="@drawable/ring_event_icon"
+                    android:drawablePadding="10dp"
+                    android:gravity="center_vertical"
+                    android:text="Ring Before Events"
+                    android:textSize="17sp" />
+
+                <CheckBox
+                    android:id="@+id/ring_before_event_setting"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
@@ -149,14 +192,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:background="#00000000"
-                    android:drawableLeft="@drawable/ring_event_icon"
+                    android:drawableLeft="@drawable/use_all_groups_icon"
                     android:drawablePadding="10dp"
                     android:gravity="center_vertical"
-                    android:text="Ring Before Event"
+                    android:text="Use main Profile in all Groups"
                     android:textSize="17sp" />
 
                 <CheckBox
-                    android:id="@+id/ring_before_event_setting"
+                    android:id="@+id/set_as_default_groups_setting"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
