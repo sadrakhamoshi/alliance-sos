@@ -1,6 +1,7 @@
 package com.example.alliancesos;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -15,12 +16,12 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,6 +43,7 @@ public class MemberActivity extends AppCompatActivity {
 
     //database
     private DatabaseReference mGroupRef, mUserRef;
+    private ChildEventListener mMembersEventListener;
 
 
     @Override
@@ -174,16 +176,14 @@ public class MemberActivity extends AppCompatActivity {
                 if (snapshot.exists()) {
                     Iterator iterator = snapshot.getChildren().iterator();
 
-                    Set<String> membersName = new HashSet<>();
-
+//                    Set<String> membersName = new HashSet<>();
+                    mMembersList.clear();
                     while (iterator.hasNext()) {
                         String memberId = ((DataSnapshot) iterator.next()).child("id").getValue().toString();
-                        getUserByIdFromUsers(memberId, membersName);
-//                        membersName.add(name);
+                        getUserByIdFromUsers(memberId);
                     }
-                    mMembersList.clear();
-                    mMembersList.addAll(membersName);
-                    adapter.notifyDataSetChanged();
+//                    mMembersList.addAll(membersName);
+//                    adapter.notifyDataSetChanged();
                 }
             }
 
@@ -194,14 +194,16 @@ public class MemberActivity extends AppCompatActivity {
         });
     }
 
-    private void getUserByIdFromUsers(final String memberId, final Set<String> membersName) {
+    private void getUserByIdFromUsers(final String memberId) {
         mUserRef.child(memberId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
                     String name = snapshot.child("userName").getValue().toString();
-                    Toast.makeText(MemberActivity.this, name, Toast.LENGTH_SHORT).show();
-                    //membersName.add(name);
+                    mMembersList.add(name);
+                    adapter.notifyDataSetChanged();
+//                    adapter.add(name);
+//                    adapter.notifyDataSetChanged();
                 }
             }
 
@@ -216,5 +218,47 @@ public class MemberActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         showAllMembers();
+//        attachDatabaseMembersOFGroup();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mMembersEventListener != null) {
+            mGroupRef.child(mGroupId).child("members").removeEventListener(mMembersEventListener);
+        }
+    }
+
+    private void attachDatabaseMembersOFGroup() {
+        if (mMembersEventListener == null) {
+            mMembersEventListener = new ChildEventListener() {
+                @Override
+                public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                    String memberId = snapshot.child("id").getValue().toString();
+                    getUserByIdFromUsers(memberId);
+                }
+
+                @Override
+                public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+                }
+
+                @Override
+                public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+
+                }
+
+                @Override
+                public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            };
+        }
+        mGroupRef.child(mGroupId).child("members").addChildEventListener(mMembersEventListener);
     }
 }

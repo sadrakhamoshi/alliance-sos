@@ -64,7 +64,6 @@ public class LogInPage extends AppCompatActivity {
         });
     }
 
-
     void LogInWithEmail() {
         mFirebaseAuth.signInWithEmailAndPassword(mEmail.getText().toString(), mPass.getText().toString())
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
