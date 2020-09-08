@@ -167,18 +167,8 @@ public class UserSettingActivity extends AppCompatActivity {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 if (task.isSuccessful()) {
-                                    user.reauthenticate(EmailAuthProvider.getCredential(newInfo.getEmail(), newInfo.getPassword()))
-                                            .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                @Override
-                                                public void onComplete(@NonNull Task<Void> task) {
-                                                    if (task.isSuccessful()) {
-                                                        Updating(mUserId, "password", mCurrUserInfo.getPassword(), newInfo.getPassword());
-                                                        Toast.makeText(UserSettingActivity.this, "reAuthentication adn Update password database..", Toast.LENGTH_SHORT).show();
-                                                    } else {
-                                                        Toast.makeText(UserSettingActivity.this, "error in second onComplete update password", Toast.LENGTH_SHORT).show();
-                                                    }
-                                                }
-                                            });
+                                    Updating(mUserId, "password", mCurrUserInfo.getPassword(), newInfo.getPassword());
+                                    Toast.makeText(UserSettingActivity.this, "Update password database..", Toast.LENGTH_SHORT).show();
                                 } else {
                                     Toast.makeText(UserSettingActivity.this, task.getException().getMessage() + " error in Update password", Toast.LENGTH_SHORT).show();
                                 }
