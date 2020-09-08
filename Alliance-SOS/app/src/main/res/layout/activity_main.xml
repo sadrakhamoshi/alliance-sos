@@ -51,7 +51,8 @@
             android:layout_weight="1"
             android:backgroundTint="#FFFFFF"
             android:onClick="gotoUserProfile"
-            android:text="Create Group" />
+            android:text="User Setting"
+            android:textAllCaps="false" />
 
         <Button
             android:id="@+id/create_group_btn"
@@ -59,7 +60,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:backgroundTint="#FFFFFF"
-            android:text="Create Group" />
+            android:text="Create Group"
+            android:textAllCaps="false" />
     </LinearLayout>
 
 

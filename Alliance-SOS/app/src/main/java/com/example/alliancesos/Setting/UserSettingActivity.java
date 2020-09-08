@@ -8,7 +8,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Debug;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AbsListView;
@@ -21,6 +23,7 @@ import android.widget.Toast;
 
 import com.example.alliancesos.R;
 import com.example.alliancesos.UserObject;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -30,10 +33,13 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.TimeZone;
+import java.util.Timer;
+import java.util.TimerTask;
+
 
 public class UserSettingActivity extends AppCompatActivity {
 
-    private EditText mEmail, mPass, mUsername, mTime;
+    private EditText mEmail, mPass, mUsername, mTime, mLanguage;
 
     private String mUserId;
     private UserObject mNewUserInfo, mOldUserInfo;
@@ -53,8 +59,6 @@ public class UserSettingActivity extends AppCompatActivity {
             mUserId = fromGroup.getStringExtra("userId");
         }
         Initialize();
-//        GetInfoTask getInfoTask = new GetInfoTask();
-//        getInfoTask.execute();
     }
 
     private void Initialize() {
@@ -63,7 +67,67 @@ public class UserSettingActivity extends AppCompatActivity {
     }
 
     public void UpdateUserProfile(View view) {
+        Toast.makeText(getApplicationContext(), mNewUserInfo.getUserName(), Toast.LENGTH_SHORT).show();
+        //setInfoToUi();
+    }
 
+    public void selectLanguage(View view) {
+    }
+
+    private void getInfoOfCurrentUser() {
+        loadingDialog.showDialog();
+
+        mRootRef.child("users").child(mUserId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    String id = snapshot.child("id").getValue().toString();
+                    String userName = snapshot.child("userName").getValue().toString();
+                    String email = snapshot.child("email").getValue().toString();
+                    String token = snapshot.child("token").getValue().toString();
+                    String pass = snapshot.child("password").getValue().toString();
+                    String language = snapshot.child("language").getValue().toString();
+                    mNewUserInfo = new UserObject(id, userName, email, pass, token);
+                    mNewUserInfo.setLanguage(language);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            setInfoToUi();
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(UserSettingActivity.this, error.getMessage() + "\n" + error.getDetails(), Toast.LENGTH_SHORT).show();
+                loadingDialog.hideDialog();
+            }
+        });
+        TimerTask task = new TimerTask() {
+            @Override
+            public void run() {
+                loadingDialog.hideDialog();
+            }
+        };
+        Timer timer = new Timer();
+        timer.schedule(task, 1500);
+    }
+
+    private void setInfoToUi() {
+        mEmail.setText(mNewUserInfo.getEmail());
+        mPass.setText(mNewUserInfo.getPassword());
+        mUsername.setText(mNewUserInfo.getUserName());
+        mTime.setText(mNewUserInfo.getTimeZone());
+        mLanguage.setText(mNewUserInfo.getLanguage());
+    }
+
+    private void UIInit() {
+        mEmail = findViewById(R.id.email_setting);
+        mPass = findViewById(R.id.password_setting);
+        mUsername = findViewById(R.id.username_setting);
+        mTime = findViewById(R.id.timeZone_setting);
+        mLanguage = findViewById(R.id.language_setting);
     }
 
     public void getTimeZone(View view) {
@@ -130,23 +194,20 @@ public class UserSettingActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        getInfoOfCurrentUser();
+    }
 
     private class GetInfoTask extends AsyncTask<Void, Void, Void> {
 
-        private String successful;
+        private boolean successful;
+        private UserObject userObject;
 
         public GetInfoTask() {
-            successful = "Successfully Done";
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            loadingDialog.hideDialog();
-            if (successful.equals("Successfully Done")) {
-                Toast.makeText(UserSettingActivity.this, successful, Toast.LENGTH_SHORT).show();
-                setInfoToUi();
-            }
+            userObject = null;
+            successful = true;
         }
 
         @Override
@@ -157,45 +218,15 @@ public class UserSettingActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            mRootRef.child("users").child(mUserId).addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if (snapshot.exists()) {
-                        String id = snapshot.child("id").getValue().toString();
-                        String userName = snapshot.child("userName").getValue().toString();
-                        String email = snapshot.child("email").getValue().toString();
-                        String token = snapshot.child("token").getValue().toString();
-                        String pass = snapshot.child("password").getValue().toString();
-                        mNewUserInfo = new UserObject(id, userName, email, pass, token);
-                    } else {
-                        successful = "no Snapshot";
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    successful = error.getMessage();
-                }
-            });
+            getInfoOfCurrentUser();
             return null;
         }
-    }
 
-    private void setInfoToUi() {
-        mEmail.setText(mNewUserInfo.getEmail());
-        mPass.setText(mNewUserInfo.getPassword());
-        mUsername.setText(mNewUserInfo.getUserName());
-        mTime.setText(mNewUserInfo.getTimeZone());
-        if(mNewUserInfo.isNotDisturb())
-        {
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
 
         }
     }
 
-    private void UIInit() {
-        mEmail = findViewById(R.id.email_setting);
-        mPass = findViewById(R.id.password_setting);
-        mUsername = findViewById(R.id.username_setting);
-        mTime = findViewById(R.id.timeZone_setting);
-    }
 }
