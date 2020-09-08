@@ -15,6 +15,26 @@ public class UserObject {
     private boolean notDisturb;
     private boolean ringEnable;
 
+
+    public <Type> void updateObject(String field, Type newVal) {
+        switch (field) {
+            case "email":
+                this.setEmail((String) newVal);
+                break;
+            case "password":
+                this.setPassword((String) newVal);
+                break;
+            case "language":
+                this.setLanguage((String) newVal);
+                break;
+            case "userName":
+                this.setUserName((String) newVal);
+                break;
+            case "ringEnable":
+                this.setRingEnable((Boolean) newVal);
+        }
+    }
+
     public UserObject(String id, String user, String mail, String pass, String tok) {
         this.id = id;
         password = pass;

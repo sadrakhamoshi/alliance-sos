@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AlertDialog;
 
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -89,15 +90,35 @@ public class UserSettingActivity extends AppCompatActivity {
         if (!newInfo.getEmail().equals(mCurrUserInfo.getEmail())) {
             emailChange = true;
             updateEmailAddress(newInfo);
+        } else {
+            Toast.makeText(getApplicationContext(), "Email Has Updated...", Toast.LENGTH_SHORT).show();
         }
         if (!newInfo.getPassword().equals(mCurrUserInfo.getPassword())) {
-            passChange = true;
-            updatePassword(newInfo);
+            if (emailChange) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialog);
+                builder.setTitle("Alert !");
+                builder.setMessage("You Can Not change email and password together" + "\n" + "Your Email has changed!!!");
+                builder.setCancelable(false);
+                builder.setIcon(R.drawable.sos_icon);
+                builder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+                builder.create().show();
+            } else {
+                updatePassword(newInfo);
+            }
+        } else {
+            Toast.makeText(getApplicationContext(), "Password Has Updated...", Toast.LENGTH_SHORT).show();
         }
         Updating(mUserId, "userName", mCurrUserInfo.getUserName(), newInfo.getUserName());
         Updating(mUserId, "ringEnable", mCurrUserInfo.isRingEnable(), newInfo.isRingEnable());
         Updating(mUserId, "timeZone", mCurrUserInfo.getTimeZone(), newInfo.getTimeZone());
         Updating(mUserId, "language", mCurrUserInfo.getLanguage(), newInfo.getLanguage());
+
+        emailChange = false;
     }
 
     private void updateEmailAddress(final UserObject newInfo) {
@@ -115,6 +136,16 @@ public class UserSettingActivity extends AppCompatActivity {
                                         Updating(mUserId, "email", mCurrUserInfo.getEmail(), newInfo.getEmail());
                                         Toast.makeText(UserSettingActivity.this, "reAuthentication adn Update email database..", Toast.LENGTH_SHORT).show();
                                     } else {
+                                        user.updateEmail(mCurrUserInfo.getEmail()).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                if (task.isSuccessful()) {
+                                                    Toast.makeText(UserSettingActivity.this, "turn back the email", Toast.LENGTH_SHORT).show();
+                                                } else {
+                                                    Toast.makeText(UserSettingActivity.this, "Could'nt turn back email", Toast.LENGTH_SHORT).show();
+                                                }
+                                            }
+                                        });
                                         Toast.makeText(UserSettingActivity.this, "error in second onComplete update email", Toast.LENGTH_SHORT).show();
                                     }
                                 }
@@ -160,8 +191,11 @@ public class UserSettingActivity extends AppCompatActivity {
     }
 
     private <Type> void Updating(String userId, String field, Type oldVal, Type newVal) {
-        if (!oldVal.equals(newVal))
+        if (!oldVal.equals(newVal)) {
             mUserRef.child(userId).child(field).setValue(newVal);
+            mCurrUserInfo.updateObject(field, newVal);
+            Toast.makeText(getApplicationContext(), field + " Updated", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private UserObject getNewUserInfoFromText() {
@@ -178,7 +212,6 @@ public class UserSettingActivity extends AppCompatActivity {
         userObject.setNotDisturb(false);
         return userObject;
     }
-
 
     private void getInfoOfCurrentUser() {
         loadingDialog.showDialog();
