@@ -97,7 +97,8 @@ public class UserSettingActivity extends AppCompatActivity {
             if (emailChange) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialog);
                 builder.setTitle("Alert !");
-                builder.setMessage("You Can Not change email and password together" + "\n" + "Your Email has changed!!!");
+                builder.setMessage("You Can Not change email and password together" + "\n" + "Your Email has changed!!!"
+                        + "\n" + "But Your Password did'nt change." + "\n" + "please press back and come here again to see changes ...");
                 builder.setCancelable(false);
                 builder.setIcon(R.drawable.sos_icon);
                 builder.setNegativeButton("Ok", new DialogInterface.OnClickListener() {
@@ -122,39 +123,62 @@ public class UserSettingActivity extends AppCompatActivity {
     }
 
     private void updateEmailAddress(final UserObject newInfo) {
+
         final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
-        user.updateEmail(newInfo.getEmail()).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if (task.isSuccessful()) {
-                    user.reauthenticate(EmailAuthProvider.getCredential(newInfo.getEmail(), newInfo.getPassword()))
-                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+        user.reauthenticate(EmailAuthProvider.getCredential(mCurrUserInfo.getEmail(), mCurrUserInfo.getPassword()))
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            user.updateEmail(newInfo.getEmail()).addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
                                     if (task.isSuccessful()) {
                                         Updating(mUserId, "email", mCurrUserInfo.getEmail(), newInfo.getEmail());
-                                        Toast.makeText(UserSettingActivity.this, "reAuthentication adn Update email database..", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(UserSettingActivity.this, "Update Email database..", Toast.LENGTH_SHORT).show();
                                     } else {
-                                        user.updateEmail(mCurrUserInfo.getEmail()).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                if (task.isSuccessful()) {
-                                                    Toast.makeText(UserSettingActivity.this, "turn back the email", Toast.LENGTH_SHORT).show();
-                                                } else {
-                                                    Toast.makeText(UserSettingActivity.this, "Could'nt turn back email", Toast.LENGTH_SHORT).show();
-                                                }
-                                            }
-                                        });
-                                        Toast.makeText(UserSettingActivity.this, "error in second onComplete update email", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(UserSettingActivity.this, task.getException().getMessage() + " Could not Authentication ...", Toast.LENGTH_SHORT).show();
                                     }
                                 }
                             });
-                } else {
-                    Toast.makeText(UserSettingActivity.this, task.getException().getMessage() + " error in Update email", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
+                        } else {
+                            Toast.makeText(UserSettingActivity.this, task.getException().getMessage() + " Could not Authentication ...", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+//see before delete
+//        user.updateEmail(newInfo.getEmail()).addOnCompleteListener(new OnCompleteListener<Void>() {
+//            @Override
+//            public void onComplete(@NonNull Task<Void> task) {
+//                if (task.isSuccessful()) {
+//                    user.reauthenticate(EmailAuthProvider.getCredential(newInfo.getEmail(), newInfo.getPassword()))
+//                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+//                                @Override
+//                                public void onComplete(@NonNull Task<Void> task) {
+//                                    if (task.isSuccessful()) {
+//                                        Updating(mUserId, "email", mCurrUserInfo.getEmail(), newInfo.getEmail());
+//                                        Toast.makeText(UserSettingActivity.this, "reAuthentication adn Update email database..", Toast.LENGTH_SHORT).show();
+//                                    } else {
+//                                        user.updateEmail(mCurrUserInfo.getEmail()).addOnCompleteListener(new OnCompleteListener<Void>() {
+//                                            @Override
+//                                            public void onComplete(@NonNull Task<Void> task) {
+//                                                if (task.isSuccessful()) {
+//                                                    Toast.makeText(UserSettingActivity.this, "turn back the email", Toast.LENGTH_SHORT).show();
+//                                                } else {
+//                                                    Toast.makeText(UserSettingActivity.this, "Could'nt turn back email", Toast.LENGTH_SHORT).show();
+//                                                }
+//                                            }
+//                                        });
+//                                        Toast.makeText(UserSettingActivity.this, "error in second onComplete update email", Toast.LENGTH_SHORT).show();
+//                                    }
+//                                }
+//                            });
+//                } else {
+//                    Toast.makeText(UserSettingActivity.this, task.getException().getMessage() + " error in Update email", Toast.LENGTH_SHORT).show();
+//                }
+//            }
+//        });
     }
 
     private void updatePassword(final UserObject newInfo) {
