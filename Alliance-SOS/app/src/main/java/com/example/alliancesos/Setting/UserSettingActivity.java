@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.text.InputFilter;
 import android.text.Spanned;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AbsListView;
@@ -24,6 +25,11 @@ import android.widget.Toast;
 
 import com.example.alliancesos.R;
 import com.example.alliancesos.UserObject;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.EmailAuthCredential;
+import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -35,11 +41,9 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Locale;
-import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.TreeSet;
 
 
 public class UserSettingActivity extends AppCompatActivity {
@@ -50,7 +54,7 @@ public class UserSettingActivity extends AppCompatActivity {
     private CheckBox mRingEnable;
 
     private String mUserId;
-    private UserObject mNewUserInfo;
+    private UserObject mCurrUserInfo;
 
     private DatabaseReference mUserRef;
 
@@ -82,16 +86,77 @@ public class UserSettingActivity extends AppCompatActivity {
     }
 
     private void checkUpdateCondition(UserObject newInfo) {
-        if (!newInfo.getEmail().equals(mNewUserInfo.getEmail())) {
+        if (!newInfo.getEmail().equals(mCurrUserInfo.getEmail())) {
             emailChange = true;
+            updateEmailAddress(newInfo);
         }
-        if (!newInfo.getPassword().equals(mNewUserInfo.getPassword())) {
+        if (!newInfo.getPassword().equals(mCurrUserInfo.getPassword())) {
             passChange = true;
+            updatePassword(newInfo);
         }
-        Updating(mUserId, "userName", mNewUserInfo.getUserName(), newInfo.getUserName());
-        Updating(mUserId, "ringEnable", mNewUserInfo.isRingEnable(), newInfo.isRingEnable());
-        Updating(mUserId, "timeZone", mNewUserInfo.getTimeZone(), newInfo.getTimeZone());
-        Updating(mUserId, "language", mNewUserInfo.getLanguage(), newInfo.getLanguage());
+        Updating(mUserId, "userName", mCurrUserInfo.getUserName(), newInfo.getUserName());
+        Updating(mUserId, "ringEnable", mCurrUserInfo.isRingEnable(), newInfo.isRingEnable());
+        Updating(mUserId, "timeZone", mCurrUserInfo.getTimeZone(), newInfo.getTimeZone());
+        Updating(mUserId, "language", mCurrUserInfo.getLanguage(), newInfo.getLanguage());
+    }
+
+    private void updateEmailAddress(final UserObject newInfo) {
+        final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        user.updateEmail(newInfo.getEmail()).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    user.reauthenticate(EmailAuthProvider.getCredential(newInfo.getEmail(), newInfo.getPassword()))
+                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (task.isSuccessful()) {
+                                        Updating(mUserId, "email", mCurrUserInfo.getEmail(), newInfo.getEmail());
+                                        Toast.makeText(UserSettingActivity.this, "reAuthentication adn Update email database..", Toast.LENGTH_SHORT).show();
+                                    } else {
+                                        Toast.makeText(UserSettingActivity.this, "error in second onComplete update email", Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                            });
+                } else {
+                    Toast.makeText(UserSettingActivity.this, task.getException().getMessage() + " error in Update email", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    private void updatePassword(final UserObject newInfo) {
+        final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        user.reauthenticate(EmailAuthProvider.getCredential(mCurrUserInfo.getEmail(), mCurrUserInfo.getPassword())).addOnCompleteListener(
+                new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        user.updatePassword(newInfo.getPassword()).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (task.isSuccessful()) {
+                                    user.reauthenticate(EmailAuthProvider.getCredential(newInfo.getEmail(), newInfo.getPassword()))
+                                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<Void> task) {
+                                                    if (task.isSuccessful()) {
+                                                        Updating(mUserId, "password", mCurrUserInfo.getPassword(), newInfo.getPassword());
+                                                        Toast.makeText(UserSettingActivity.this, "reAuthentication adn Update password database..", Toast.LENGTH_SHORT).show();
+                                                    } else {
+                                                        Toast.makeText(UserSettingActivity.this, "error in second onComplete update password", Toast.LENGTH_SHORT).show();
+                                                    }
+                                                }
+                                            });
+                                } else {
+                                    Toast.makeText(UserSettingActivity.this, task.getException().getMessage() + " error in Update password", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+                    }
+                }
+        );
+
     }
 
     private <Type> void Updating(String userId, String field, Type oldVal, Type newVal) {
@@ -108,8 +173,8 @@ public class UserSettingActivity extends AppCompatActivity {
         userObject.setLanguage(mLanguage.getText().toString());
         userObject.setRingEnable(mRingEnable.isChecked());
 
-        userObject.setToken(mNewUserInfo.getToken());
-        userObject.setId(mNewUserInfo.getId());
+        userObject.setToken(mCurrUserInfo.getToken());
+        userObject.setId(mCurrUserInfo.getId());
         userObject.setNotDisturb(false);
         return userObject;
     }
@@ -128,8 +193,8 @@ public class UserSettingActivity extends AppCompatActivity {
                     String token = snapshot.child("token").getValue().toString();
                     String pass = snapshot.child("password").getValue().toString();
                     String language = snapshot.child("language").getValue().toString();
-                    mNewUserInfo = new UserObject(id, userName, email, pass, token);
-                    mNewUserInfo.setLanguage(language);
+                    mCurrUserInfo = new UserObject(id, userName, email, pass, token);
+                    mCurrUserInfo.setLanguage(language);
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -156,11 +221,11 @@ public class UserSettingActivity extends AppCompatActivity {
     }
 
     private void setInfoToUi() {
-        mEmail.setText(mNewUserInfo.getEmail());
-        mPass.setText(mNewUserInfo.getPassword());
-        mUsername.setText(mNewUserInfo.getUserName());
-        mTime.setText(mNewUserInfo.getTimeZone());
-        mLanguage.setText(mNewUserInfo.getLanguage());
+        mEmail.setText(mCurrUserInfo.getEmail());
+        mPass.setText(mCurrUserInfo.getPassword());
+        mUsername.setText(mCurrUserInfo.getUserName());
+        mTime.setText(mCurrUserInfo.getTimeZone());
+        mLanguage.setText(mCurrUserInfo.getLanguage());
         mRingEnable.setChecked(true);
     }
 
