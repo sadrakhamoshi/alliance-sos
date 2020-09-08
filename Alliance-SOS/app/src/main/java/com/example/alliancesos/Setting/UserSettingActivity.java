@@ -8,14 +8,15 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Debug;
+import android.text.InputFilter;
+import android.text.Spanned;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SearchView;
@@ -23,7 +24,8 @@ import android.widget.Toast;
 
 import com.example.alliancesos.R;
 import com.example.alliancesos.UserObject;
-import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -32,19 +34,25 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Locale;
+import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.TreeSet;
 
 
 public class UserSettingActivity extends AppCompatActivity {
 
+    private boolean passChange, emailChange;
+
     private EditText mEmail, mPass, mUsername, mTime, mLanguage;
+    private CheckBox mRingEnable;
 
     private String mUserId;
-    private UserObject mNewUserInfo, mOldUserInfo;
+    private UserObject mNewUserInfo;
 
-    private DatabaseReference mRootRef;
+    private DatabaseReference mUserRef;
 
     private ViewDialog loadingDialog;
 
@@ -62,22 +70,55 @@ public class UserSettingActivity extends AppCompatActivity {
     }
 
     private void Initialize() {
-        mRootRef = FirebaseDatabase.getInstance().getReference();
+        mUserRef = FirebaseDatabase.getInstance().getReference().child("users");
+
+        passChange = emailChange = false;
         UIInit();
     }
 
     public void UpdateUserProfile(View view) {
-        Toast.makeText(getApplicationContext(), mNewUserInfo.getUserName(), Toast.LENGTH_SHORT).show();
-        //setInfoToUi();
+        UserObject newInfo = getNewUserInfoFromText();
+        checkUpdateCondition(newInfo);
     }
 
-    public void selectLanguage(View view) {
+    private void checkUpdateCondition(UserObject newInfo) {
+        if (!newInfo.getEmail().equals(mNewUserInfo.getEmail())) {
+            emailChange = true;
+        }
+        if (!newInfo.getPassword().equals(mNewUserInfo.getPassword())) {
+            passChange = true;
+        }
+        Updating(mUserId, "userName", mNewUserInfo.getUserName(), newInfo.getUserName());
+        Updating(mUserId, "ringEnable", mNewUserInfo.isRingEnable(), newInfo.isRingEnable());
+        Updating(mUserId, "timeZone", mNewUserInfo.getTimeZone(), newInfo.getTimeZone());
+        Updating(mUserId, "language", mNewUserInfo.getLanguage(), newInfo.getLanguage());
     }
+
+    private <Type> void Updating(String userId, String field, Type oldVal, Type newVal) {
+        if (!oldVal.equals(newVal))
+            mUserRef.child(userId).child(field).setValue(newVal);
+    }
+
+    private UserObject getNewUserInfoFromText() {
+        UserObject userObject = new UserObject();
+        userObject.setEmail(mEmail.getText().toString());
+        userObject.setPassword(mPass.getText().toString());
+        userObject.setUserName(mUsername.getText().toString());
+        userObject.setTimeZone(mTime.getText().toString());
+        userObject.setLanguage(mLanguage.getText().toString());
+        userObject.setRingEnable(mRingEnable.isChecked());
+
+        userObject.setToken(mNewUserInfo.getToken());
+        userObject.setId(mNewUserInfo.getId());
+        userObject.setNotDisturb(false);
+        return userObject;
+    }
+
 
     private void getInfoOfCurrentUser() {
         loadingDialog.showDialog();
 
-        mRootRef.child("users").child(mUserId).addListenerForSingleValueEvent(new ValueEventListener() {
+        mUserRef.child(mUserId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
@@ -120,6 +161,7 @@ public class UserSettingActivity extends AppCompatActivity {
         mUsername.setText(mNewUserInfo.getUserName());
         mTime.setText(mNewUserInfo.getTimeZone());
         mLanguage.setText(mNewUserInfo.getLanguage());
+        mRingEnable.setChecked(true);
     }
 
     private void UIInit() {
@@ -128,12 +170,78 @@ public class UserSettingActivity extends AppCompatActivity {
         mUsername = findViewById(R.id.username_setting);
         mTime = findViewById(R.id.timeZone_setting);
         mLanguage = findViewById(R.id.language_setting);
+        mRingEnable = findViewById(R.id.ring_before_event_setting);
+        NotAllowedUseSpace();
     }
 
-    public void getTimeZone(View view) {
+    public void selectLanguage(View view) {
         AlertDialog.Builder builder = new AlertDialog.Builder(UserSettingActivity.this);
         LayoutInflater layoutInflater = LayoutInflater.from(UserSettingActivity.this);
-        View searchView = layoutInflater.inflate(R.layout.set_time_zone, null, false);
+        View searchView = layoutInflater.inflate(R.layout.zones_languages_pattern, null, false);
+        setAllLanguages(searchView);
+
+        builder.setTitle("pick Language");
+        builder.setView(searchView);
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (TextUtils.isEmpty(mTime.getText().toString())) {
+                    Toast.makeText(UserSettingActivity.this, "You should Chose on Item", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        builder.create().show();
+    }
+
+    private void setAllLanguages(View root) {
+        ListView languages_listView = root.findViewById(R.id.time_zone_listView);
+        final SearchView searchView = root.findViewById(R.id.time_zone_search_view);
+        final ArrayList<String> allLanguages = new ArrayList<>();
+        String[] isoLanguages = Locale.getISOLanguages();
+        for (int i = 0; i < isoLanguages.length; i++) {
+            Locale loc = new Locale(isoLanguages[i]);
+            allLanguages.add(loc.getDisplayLanguage());
+        }
+        final ArrayAdapter<String> languages_adapter = new ArrayAdapter<>(root.getContext(), android.R.layout.simple_list_item_1, allLanguages);
+        languages_listView.setAdapter(languages_adapter);
+        languages_listView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
+        languages_listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Toast.makeText(UserSettingActivity.this, languages_adapter.getItem(position), Toast.LENGTH_SHORT).show();
+                mLanguage.setText(languages_adapter.getItem(position));
+            }
+        });
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                if (allLanguages.contains(query)) {
+                    languages_adapter.getFilter().filter(query);
+                } else {
+                    Toast.makeText(UserSettingActivity.this, "Not Found", Toast.LENGTH_SHORT).show();
+                }
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                languages_adapter.getFilter().filter(newText);
+                return false;
+            }
+        });
+    }
+
+    public void setTimeZone(View view) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(UserSettingActivity.this);
+        LayoutInflater layoutInflater = LayoutInflater.from(UserSettingActivity.this);
+        View searchView = layoutInflater.inflate(R.layout.zones_languages_pattern, null, false);
 
         setAllZoneIds(searchView);
 
@@ -157,20 +265,20 @@ public class UserSettingActivity extends AppCompatActivity {
     }
 
     private void setAllZoneIds(View root) {
-        ListView ZoneIds = root.findViewById(R.id.time_zone_listView);
-
-        SearchView searchView = root.findViewById(R.id.time_zone_search_view);
+        final ListView zoneIds_listView = root.findViewById(R.id.time_zone_listView);
+        final SearchView searchView = root.findViewById(R.id.time_zone_search_view);
         final String[] tmp = TimeZone.getAvailableIDs();
         final ArrayList<String> allZonesIds = new ArrayList<>();
-        allZonesIds.add("_");
         allZonesIds.addAll(Arrays.asList(tmp));
         final ArrayAdapter<String> mAllZonesId_adapter = new ArrayAdapter<>(root.getContext(), android.R.layout.simple_list_item_1, allZonesIds);
-        ZoneIds.setAdapter(mAllZonesId_adapter);
-        ZoneIds.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
-        ZoneIds.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        zoneIds_listView.setAdapter(mAllZonesId_adapter);
+        zoneIds_listView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
+
+        zoneIds_listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                mTime.setText(allZonesIds.get(position));
+                Toast.makeText(UserSettingActivity.this, mAllZonesId_adapter.getItem(position), Toast.LENGTH_SHORT).show();
+                mTime.setText(mAllZonesId_adapter.getItem(position) + "");
             }
         });
 
@@ -198,6 +306,24 @@ public class UserSettingActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         getInfoOfCurrentUser();
+    }
+
+    private void NotAllowedUseSpace() {
+        InputFilter filter = new InputFilter() {
+            public CharSequence filter(CharSequence source, int start, int end,
+                                       Spanned dest, int dstart, int dend) {
+                for (int i = start; i < end; i++) {
+                    if (Character.isWhitespace(source.charAt(i))) {
+                        Toast.makeText(getApplicationContext(), "Not Space For this Field", Toast.LENGTH_SHORT).show();
+                        return "";
+                    }
+                }
+                return null;
+            }
+        };
+        InputFilter[] filter1 = new InputFilter[]{filter};
+        mEmail.setFilters(filter1);
+        mUsername.setFilters(filter1);
     }
 
     private class GetInfoTask extends AsyncTask<Void, Void, Void> {
@@ -228,5 +354,4 @@ public class UserSettingActivity extends AppCompatActivity {
 
         }
     }
-
 }
