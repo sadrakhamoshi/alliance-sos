@@ -4,40 +4,31 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/invite_Activity"
+    android:background="@drawable/game"
     android:orientation="vertical"
-    android:padding="20sp"
+    android:padding="20dp"
     tools:context=".SendNotificationPack.InvitationResponseActivity">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Do you Want to Join to This group?"
+        android:text="Do you Want to Join to This group ...?"
         android:textColor="#fff"
         android:textSize="20dp"
-        android:textStyle="bold" />
+        android:textStyle="bold|italic" />
 
-    <com.google.android.material.textfield.TextInputLayout
+    <EditText
+        android:id="@+id/username_for_group_edt"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:layout_marginLeft="5dp"
-        android:layout_marginTop="30dp"
-        android:layout_marginRight="5dp"
-        app:counterTextColor="#fff">
-
-        <EditText
-            android:id="@+id/username_for_group_edt"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#fff"
-            android:drawableLeft="@drawable/game_icon"
-            android:drawablePadding="8dp"
-            android:drawableTint="@color/red"
-            android:hint="Username for this Group"
-            android:inputType="textAutoComplete"
-            android:textColor="#000000" />
-
-    </com.google.android.material.textfield.TextInputLayout>
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:background="#fff"
+        android:drawableLeft="@drawable/game_icon"
+        android:drawablePadding="8dp"
+        android:hint="Username for this Group"
+        android:inputType="textAutoComplete"
+        android:padding="10dp"
+        android:textColor="@color/red" />
 
     <RelativeLayout
         android:layout_width="match_parent"

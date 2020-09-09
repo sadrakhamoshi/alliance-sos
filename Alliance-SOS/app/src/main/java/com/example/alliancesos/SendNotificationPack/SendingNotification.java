@@ -21,8 +21,9 @@ import retrofit2.Response;
 public class SendingNotification {
 
     private static final String BASE_URL = "https://fcm.googleapis.com/";
-
     private APIService mApiService;
+
+    private String targetUserId;
 
     private Context mContext;
     private String mGroupId, mGroupName;
@@ -40,10 +41,61 @@ public class SendingNotification {
         mFrom = from_username;
         data = dataToSendForSOS;
         mContext = context;
+
         mApiService = Client.getClient(BASE_URL).create(APIService.class);
         DatabaseReference root = FirebaseDatabase.getInstance().getReference();
         mGroupRef = root.child("groups");
         mUserRef = root.child("users");
+    }
+
+    public SendingNotification(Context context, String targetUserId, DataToSend dataToSend) {
+        mContext = context;
+        this.data = dataToSend;
+        this.targetUserId = targetUserId;
+        mApiService = Client.getClient(BASE_URL).create(APIService.class);
+        mUserRef = FirebaseDatabase.getInstance().getReference().child("users");
+    }
+
+    public void sendInvitation() {
+        mUserRef.child(targetUserId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+
+                    String token = snapshot.child("token").getValue().toString();
+                    Invite(token);
+
+                } else {
+                    Toast.makeText(mContext, "Not exist this user for invite...", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(mContext, error.getMessage() + " " + error.getDetails(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void Invite(String token) {
+        NotificationSender sender = new NotificationSender(data, token);
+        mApiService.sendNotification(sender).enqueue(new Callback<MyResponse>() {
+            @Override
+            public void onResponse(Call<MyResponse> call, Response<MyResponse> response) {
+                if (response.code() == 200) {
+                    if (response.body().success != 1) {
+                        Toast.makeText(mContext, "Failed ", Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(mContext, "Send Successfully ... ", Toast.LENGTH_LONG).show();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<MyResponse> call, Throwable t) {
+                Toast.makeText(mContext, t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     public void Send() {

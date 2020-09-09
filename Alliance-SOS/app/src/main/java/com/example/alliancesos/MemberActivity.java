@@ -14,6 +14,9 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.example.alliancesos.SendNotificationPack.DataToSend;
+import com.example.alliancesos.SendNotificationPack.SendingNotification;
+import com.example.alliancesos.Utils.MessageType;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.ChildEventListener;
@@ -31,7 +34,7 @@ import java.util.Set;
 
 public class MemberActivity extends AppCompatActivity {
 
-    private String mGroupId, mGroupName;
+    private String mGroupId, mGroupName, mHostUsername, mHostUserId;
 
 
     private Button mAddToGroup;
@@ -54,6 +57,8 @@ public class MemberActivity extends AppCompatActivity {
         if (intent != null) {
             mGroupId = intent.getStringExtra("groupId");
             mGroupName = intent.getStringExtra("groupName");
+            mHostUsername = intent.getStringExtra("currUsername");
+            mHostUserId = intent.getStringExtra("currUserId");
         }
 
         initialize();
@@ -131,40 +136,16 @@ public class MemberActivity extends AppCompatActivity {
         });
     }
 
-    private void addingMemberFunc(String newMemberId, String newMemberName) {
-        addToUsersGroups(newMemberId);
-        addMemberToGroups(newMemberName, newMemberId);
+    private void addingMemberFunc(String foundedUserId, String foundedUsername) {
+        addMemberToGroups(foundedUsername, foundedUserId);
     }
 
-    private void addMemberToGroups(final String newMemberName, String newMemberId) {
-        Member member = new Member(newMemberId, newMemberName);
-
-        mGroupRef.child(mGroupId).child("members").child(member.getId()).setValue(member).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if (task.isSuccessful()) {
-                    Toast.makeText(MemberActivity.this, newMemberName + " added to member " + mGroupId + " Successfully", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(MemberActivity.this, newMemberName + " Can't added to member " + mGroupId, Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-    }
-
-    private void addToUsersGroups(final String foundedUserId) {
-        HashMap<String, String> groupInfo = new HashMap<>();
-        groupInfo.put("groupName", mGroupName);
-        groupInfo.put("groupId", mGroupId);
-        mUserRef.child(foundedUserId).child("Groups").push().setValue(groupInfo).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if (task.isSuccessful()) {
-                    Toast.makeText(MemberActivity.this, "Added to Groups of " + foundedUserId, Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(MemberActivity.this, "Not Added to Groups of " + foundedUserId, Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
+    private void addMemberToGroups(final String foundedUsername, String foundedUserId) {
+        DataToSend data = new DataToSend(mHostUsername, mGroupName, mGroupId, MessageType.INVITATION_TYPE);
+        data.setToId(foundedUserId);
+        data.setToName(foundedUsername);
+        SendingNotification sender = new SendingNotification(MemberActivity.this, foundedUserId, data);
+        sender.sendInvitation();
     }
 
     private void showAllMembers() {
@@ -174,14 +155,14 @@ public class MemberActivity extends AppCompatActivity {
                 if (snapshot.exists()) {
                     Iterator iterator = snapshot.getChildren().iterator();
 
-//                  Set<String> membersName = new HashSet<>();
-                    mMembersList.clear();
+                    Set<String> membersName = new HashSet<>();
                     while (iterator.hasNext()) {
-                        String memberId = ((DataSnapshot) iterator.next()).child("id").getValue().toString();
-                        getUserByIdFromUsers(memberId);
+                        String name = ((DataSnapshot) iterator.next()).child("userName").getValue().toString();
+                        membersName.add(name);
                     }
-//                    mMembersList.addAll(membersName);
-//                    adapter.notifyDataSetChanged();
+                    mMembersList.clear();
+                    mMembersList.addAll(membersName);
+                    adapter.notifyDataSetChanged();
                 }
             }
 
@@ -190,6 +171,21 @@ public class MemberActivity extends AppCompatActivity {
                 Toast.makeText(MemberActivity.this, "Error On showAllMembers Func " + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        showAllMembers();
+//        attachDatabaseMembersOFGroup();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mMembersEventListener != null) {
+            mGroupRef.child(mGroupId).child("members").removeEventListener(mMembersEventListener);
+        }
     }
 
     private void getUserByIdFromUsers(final String memberId) {
@@ -210,21 +206,6 @@ public class MemberActivity extends AppCompatActivity {
                 Toast.makeText(MemberActivity.this, error.getMessage() + error.getDetails(), Toast.LENGTH_SHORT).show();
             }
         });
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        showAllMembers();
-//        attachDatabaseMembersOFGroup();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (mMembersEventListener != null) {
-            mGroupRef.child(mGroupId).child("members").removeEventListener(mMembersEventListener);
-        }
     }
 
     private void attachDatabaseMembersOFGroup() {

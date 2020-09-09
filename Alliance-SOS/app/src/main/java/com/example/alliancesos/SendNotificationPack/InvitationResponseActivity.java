@@ -4,7 +4,9 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.animation.ObjectAnimator;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -20,6 +22,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.sql.Time;
+import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -27,9 +30,8 @@ public class InvitationResponseActivity extends AppCompatActivity {
 
     private EditText mName_edt;
     private String mCurrUserId;
-    private String mGroupId;
-
-    DatabaseReference mGroupRef;
+    private String mGroupId, mGroupName;
+    DatabaseReference mGroupRef, mUserRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,13 +44,16 @@ public class InvitationResponseActivity extends AppCompatActivity {
         Bundle bundle = getIntent().getExtras();
         try {
             mGroupId = bundle.getString("groupId");
+            mGroupName = bundle.getString("groupName");
+            mCurrUserId = bundle.getString("toId");
         } catch (Exception e) {
             Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
         }
 
         mName_edt = findViewById(R.id.username_for_group_edt);
-        mCurrUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        //mCurrUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         mGroupRef = FirebaseDatabase.getInstance().getReference().child("groups");
+        mUserRef = FirebaseDatabase.getInstance().getReference().child("users");
     }
 
     public void addUserToGroup(View view) {
@@ -61,12 +66,26 @@ public class InvitationResponseActivity extends AppCompatActivity {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if (task.isSuccessful()) {
-                        Toast.makeText(InvitationResponseActivity.this, "You Added to Group", Toast.LENGTH_SHORT).show();
+                        HashMap<String, String> groupInfo = new HashMap<>();
+                        groupInfo.put("groupName", mGroupName);
+                        groupInfo.put("groupId", mGroupId);
+                        mUserRef.child(mCurrUserId).child("Groups").push().setValue(groupInfo).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (task.isSuccessful()) {
+                                    Toast.makeText(InvitationResponseActivity.this, "You Added to Group", Toast.LENGTH_SHORT).show();
+                                    MakeAlertDialog("Attention", "You Added to " + mGroupName);
+                                } else {
+                                    Toast.makeText(InvitationResponseActivity.this, "error in second complete " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
                     } else {
                         Toast.makeText(InvitationResponseActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 }
             });
+
         }
     }
 
@@ -92,7 +111,7 @@ public class InvitationResponseActivity extends AppCompatActivity {
                         finish();
                         return;
                     }
-                }, 1000);
+                }, 600);
             }
         });
         builder.create().show();

@@ -57,12 +57,12 @@ public class DataToSend {
         this.groupName = groupName;
     }
 
-    //for sos
-    public DataToSend(String makeBy, String groupName, String groupId) {
+    //for SOS or Invitation
+    public DataToSend(String makeBy, String groupName, String groupId, Integer message_type) {
         this.groupName = groupName;
         this.makeBy = makeBy;
         this.groupId = groupId;
-        type = MessageType.SOS_TYPE;
+        this.type = message_type;
     }
 
     //for notification

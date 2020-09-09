@@ -117,6 +117,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         groupName = remoteMessage.getData().get("groupName");
         groupId = remoteMessage.getData().get("groupId");
         makeBy = remoteMessage.getData().get("makeBy");
+        toId = remoteMessage.getData().get("toId");
 
         if (type == MessageType.SOS_TYPE) {
 
@@ -129,38 +130,29 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         } else if (type == MessageType.NOTIFICATION_TYPE) {
 
             eventId = remoteMessage.getData().get("eventId");
-            toId = remoteMessage.getData().get("toId");
+            //toId = remoteMessage.getData().get("toId");
             toName = remoteMessage.getData().get("toName");
-
 
             notificationColor = Color.YELLOW;
             notificationIcon = R.drawable.notif_icon;
             title = "New Schedule ...";
             message = makeBy + " Created New Schedule in " + groupName + " . " + "\n" + "Are You going to join the group?";
 
-        } else {
-            title = "title";
-            message = "message";
-            notificationColor = Color.GRAY;
-            notificationIcon = R.drawable.un_known;
+        } else if (type == MessageType.INVITATION_TYPE) {
+            title = "Invitation";
+            message = "You Added to " + groupName + " By " + makeBy + ". \n" + "Click Here to Set Your Name.";
+            notificationColor = Color.RED;
+            notificationIcon = R.drawable.add_group_icon;
         }
     }
 
     private void buildNotification(Context context) {
-        Intent intent = new Intent(context, NotificationResponseActivity.class);
 
-        intent.putExtra("groupId", groupId);
-        intent.putExtra("eventId", eventId);
-        intent.putExtra("toName", toName);
-        intent.putExtra("toId", toId);
-
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent pendingIntent = getPendingIntent(context);
 
         //Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.ic3);
 
         Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(getApplicationContext(), "CHANNEL_ID")
@@ -190,6 +182,26 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             notificationManager.createNotificationChannel(notificationChannel);
         }
         notificationManager.notify(0, builder.build());
+    }
+
+    private PendingIntent getPendingIntent(Context context) {
+        if (type == MessageType.NOTIFICATION_TYPE || type == MessageType.SOS_TYPE) {
+            Intent intent = new Intent(context, NotificationResponseActivity.class);
+            intent.putExtra("groupId", groupId);
+            intent.putExtra("eventId", eventId);
+            intent.putExtra("toName", toName);
+            intent.putExtra("toId", toId);
+
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            return PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        } else {
+            Intent intent = new Intent(context, InvitationResponseActivity.class);
+            intent.putExtra("groupId", groupId);
+            intent.putExtra("groupName", groupName);
+            intent.putExtra("toId", toId);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            return PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        }
     }
 
     private void playRingtone() {

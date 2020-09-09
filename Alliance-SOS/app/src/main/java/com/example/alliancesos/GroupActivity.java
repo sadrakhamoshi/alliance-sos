@@ -16,6 +16,7 @@ import android.widget.Toast;
 import com.example.alliancesos.SendNotificationPack.DataToSend;
 import com.example.alliancesos.SendNotificationPack.SendingNotification;
 import com.example.alliancesos.Setting.UserSettingActivity;
+import com.example.alliancesos.Utils.MessageType;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -85,7 +86,7 @@ public class GroupActivity extends AppCompatActivity {
         mSOS_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DataToSend data = new DataToSend(mCurrentUserName, mCurrentGroupName, mCurrentGroupId);
+                DataToSend data = new DataToSend(mCurrentUserName, mCurrentGroupName, mCurrentGroupId, MessageType.SOS_TYPE);
                 SendingNotification sender = new SendingNotification(mCurrentGroupId, mCurrentGroupName,
                         mCurrentUserName, mCurrentUserId, GroupActivity.this, data);
                 sender.Send();
@@ -99,6 +100,8 @@ public class GroupActivity extends AppCompatActivity {
                 Intent toMember = new Intent(getApplicationContext(), MemberActivity.class);
                 toMember.putExtra("groupId", mCurrentGroupId);
                 toMember.putExtra("groupName", mCurrentGroupName);
+                toMember.putExtra("currUsername", mCurrentUserName);
+                toMember.putExtra("currUserId", mCurrentUserId);
                 startActivity(toMember);
             }
         });
