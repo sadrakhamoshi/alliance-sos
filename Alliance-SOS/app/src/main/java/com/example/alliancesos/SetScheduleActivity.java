@@ -190,7 +190,7 @@ public class SetScheduleActivity extends AppCompatActivity {
     }
 
     private void sendNotificationToOtherDevice() {
-        DataToSend<Event> data = new DataToSend<>(mAuthorUserName, mGroupName, mGroupId, mEvent.getEventId());
+        DataToSend data = new DataToSend(mAuthorUserName, mGroupName, mGroupId, mEvent.getEventId());
 
         SendingNotification sendingNotification = new SendingNotification(mGroupId, mGroupName
                 , mAuthorUserName, mAuthorId, getApplicationContext(), data);

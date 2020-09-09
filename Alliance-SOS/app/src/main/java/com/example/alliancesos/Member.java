@@ -7,9 +7,9 @@ public class Member {
     public Member() {
     }
 
-    public Member(String id, String thisGroupName) {
+    public Member(String id, String usernameForThisGroup) {
         this.id = id;
-        this.userName = thisGroupName;
+        this.userName = usernameForThisGroup;
         notDisturb = false;
     }
 

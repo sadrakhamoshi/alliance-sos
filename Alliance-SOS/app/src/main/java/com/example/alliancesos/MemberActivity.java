@@ -94,7 +94,6 @@ public class MemberActivity extends AppCompatActivity {
                 if (snapshot.exists()) {
                     boolean isFoundUsername = false;
                     String foundedUserId = null;
-                    String foundedUserToken = null;
 
                     Iterator iterator = snapshot.getChildren().iterator();
 
@@ -107,13 +106,12 @@ public class MemberActivity extends AppCompatActivity {
                             if (userName.equals(addition_member)) {
                                 isFoundUsername = true;
                                 foundedUserId = dataSnapshot.getKey();
-                                foundedUserToken = dataSnapshot.child("token").getValue().toString();
                                 break;
                             }
                         }
                         if (isFoundUsername) {
 
-                            addingMemberFunc(foundedUserId, addition_member, foundedUserToken);
+                            addingMemberFunc(foundedUserId, addition_member);
 
                         } else {
                             Toast.makeText(MemberActivity.this, addition_member + " not Valid Username", Toast.LENGTH_LONG).show();
@@ -133,12 +131,12 @@ public class MemberActivity extends AppCompatActivity {
         });
     }
 
-    private void addingMemberFunc(String newMemberId, String newMemberName, String newMemberToken) {
+    private void addingMemberFunc(String newMemberId, String newMemberName) {
         addToUsersGroups(newMemberId);
-        addMemberToGroups(newMemberName, newMemberId, newMemberToken);
+        addMemberToGroups(newMemberName, newMemberId);
     }
 
-    private void addMemberToGroups(final String newMemberName, String newMemberId, String newMemberToken) {
+    private void addMemberToGroups(final String newMemberName, String newMemberId) {
         Member member = new Member(newMemberId, newMemberName);
 
         mGroupRef.child(mGroupId).child("members").child(member.getId()).setValue(member).addOnCompleteListener(new OnCompleteListener<Void>() {

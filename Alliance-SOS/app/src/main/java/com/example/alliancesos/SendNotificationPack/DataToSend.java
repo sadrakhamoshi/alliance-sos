@@ -2,7 +2,7 @@ package com.example.alliancesos.SendNotificationPack;
 
 import com.example.alliancesos.Utils.MessageType;
 
-public class DataToSend<TypeOfNot> {
+public class DataToSend {
     private String makeBy, groupName;
     private String toName, toId;
     private String groupId;

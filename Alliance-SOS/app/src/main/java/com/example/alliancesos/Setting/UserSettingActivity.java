@@ -76,7 +76,6 @@ public class UserSettingActivity extends AppCompatActivity {
 
     private void Initialize() {
         mUserRef = FirebaseDatabase.getInstance().getReference().child("users");
-
         passChange = emailChange = false;
         UIInit();
     }

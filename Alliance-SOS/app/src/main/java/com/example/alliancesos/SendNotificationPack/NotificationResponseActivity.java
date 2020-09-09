@@ -67,7 +67,6 @@ public class NotificationResponseActivity extends AppCompatActivity {
         //database
         mRootRef = FirebaseDatabase.getInstance().getReference();
         mGroupRef = mRootRef.child("groups");
-
         getExtra();
 
         InitUI();

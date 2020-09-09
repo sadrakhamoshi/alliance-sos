@@ -169,7 +169,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                         .setContentTitle(title)
                         .setSmallIcon(notificationIcon)
                         .setContentText(message)
-                        .setVibrate(new long[]{500, 200, 300, 400, 500, 200, 400, 300, 200, 400, 2000})
+                        .setVibrate(new long[]{500, 200, 300, 400, 500, 200, 400, 300, 200, 400, 200})
                         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                         .setContentIntent(pendingIntent)
                         .setStyle(new NotificationCompat.BigTextStyle().bigText(message));

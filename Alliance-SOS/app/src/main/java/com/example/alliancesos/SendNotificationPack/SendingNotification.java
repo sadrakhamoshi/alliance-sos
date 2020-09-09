@@ -58,11 +58,9 @@ public class SendingNotification {
                     String id = member.getId();
                     if (!mFrom_id.equals(id)) {
                         goToUsersRef(id);
-
                     } else {
                         Toast.makeText(mContext, "not For Your self..:)", Toast.LENGTH_SHORT).show();
                     }
-
                 }
             }
 
