@@ -16,16 +16,12 @@
         android:textDirection="ltr"
         android:textSize="25sp"
         android:textStyle="bold|italic" />
-        <EditText
-            android:id="@+id/time_edt"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text=""/>
-        <EditText
-            android:id="@+id/time2_edt"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text=""/>
+
+    <EditText
+        android:id="@+id/time2_edt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="" />
 
 
     <LinearLayout
@@ -38,9 +34,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:background="@drawable/signup_btn"
             android:onClick="JoinEvent"
             android:text="Okay, Im In."
-            android:textAllCaps="false" />
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF" />
 
         <View
             android:layout_width="0dp"
@@ -51,9 +49,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:background="@drawable/login_btn"
             android:onClick="NotJoining"
             android:text="NO, Thanks"
-            android:textAllCaps="false" />
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF" />
 
     </LinearLayout>
 

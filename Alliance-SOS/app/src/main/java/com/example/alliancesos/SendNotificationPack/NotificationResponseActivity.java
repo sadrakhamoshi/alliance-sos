@@ -49,14 +49,12 @@ public class NotificationResponseActivity extends AppCompatActivity {
 
     private DatabaseReference mGroupRef, mRootRef;
 
-    EditText editText1;
     EditText editText2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notification_response);
-        editText1 = findViewById(R.id.time_edt);
         editText2 = findViewById(R.id.time2_edt);
         Initialize();
 
@@ -68,7 +66,6 @@ public class NotificationResponseActivity extends AppCompatActivity {
         mRootRef = FirebaseDatabase.getInstance().getReference();
         mGroupRef = mRootRef.child("groups");
         getExtra();
-
         InitUI();
     }
 
@@ -76,15 +73,15 @@ public class NotificationResponseActivity extends AppCompatActivity {
         Bundle bundle = getIntent().getExtras();
         mGroupId = bundle.getString("groupId");
         mEventId = bundle.getString("eventId");
-        if (TextUtils.isEmpty(mEventId))
-            finish();
-        else {
+        if (!TextUtils.isEmpty(mEventId)) {
             mCurrUserId = bundle.getString("toId");
             mCurrUsername = bundle.getString("toName");
             Toast.makeText(this, mEventId + " " + mCurrUsername + " " + mCurrUserId, Toast.LENGTH_SHORT).show();
+        } else {
+            finish();
+            return;
         }
     }
-
 
     public void JoinEvent(View view) {
         HashMap<String, String> hashMap = new HashMap<>();
@@ -200,7 +197,9 @@ public class NotificationResponseActivity extends AppCompatActivity {
         showAttendingMembers();
     }
 
-    public void setAlarm() {
+    public void
+    setAlarm() {
+
         if (scheduleObject != null) {
             AlarmManager alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
             Intent intent = new Intent(this, MyAlarmService.class);

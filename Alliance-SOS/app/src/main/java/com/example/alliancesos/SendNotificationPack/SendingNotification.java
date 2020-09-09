@@ -109,7 +109,8 @@ public class SendingNotification {
                     Member member = ((DataSnapshot) iterator.next()).getValue(Member.class);
                     String id = member.getId();
                     if (!mFrom_id.equals(id)) {
-                        goToUsersRef(id);
+                        String userNameForThisGroup = member.getUserName();
+                        goToUsersRef(id, userNameForThisGroup);
                     } else {
                         Toast.makeText(mContext, "not For Your self..:)", Toast.LENGTH_SHORT).show();
                     }
@@ -123,14 +124,14 @@ public class SendingNotification {
         });
     }
 
-    private void goToUsersRef(final String userId) {
+    private void goToUsersRef(final String userId, final String userNameForThisGroup) {
         mUserRef.child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    String name = snapshot.child("userName").getValue().toString();
+//                    String name = snapshot.child("userName").getValue().toString();
                     String token = snapshot.child("token").getValue().toString();
-                    sendNotif(token, name, userId);
+                    sendNotif(token, userNameForThisGroup, userId);
 
                 } else {
                     Toast.makeText(mContext, "not exist for sending notifi....", Toast.LENGTH_SHORT).show();

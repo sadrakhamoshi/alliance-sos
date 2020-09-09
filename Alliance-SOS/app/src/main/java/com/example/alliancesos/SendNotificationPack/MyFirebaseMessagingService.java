@@ -39,7 +39,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private Context mContext;
 
-    private Vibrator mVibrator;
     private Ringtone mRingtone;
 
     Integer type;
@@ -130,7 +129,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         } else if (type == MessageType.NOTIFICATION_TYPE) {
 
             eventId = remoteMessage.getData().get("eventId");
-            //toId = remoteMessage.getData().get("toId");
             toName = remoteMessage.getData().get("toName");
 
             notificationColor = Color.YELLOW;
