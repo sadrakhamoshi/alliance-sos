@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/invite_bak"
     android:orientation="vertical"
     android:padding="15dp"
 
@@ -13,16 +14,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/question"
+        android:textColor="#FFFFFF"
         android:textDirection="ltr"
         android:textSize="25sp"
         android:textStyle="bold|italic" />
-
-    <EditText
-        android:id="@+id/time2_edt"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="" />
-
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -61,8 +56,10 @@
         android:id="@+id/event_member_listView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="50dp"
+        android:background="@drawable/groups_background"
         android:layoutDirection="ltr"
+        android:padding="10dp"
         android:textDirection="ltr" />
 
 

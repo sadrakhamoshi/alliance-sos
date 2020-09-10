@@ -21,6 +21,9 @@ public class UserObject {
             case "email":
                 this.setEmail((String) newVal);
                 break;
+            case "timeZone":
+                this.setTimeZone((String) newVal);
+                break;
             case "password":
                 this.setPassword((String) newVal);
                 break;

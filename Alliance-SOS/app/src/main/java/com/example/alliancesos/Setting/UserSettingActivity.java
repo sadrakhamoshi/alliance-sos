@@ -239,8 +239,10 @@ public class UserSettingActivity extends AppCompatActivity {
                     String token = snapshot.child("token").getValue().toString();
                     String pass = snapshot.child("password").getValue().toString();
                     String language = snapshot.child("language").getValue().toString();
+                    String timeZone = snapshot.child("timeZone").getValue().toString();
                     mCurrUserInfo = new UserObject(id, userName, email, pass, token);
                     mCurrUserInfo.setLanguage(language);
+                    mCurrUserInfo.setTimeZone(timeZone);
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {

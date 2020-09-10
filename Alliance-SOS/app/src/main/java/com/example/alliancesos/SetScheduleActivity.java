@@ -43,6 +43,7 @@ public class SetScheduleActivity extends AppCompatActivity {
     private String mYear, mMonth, mDay, mHour, mMinute;
 
     private String mAuthorUserName, mAuthorId;
+    private String mAuthorTimezone;
 
     private Event mEvent;
 
@@ -50,7 +51,7 @@ public class SetScheduleActivity extends AppCompatActivity {
 
 
     //database
-    private DatabaseReference mGroupsRef;
+    private DatabaseReference mGroupsRef, mRootRef;
 
     private EditText mTitle_edt;
     private EditText mDate_edt;
@@ -78,15 +79,33 @@ public class SetScheduleActivity extends AppCompatActivity {
             mAuthorUserName = fromGroupAct.getStringExtra("currUserName");
             mGroupName = fromGroupAct.getStringExtra("groupName");
         }
-
         Initialize();
+        getCurrentTimezone();
+    }
 
+    private void getCurrentTimezone() {
+        mRootRef.child("users").child(mAuthorId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    mAuthorTimezone = snapshot.child("timeZone").getValue().toString();
+                } else {
+                    Toast.makeText(SetScheduleActivity.this, "not exist user...", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(SetScheduleActivity.this, "onCancelled " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void Initialize() {
 
         //database
-        mGroupsRef = FirebaseDatabase.getInstance().getReference().child("groups");
+        mRootRef = FirebaseDatabase.getInstance().getReference();
+        mGroupsRef = mRootRef.child("groups");
 
         mCalendar = Calendar.getInstance();
         mTime = Calendar.getInstance();
@@ -152,7 +171,7 @@ public class SetScheduleActivity extends AppCompatActivity {
                 SimpleDateFormat df = new SimpleDateFormat("dd-MMM-yyyy", Locale.getDefault());
                 String formattedDate = df.format(c);
 
-                mEvent = new Event("", "", formattedDate, scheduleObject);
+                mEvent = new Event("", "", formattedDate, scheduleObject, mAuthorTimezone);
 
                 sendMessage();
 

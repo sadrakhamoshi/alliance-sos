@@ -1,5 +1,6 @@
 package com.example.alliancesos.SendNotificationPack;
 
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -48,6 +49,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     String toName, toId;
     String title, message;
     String groupName, groupId, makeBy;
+    String fromTimezoneId;
     String eventId;
 
     @Override
@@ -130,7 +132,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
             eventId = remoteMessage.getData().get("eventId");
             toName = remoteMessage.getData().get("toName");
-
             notificationColor = Color.YELLOW;
             notificationIcon = R.drawable.notif_icon;
             title = "New Schedule ...";
@@ -179,7 +180,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             assert notificationManager != null;
             notificationManager.createNotificationChannel(notificationChannel);
         }
-        notificationManager.notify(0, builder.build());
+        Notification notification = builder.build();
+        notification.flags |= Notification.FLAG_AUTO_CANCEL;
+        notificationManager.notify(0, notification);
     }
 
     private PendingIntent getPendingIntent(Context context) {
