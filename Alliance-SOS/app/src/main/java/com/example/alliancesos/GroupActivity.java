@@ -127,6 +127,10 @@ public class GroupActivity extends AppCompatActivity {
 
     public void gotoGroupSetting(View view) {
         Intent goToGroupProfile = new Intent(getApplicationContext(), GroupProfileActivity.class);
+        goToGroupProfile.putExtra("groupId", mCurrentGroupId);
+        goToGroupProfile.putExtra("groupName", mCurrentGroupName);
+        goToGroupProfile.putExtra("userId", mCurrentUserId);
+
         startActivity(goToGroupProfile);
     }
 

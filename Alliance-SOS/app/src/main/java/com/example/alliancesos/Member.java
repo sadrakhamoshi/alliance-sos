@@ -13,6 +13,12 @@ public class Member {
         notDisturb = false;
     }
 
+    public Member(String id, String userNameForThisGroup, boolean ischeck) {
+        this.id = id;
+        this.userName = userNameForThisGroup;
+        this.notDisturb = ischeck;
+    }
+
     public void setNotDisturb(boolean notDisturb) {
         this.notDisturb = notDisturb;
     }
