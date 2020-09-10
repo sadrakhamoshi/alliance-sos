@@ -237,15 +237,24 @@ public class MainActivity extends AppCompatActivity {
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
                     Toast.makeText(MainActivity.this, groupId + "  created Successfully ...", Toast.LENGTH_SHORT).show();
+
+                    mGroupsRef.child(groupId).child("members").child(mCurrentUserId).setValue(new Member(mCurrentUserId, mCurrentUserName)).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()) {
+                                Toast.makeText(MainActivity.this, "admin added to group ... ", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(MainActivity.this, "admin didn't add to group " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+
                 } else {
                     String message = task.getException().toString();
                     Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
                 }
             }
         });
-
-        mGroupsRef.child(groupId).child("members").child(mCurrentUserId).setValue(new Member(mCurrentUserId, mCurrentUserName));
-        Toast.makeText(this, "admin added to group ... ", Toast.LENGTH_SHORT).show();
     }
 
     private void addGroupToUserSubset(String groupName, String groupId) {

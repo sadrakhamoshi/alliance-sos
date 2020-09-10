@@ -35,6 +35,7 @@ import com.google.firebase.iid.InstanceIdResult;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 
@@ -151,6 +152,8 @@ public class SetScheduleActivity extends AppCompatActivity {
                     Toast.makeText(SetScheduleActivity.this, "some fields are empty ...", Toast.LENGTH_SHORT).show();
                 } else {
                     makeNotificationAlert(title, description);
+
+
                 }
             }
         });
@@ -194,13 +197,25 @@ public class SetScheduleActivity extends AppCompatActivity {
 
     private void sendMessageToDB() {
         mEvent.setCreatedBy(mAuthorUserName);
-        String key = mGroupsRef.child(mGroupId).child("events").push().getKey();
+        final String key = mGroupsRef.child(mGroupId).child("events").push().getKey();
         mEvent.setEventId(key);
         mGroupsRef.child(mGroupId).child("events").child(key).setValue(mEvent).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
-                    Toast.makeText(SetScheduleActivity.this, "Message Successfully added to Database...", Toast.LENGTH_SHORT).show();
+                    HashMap<String, String> hashMap = new HashMap<>();
+                    hashMap.put("id", mAuthorId);
+                    mGroupsRef.child(mGroupId).child("events").child(key).child("members").child(mAuthorId).setValue(hashMap).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+
+                            if (task.isSuccessful()) {
+                                Toast.makeText(SetScheduleActivity.this, "Message Successfully added to Database...", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(SetScheduleActivity.this, "Can't add Author to event members...", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
                 } else {
                     Toast.makeText(SetScheduleActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                 }
