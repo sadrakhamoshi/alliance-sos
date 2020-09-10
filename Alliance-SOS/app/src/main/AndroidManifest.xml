@@ -16,7 +16,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".SendNotificationPack.InvitationResponseActivity"></activity>
+        <activity android:name=".GroupSetting.GroupProfileActivity"></activity>
+        <activity android:name=".SendNotificationPack.InvitationResponseActivity" />
         <activity android:name=".Setting.UserSettingActivity" />
         <activity android:name=".SendNotificationPack.NotificationResponseActivity" />
         <activity android:name=".SetScheduleActivity" />

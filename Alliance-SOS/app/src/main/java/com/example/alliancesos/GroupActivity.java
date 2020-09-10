@@ -13,6 +13,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.alliancesos.GroupSetting.GroupProfileActivity;
 import com.example.alliancesos.SendNotificationPack.DataToSend;
 import com.example.alliancesos.SendNotificationPack.SendingNotification;
 import com.example.alliancesos.Setting.UserSettingActivity;
@@ -125,8 +126,8 @@ public class GroupActivity extends AppCompatActivity {
     }
 
     public void gotoGroupSetting(View view) {
-        Toast.makeText(this, "will go to groupSetting us Activity", Toast.LENGTH_SHORT).show();
-
+        Intent goToGroupProfile = new Intent(getApplicationContext(), GroupProfileActivity.class);
+        startActivity(goToGroupProfile);
     }
 
 
