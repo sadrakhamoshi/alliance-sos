@@ -1,11 +1,15 @@
 package com.example.alliancesos.GroupSetting;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -16,6 +20,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.example.alliancesos.Member;
 import com.example.alliancesos.R;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -29,6 +34,8 @@ import com.google.firebase.database.ValueEventListener;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class GroupProfileActivity extends AppCompatActivity {
+
+    private static final int PICK_FROM_GALLERY = 2;
 
     private ImageView mEdit_image, mExit_image, mBackGroupImage;
     private TextView mGroupName_txt;
@@ -138,15 +145,50 @@ public class GroupProfileActivity extends AppCompatActivity {
 
     public void pickImageForGroup(View view) {
         if (edit_mode) {
+            pickImageFromGallery();
+        }
+    }
 
+    private void pickImageFromGallery() {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        intent.putExtra("crop", "true");
+        intent.putExtra("aspectX", 0);
+        intent.putExtra("aspectY", 0);
+        try {
+            intent.putExtra("data", true);
+            startActivityForResult(
+                    Intent.createChooser(intent, "Complete action using"),
+                    PICK_FROM_GALLERY);
+        } catch (ActivityNotFoundException e) {
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PICK_FROM_GALLERY) {
+            if (resultCode == RESULT_OK) {
+                Toast.makeText(this, "okey", Toast.LENGTH_SHORT).show();
+                Uri photo = data.getData();
+                Glide.with(getApplicationContext())
+                        .load(photo)
+                        .into(mGroupImage);
+                Glide.with(getApplicationContext())
+                        .load(photo)
+                        .into(mBackGroupImage);
+            }
         }
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        forTestAlertDiaolag();
-        getBasicInfo();
+        if (!edit_mode) {
+            forTestAlertDiaolag();
+            getBasicInfo();
+        }
     }
 
     private void forTestAlertDiaolag() {
