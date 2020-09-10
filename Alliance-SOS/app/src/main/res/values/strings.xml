@@ -4,6 +4,7 @@
     <string name="username_hint">Username</string>
     <string name="signup_btn">Sign Up</string>
     <string name="password_hint">Password</string>
+    <string name="confirm_password_hint">Confirm Password</string>
     <string name="schedule_title">Title of Schedule ...</string>
     <string name="schedule_button">Set schedule and send Notification </string>
     <string name="schedule_describe">More Description ...</string>
@@ -12,4 +13,6 @@
     <string name="question">Are you In or Not ?</string>
     <string name="email_hint">Email</string>
     <string name="signUpwithgoogel">SginUp Via Google</string>
+    <string name="notificationChannel_id"></string>
+    <string name="notificationChannel_name">FirebaseNotificationChannel</string>
 </resources>

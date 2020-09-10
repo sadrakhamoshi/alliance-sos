@@ -16,7 +16,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".SendNotificationPack.NotificationResponseActivity"></activity>
+        <activity android:name=".SendNotificationPack.InvitationResponseActivity"></activity>
+        <activity android:name=".Setting.UserSettingActivity" />
+        <activity android:name=".SendNotificationPack.NotificationResponseActivity" />
         <activity android:name=".SetScheduleActivity" />
         <activity android:name=".MemberActivity" />
         <activity android:name=".GroupActivity" />
@@ -38,6 +40,7 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
+
         <receiver
             android:name=".DeviceAlarm.MyAlarmService"
             android:enabled="true"
@@ -46,7 +49,6 @@
                 <action android:name="com.example.helloandroid.alarms" />
             </intent-filter>
         </receiver>
-
     </application>
 
 </manifest>

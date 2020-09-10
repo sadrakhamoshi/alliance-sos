@@ -7,9 +7,14 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 import android.app.AlarmManager;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
+import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -24,9 +29,13 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
+
 import com.example.alliancesos.DeviceAlarm.MyAlarmService;
 import com.example.alliancesos.SendNotificationPack.NotificationResponseActivity;
+import com.example.alliancesos.SendNotificationPack.Token;
+import com.example.alliancesos.Setting.UserSettingActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -34,6 +43,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -219,13 +230,25 @@ public class MainActivity extends AppCompatActivity {
 
     private void CreateNewGroup(final String groupName, final String groupId) {
 
-        Groups groups = new Groups(groupName, groupId, mCurrentUserName);
+        Groups groups = new Groups(groupName, groupId, mCurrentUserId);
 
         mGroupsRef.child(groupId).setValue(groups).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
                     Toast.makeText(MainActivity.this, groupId + "  created Successfully ...", Toast.LENGTH_SHORT).show();
+
+                    mGroupsRef.child(groupId).child("members").child(mCurrentUserId).setValue(new Member(mCurrentUserId, mCurrentUserName)).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()) {
+                                Toast.makeText(MainActivity.this, "admin added to group ... ", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(MainActivity.this, "admin didn't add to group " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+
                 } else {
                     String message = task.getException().toString();
                     Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
@@ -264,6 +287,7 @@ public class MainActivity extends AppCompatActivity {
                     String token = snapshot.child("token").getValue().toString();
                     String pass = snapshot.child("password").getValue().toString();
                     mCurrentUser = new UserObject(id, userName, email, pass, token);
+                    Toast.makeText(MainActivity.this, "admin info gotten...", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(MainActivity.this, "Main activity not exist...", Toast.LENGTH_SHORT).show();
                 }
@@ -276,22 +300,64 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void UpdateToken() {
+        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(MainActivity.this, new OnSuccessListener<InstanceIdResult>() {
+            @Override
+            public void onSuccess(InstanceIdResult instanceIdResult) {
+                Token newToken = new Token(instanceIdResult.getToken());
+                mUsersRef.child(mCurrentUserId).setValue(newToken);
+
+                changeGroupMemberToken(newToken.getToken());
+            }
+        });
+    }
+
+    private void changeGroupMemberToken(final String s) {
+        mUsersRef.child(mCurrentUserId).child("Groups").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    Iterator iterator = snapshot.getChildren().iterator();
+                    while (iterator.hasNext()) {
+
+                        DataSnapshot dataSnapshot = (DataSnapshot) (iterator.next());
+                        String groupId = dataSnapshot.child("groupId").getValue().toString();
+                        groupMemberToken(s, groupId);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(MainActivity.this, "error in changeMessageMember " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void groupMemberToken(String s, String groupId) {
+        mGroupsRef.child(groupId).child("members").child(mCurrentUserId).child("token").setValue(s);
+    }
+
+
     @Override
     protected void onStart() {
         super.onStart();
         showCurrentUserGroups();
-
+        getCurrentUserInfo();
         //permission
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (!Settings.System.canWrite(getApplicationContext())) {
-
                 Intent intent = new Intent(android.provider.Settings.ACTION_MANAGE_WRITE_SETTINGS);
                 intent.setData(Uri.parse("package:" + getPackageName()));
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivityForResult(intent, 200);
             }
         }
-        //getCurrentUserInfo();
     }
 
+    public void gotoUserProfile(View view) {
+        Intent intent = new Intent(getApplicationContext(), UserSettingActivity.class);
+        intent.putExtra("userId", mCurrentUserId);
+        startActivity(intent);
+    }
 }

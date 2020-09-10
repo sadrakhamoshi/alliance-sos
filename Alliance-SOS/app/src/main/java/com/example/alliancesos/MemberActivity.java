@@ -1,6 +1,7 @@
 package com.example.alliancesos;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -13,23 +14,27 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.example.alliancesos.SendNotificationPack.DataToSend;
+import com.example.alliancesos.SendNotificationPack.SendingNotification;
+import com.example.alliancesos.Utils.MessageType;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
 public class MemberActivity extends AppCompatActivity {
 
-    private String mGroupId;
+    private String mGroupId, mGroupName, mHostUsername, mHostUserId;
 
 
     private Button mAddToGroup;
@@ -41,6 +46,7 @@ public class MemberActivity extends AppCompatActivity {
 
     //database
     private DatabaseReference mGroupRef, mUserRef;
+    private ChildEventListener mMembersEventListener;
 
 
     @Override
@@ -50,6 +56,9 @@ public class MemberActivity extends AppCompatActivity {
         Intent intent = getIntent();
         if (intent != null) {
             mGroupId = intent.getStringExtra("groupId");
+            mGroupName = intent.getStringExtra("groupName");
+            mHostUsername = intent.getStringExtra("currUsername");
+            mHostUserId = intent.getStringExtra("currUserId");
         }
 
         initialize();
@@ -90,7 +99,6 @@ public class MemberActivity extends AppCompatActivity {
                 if (snapshot.exists()) {
                     boolean isFoundUsername = false;
                     String foundedUserId = null;
-                    String foundedUserToken = null;
 
                     Iterator iterator = snapshot.getChildren().iterator();
 
@@ -103,13 +111,12 @@ public class MemberActivity extends AppCompatActivity {
                             if (userName.equals(addition_member)) {
                                 isFoundUsername = true;
                                 foundedUserId = dataSnapshot.getKey();
-                                foundedUserToken = dataSnapshot.child("token").getValue().toString();
                                 break;
                             }
                         }
                         if (isFoundUsername) {
 
-                            addingMemberFunc(foundedUserId, addition_member, foundedUserToken);
+                            addingMemberFunc(foundedUserId, addition_member);
 
                         } else {
                             Toast.makeText(MemberActivity.this, addition_member + " not Valid Username", Toast.LENGTH_LONG).show();
@@ -129,37 +136,16 @@ public class MemberActivity extends AppCompatActivity {
         });
     }
 
-    private void addingMemberFunc(String newMemberId, String newMemberName, String newMemberToken) {
-        addToUsersGroups(newMemberId);
-        addMemberToGroups(newMemberName, newMemberId, newMemberToken);
+    private void addingMemberFunc(String foundedUserId, String foundedUsername) {
+        addMemberToGroups(foundedUsername, foundedUserId);
     }
 
-    private void addMemberToGroups(final String newMemberName, String newMemberId, String newMemberToken) {
-        Member member = new Member(newMemberToken, newMemberName, newMemberId);
-
-        mGroupRef.child(mGroupId).child("members").push().setValue(member).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if (task.isSuccessful()) {
-                    Toast.makeText(MemberActivity.this, newMemberName + " added to member " + mGroupId + " Successfully", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(MemberActivity.this, newMemberName + " Can't added to member " + mGroupId, Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-    }
-
-    private void addToUsersGroups(final String foundedUserId) {
-        mUserRef.child(foundedUserId).child("Groups").push().setValue(mGroupId).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if (task.isSuccessful()) {
-                    Toast.makeText(MemberActivity.this, "Added to Groups of " + foundedUserId, Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(MemberActivity.this, "Not Added to Groups of " + foundedUserId, Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
+    private void addMemberToGroups(final String foundedUsername, String foundedUserId) {
+        DataToSend data = new DataToSend(mHostUsername, mGroupName, mGroupId, MessageType.INVITATION_TYPE);
+        data.setToId(foundedUserId);
+        data.setToName(foundedUsername);
+        SendingNotification sender = new SendingNotification(MemberActivity.this, foundedUserId, data);
+        sender.sendInvitation();
     }
 
     private void showAllMembers() {
@@ -169,15 +155,13 @@ public class MemberActivity extends AppCompatActivity {
                 if (snapshot.exists()) {
                     Iterator iterator = snapshot.getChildren().iterator();
 
-                    Set<String> memberName = new HashSet<>();
-
+                    Set<String> membersName = new HashSet<>();
                     while (iterator.hasNext()) {
-                        Member member = ((DataSnapshot) iterator.next()).getValue(Member.class);
-                        String name = member.getName();
-                        memberName.add(name);
+                        String name = ((DataSnapshot) iterator.next()).child("userName").getValue().toString();
+                        membersName.add(name);
                     }
                     mMembersList.clear();
-                    mMembersList.addAll(memberName);
+                    mMembersList.addAll(membersName);
                     adapter.notifyDataSetChanged();
                 }
             }
@@ -193,5 +177,67 @@ public class MemberActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         showAllMembers();
+//        attachDatabaseMembersOFGroup();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mMembersEventListener != null) {
+            mGroupRef.child(mGroupId).child("members").removeEventListener(mMembersEventListener);
+        }
+    }
+
+    private void getUserByIdFromUsers(final String memberId) {
+        mUserRef.child(memberId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    String name = snapshot.child("userName").getValue().toString();
+                    mMembersList.add(name);
+                    adapter.notifyDataSetChanged();
+//                    adapter.add(name);
+//                    adapter.notifyDataSetChanged();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(MemberActivity.this, error.getMessage() + error.getDetails(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void attachDatabaseMembersOFGroup() {
+        if (mMembersEventListener == null) {
+            mMembersEventListener = new ChildEventListener() {
+                @Override
+                public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                    String memberId = snapshot.child("id").getValue().toString();
+                    getUserByIdFromUsers(memberId);
+                }
+
+                @Override
+                public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+                }
+
+                @Override
+                public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+
+                }
+
+                @Override
+                public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            };
+        }
+        mGroupRef.child(mGroupId).child("members").addChildEventListener(mMembersEventListener);
     }
 }

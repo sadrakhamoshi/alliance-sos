@@ -20,14 +20,23 @@ import android.widget.Toast;
 
 import com.example.alliancesos.SendNotificationPack.DataToSend;
 import com.example.alliancesos.SendNotificationPack.SendingNotification;
+import com.example.alliancesos.SendNotificationPack.Token;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Locale;
 
 public class SetScheduleActivity extends AppCompatActivity {
@@ -35,6 +44,7 @@ public class SetScheduleActivity extends AppCompatActivity {
     private String mYear, mMonth, mDay, mHour, mMinute;
 
     private String mAuthorUserName, mAuthorId;
+    private String mAuthorTimezone;
 
     private Event mEvent;
 
@@ -42,7 +52,7 @@ public class SetScheduleActivity extends AppCompatActivity {
 
 
     //database
-    private DatabaseReference mGroupsRef;
+    private DatabaseReference mGroupsRef, mRootRef;
 
     private EditText mTitle_edt;
     private EditText mDate_edt;
@@ -70,15 +80,33 @@ public class SetScheduleActivity extends AppCompatActivity {
             mAuthorUserName = fromGroupAct.getStringExtra("currUserName");
             mGroupName = fromGroupAct.getStringExtra("groupName");
         }
-
         Initialize();
+        getCurrentTimezone();
+    }
 
+    private void getCurrentTimezone() {
+        mRootRef.child("users").child(mAuthorId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    mAuthorTimezone = snapshot.child("timeZone").getValue().toString();
+                } else {
+                    Toast.makeText(SetScheduleActivity.this, "not exist user...", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(SetScheduleActivity.this, "onCancelled " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void Initialize() {
 
         //database
-        mGroupsRef = FirebaseDatabase.getInstance().getReference().child("groups");
+        mRootRef = FirebaseDatabase.getInstance().getReference();
+        mGroupsRef = mRootRef.child("groups");
 
         mCalendar = Calendar.getInstance();
         mTime = Calendar.getInstance();
@@ -124,6 +152,8 @@ public class SetScheduleActivity extends AppCompatActivity {
                     Toast.makeText(SetScheduleActivity.this, "some fields are empty ...", Toast.LENGTH_SHORT).show();
                 } else {
                     makeNotificationAlert(title, description);
+
+
                 }
             }
         });
@@ -144,7 +174,7 @@ public class SetScheduleActivity extends AppCompatActivity {
                 SimpleDateFormat df = new SimpleDateFormat("dd-MMM-yyyy", Locale.getDefault());
                 String formattedDate = df.format(c);
 
-                mEvent = new Event("", "", formattedDate, scheduleObject);
+                mEvent = new Event("", "", formattedDate, scheduleObject, mAuthorTimezone);
 
                 sendMessage();
 
@@ -167,13 +197,25 @@ public class SetScheduleActivity extends AppCompatActivity {
 
     private void sendMessageToDB() {
         mEvent.setCreatedBy(mAuthorUserName);
-        String key = mGroupsRef.child(mGroupId).child("events").push().getKey();
+        final String key = mGroupsRef.child(mGroupId).child("events").push().getKey();
         mEvent.setEventId(key);
         mGroupsRef.child(mGroupId).child("events").child(key).setValue(mEvent).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
-                    Toast.makeText(SetScheduleActivity.this, "Message Successfully added to Database...", Toast.LENGTH_SHORT).show();
+                    HashMap<String, String> hashMap = new HashMap<>();
+                    hashMap.put("id", mAuthorId);
+                    mGroupsRef.child(mGroupId).child("events").child(key).child("members").child(mAuthorId).setValue(hashMap).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+
+                            if (task.isSuccessful()) {
+                                Toast.makeText(SetScheduleActivity.this, "Message Successfully added to Database...", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(SetScheduleActivity.this, "Can't add Author to event members...", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
                 } else {
                     Toast.makeText(SetScheduleActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                 }
@@ -182,10 +224,10 @@ public class SetScheduleActivity extends AppCompatActivity {
     }
 
     private void sendNotificationToOtherDevice() {
-        DataToSend<Event> data = new DataToSend<>(mAuthorUserName, mGroupName, mGroupId, mEvent.getEventId());
+        DataToSend data = new DataToSend(mAuthorUserName, mGroupName, mGroupId, mEvent.getEventId());
 
         SendingNotification sendingNotification = new SendingNotification(mGroupId, mGroupName
-                , mAuthorUserName, getApplicationContext(), data);
+                , mAuthorUserName, mAuthorId, getApplicationContext(), data);
 
         sendingNotification.Send();
     }
@@ -232,5 +274,4 @@ public class SetScheduleActivity extends AppCompatActivity {
         SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
         mDate_edt.setText(sdf.format(mCalendar.getTime()));
     }
-
 }

@@ -21,29 +21,84 @@ import retrofit2.Response;
 public class SendingNotification {
 
     private static final String BASE_URL = "https://fcm.googleapis.com/";
-
     private APIService mApiService;
+
+    private String targetUserId;
 
     private Context mContext;
     private String mGroupId, mGroupName;
     private String mFrom;
+    private String mFrom_id;
 
     private DataToSend data;
 
-    DatabaseReference mGroupRef;
+    private DatabaseReference mGroupRef, mUserRef;
 
-    public SendingNotification(String groupId, String groupName, String from, Context context, DataToSend dataToSendForSOS) {
+    public SendingNotification(String groupId, String groupName, String from_username, String mFrom_id, Context context, DataToSend dataToSendForSOS) {
         mGroupId = groupId;
         mGroupName = groupName;
-        mFrom = from;
+        this.mFrom_id = mFrom_id;
+        mFrom = from_username;
         data = dataToSendForSOS;
         mContext = context;
+
         mApiService = Client.getClient(BASE_URL).create(APIService.class);
-        mGroupRef = FirebaseDatabase.getInstance().getReference().child("groups");
+        DatabaseReference root = FirebaseDatabase.getInstance().getReference();
+        mGroupRef = root.child("groups");
+        mUserRef = root.child("users");
+    }
+
+    public SendingNotification(Context context, String targetUserId, DataToSend dataToSend) {
+        mContext = context;
+        this.data = dataToSend;
+        this.targetUserId = targetUserId;
+        mApiService = Client.getClient(BASE_URL).create(APIService.class);
+        mUserRef = FirebaseDatabase.getInstance().getReference().child("users");
+    }
+
+    public void sendInvitation() {
+        mUserRef.child(targetUserId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+
+                    String token = snapshot.child("token").getValue().toString();
+                    Invite(token);
+
+                } else {
+                    Toast.makeText(mContext, "Not exist this user for invite...", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(mContext, error.getMessage() + " " + error.getDetails(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void Invite(String token) {
+        NotificationSender sender = new NotificationSender(data, token);
+        mApiService.sendNotification(sender).enqueue(new Callback<MyResponse>() {
+            @Override
+            public void onResponse(Call<MyResponse> call, Response<MyResponse> response) {
+                if (response.code() == 200) {
+                    if (response.body().success != 1) {
+                        Toast.makeText(mContext, "Failed ", Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(mContext, "Send Successfully ... ", Toast.LENGTH_LONG).show();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<MyResponse> call, Throwable t) {
+                Toast.makeText(mContext, t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     public void Send() {
-
         mGroupRef.child(this.mGroupId).child("members").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -52,18 +107,40 @@ public class SendingNotification {
                 while (iterator.hasNext()) {
 
                     Member member = ((DataSnapshot) iterator.next()).getValue(Member.class);
-
-                    String token = member.getToken();
                     String id = member.getId();
-                    String name = member.getName();
-
-                    sendNotif(token, name, id);
+                    if (!mFrom_id.equals(id)) {
+                        String userNameForThisGroup = member.getUserName();
+                        goToUsersRef(id, userNameForThisGroup);
+                    } else {
+                        Toast.makeText(mContext, "not For Your self..:)", Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Toast.makeText(mContext, "error in sendNotification " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void goToUsersRef(final String userId, final String userNameForThisGroup) {
+        mUserRef.child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+//                    String name = snapshot.child("userName").getValue().toString();
+                    String token = snapshot.child("token").getValue().toString();
+                    sendNotif(token, userNameForThisGroup, userId);
+
+                } else {
+                    Toast.makeText(mContext, "not exist for sending notifi....", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(mContext, error.getMessage() + "\n" + error.getDetails() + " error in gotouserref sendingnotificaiton", Toast.LENGTH_SHORT).show();
             }
         });
     }

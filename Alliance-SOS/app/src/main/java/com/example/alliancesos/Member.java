@@ -1,35 +1,36 @@
 package com.example.alliancesos;
 
 public class Member {
-    private String token, name, id;
+    private String id, userName;
+    boolean notDisturb;
 
     public Member() {
     }
 
-    public Member(String token, String name, String id) {
+    public Member(String id, String usernameForThisGroup) {
         this.id = id;
-        this.name = name;
-        this.token = token;
+        this.userName = usernameForThisGroup;
+        notDisturb = false;
     }
 
-    public String getToken() {
-        return token;
+    public void setNotDisturb(boolean notDisturb) {
+        this.notDisturb = notDisturb;
     }
 
-    public void setToken(String token) {
-        this.token = token;
+    public boolean isNotDisturb() {
+        return notDisturb;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getUserName() {
+        return userName;
     }
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public String getName() {
-        return name;
     }
 
     public String getId() {

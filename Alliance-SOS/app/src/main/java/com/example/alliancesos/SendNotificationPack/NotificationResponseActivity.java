@@ -29,11 +29,14 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.TimeZone;
 
 public class NotificationResponseActivity extends AppCompatActivity {
 
@@ -47,19 +50,18 @@ public class NotificationResponseActivity extends AppCompatActivity {
 
     private ScheduleObject scheduleObject;
 
-    private DatabaseReference mGroupRef, mRootRef;
+    private String mFrom_TimeZoneId, mCurrent_TimezoneId;
 
-    EditText editText1;
-    EditText editText2;
+    private DatabaseReference mGroupRef, mRootRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notification_response);
-        editText1 = findViewById(R.id.time_edt);
-        editText2 = findViewById(R.id.time2_edt);
         Initialize();
-
+        if (!TextUtils.isEmpty(mEventId)) {
+            getCurrentTimezone();
+        }
     }
 
     private void Initialize() {
@@ -67,35 +69,30 @@ public class NotificationResponseActivity extends AppCompatActivity {
         //database
         mRootRef = FirebaseDatabase.getInstance().getReference();
         mGroupRef = mRootRef.child("groups");
-
+        mCurrent_TimezoneId = "";
         getExtra();
-
         InitUI();
     }
 
     private void getExtra() {
         Bundle bundle = getIntent().getExtras();
-        mGroupId = bundle.getString("groupId");
         mEventId = bundle.getString("eventId");
-        if (TextUtils.isEmpty(mEventId))
+        if (TextUtils.isEmpty(mEventId)) {
             finish();
-        else {
-            mCurrUserId = bundle.getString("toId");
-            mCurrUsername = bundle.getString("toName");
-            Toast.makeText(this, mEventId + " " + mCurrUsername + " " + mCurrUserId, Toast.LENGTH_SHORT).show();
+            return;
         }
+        mGroupId = bundle.getString("groupId");
+        mCurrUserId = bundle.getString("toId");
+        mCurrUsername = bundle.getString("toName");
     }
-
 
     public void JoinEvent(View view) {
         HashMap<String, String> hashMap = new HashMap<>();
-        hashMap.put("name", mCurrUsername);
-        hashMap.put("userId", mCurrUserId);
-        mGroupRef.child(mGroupId).child("events").child(mEventId).child("members").push().setValue(hashMap).addOnCompleteListener(new OnCompleteListener<Void>() {
+        hashMap.put("id", mCurrUserId);
+        mGroupRef.child(mGroupId).child("events").child(mEventId).child("members").child(mCurrUserId).setValue(hashMap).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
-
                     Toast.makeText(NotificationResponseActivity.this, "Member added to event members", Toast.LENGTH_SHORT).show();
                     setAlarm();
                     AlertDialogToMainActivity();
@@ -115,6 +112,7 @@ public class NotificationResponseActivity extends AppCompatActivity {
 
                     try {
                         scheduleObject = snapshot.child("scheduleObject").getValue(ScheduleObject.class);
+                        mFrom_TimeZoneId = snapshot.child("createdTimezoneId").getValue().toString();
                         Toast.makeText(NotificationResponseActivity.this, "get schedule object", Toast.LENGTH_SHORT).show();
 
                     } catch (Exception e) {
@@ -128,6 +126,164 @@ public class NotificationResponseActivity extends AppCompatActivity {
                 Toast.makeText(NotificationResponseActivity.this, "Error in getEventfromDatabase" + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void showAttendingMembers() {
+        mGroupRef.child(mGroupId).child("events").child(mEventId).child("members").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                if (snapshot.exists()) {
+                    Iterator iterator = snapshot.getChildren().iterator();
+                    //List<String> names = new ArrayList<>();
+                    mNames.clear();
+                    while (iterator.hasNext()) {
+                        DataSnapshot dataSnapshot = (DataSnapshot) (iterator.next());
+                        String id = dataSnapshot.child("id").getValue().toString();
+                        goToGroupMembersRef(id);
+//                        String name = dataSnapshot.child("name").getValue().toString();
+//                        names.add(name);
+                    }
+//                    mNames.clear();
+//                    mNames.addAll(names);
+//                    adapter.notifyDataSetChanged();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(NotificationResponseActivity.this, "Error in ShowAttending members " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void goToGroupMembersRef(String id) {
+        mGroupRef.child(mGroupId).child("members").child(id).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    String name = snapshot.child("userName").getValue().toString();
+                    mNames.add(name);
+                    adapter.notifyDataSetChanged();
+                } else {
+                    Toast.makeText(NotificationResponseActivity.this, "not exist memberId", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(NotificationResponseActivity.this, error.getMessage() + error.getDetails(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    public void setAlarm() {
+
+        if (scheduleObject != null) {
+            AlarmManager alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
+            Intent intent = new Intent(this, MyAlarmService.class);
+            intent.setAction("com.example.helloandroid.alarms");
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 101, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            Calendar calendar = ConvertTime();
+            Toast.makeText(this, "Alarm set Successfully ....", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, calendar.get(Calendar.HOUR_OF_DAY) + " " + calendar.get(Calendar.MINUTE) + " " + calendar.get(Calendar.SECOND), Toast.LENGTH_SHORT).show();
+            alarmManager.setExact(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
+        } else {
+            Toast.makeText(this, "schedule object is null ", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private Calendar ConvertTime() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.YEAR, Integer.parseInt(scheduleObject.getDateTime().getYear()));
+        calendar.set(Calendar.MONTH, Integer.parseInt(scheduleObject.getDateTime().getMonth()));
+        calendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(scheduleObject.getDateTime().getDay()));
+        calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(scheduleObject.getDateTime().getHour()));
+        calendar.set(Calendar.MINUTE, Integer.parseInt(scheduleObject.getDateTime().getMinute()));
+        calendar.set(Calendar.SECOND, 0);
+
+        String from = TimeZone.getTimeZone(mFrom_TimeZoneId).getDisplayName(true, TimeZone.SHORT);
+        from = from.replace("GMT", "");
+        String[] h_m_seperated = from.split(":");
+
+        Integer h_from = 0, m_from = 0;
+        try {
+            h_from = Integer.parseInt(h_m_seperated[0]);
+        } catch (Exception e) {
+        }
+        try {
+            m_from = Integer.parseInt(h_m_seperated[1]);
+        } catch (Exception e) {
+        }
+        if (from.contains("-")) {
+            m_from *= -1;
+//            h_from *= -1;
+        }
+        Date targetTime_in_GMT = new Date(calendar.getTimeInMillis() - (h_from * 60 * 60 * 1000 + m_from * 60 * 1000));
+
+        if (TextUtils.isEmpty(mCurrent_TimezoneId)) {
+            mCurrent_TimezoneId = TimeZone.getDefault().getID();
+        }
+        String target = TimeZone.getTimeZone(mCurrent_TimezoneId).getDisplayName(true, TimeZone.SHORT);
+        target = target.replace("GMT", "");
+        String[] h_m_spereated2 = target.split(":");
+        Integer h_target = 0, m_target = 0;
+        try {
+            h_target = Integer.parseInt(h_m_spereated2[0]);
+        } catch (Exception e) {
+        }
+        try {
+            m_target = Integer.parseInt(h_m_spereated2[1]);
+        } catch (Exception e) {
+        }
+        if (target.contains("-")) {
+            m_target *= -1;
+//            h_target *= -1;
+        }
+        Date newDate = new Date(targetTime_in_GMT.getTime() + (h_target * 60 * 60 * 1000 + m_target * 60 * 1000));
+        calendar.setTime(newDate);
+        return calendar;
+    }
+
+    private void getCurrentTimezone() {
+//        mCurrent_TimezoneId = TimeZone.getDefault().getID();
+
+        //for test
+        mRootRef.child("users").child(mCurrUserId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+
+                    mCurrent_TimezoneId = snapshot.child("timeZone").getValue().toString();
+                } else {
+                    Toast.makeText(NotificationResponseActivity.this, "not exists user (timezone)...", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(NotificationResponseActivity.this, "error onCreate getting timezone " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void InitUI() {
+        mNames = new ArrayList<>();
+        listView = findViewById(R.id.event_member_listView);
+        adapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_list_item_1, mNames);
+        listView.setAdapter(adapter);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        getEventFromDatabase();
+        showAttendingMembers();
+    }
+
+    public void NotJoining(View view) {
+        finish();
+        return;
     }
 
     private void AlertDialogToMainActivity() {
@@ -152,74 +308,6 @@ public class NotificationResponseActivity extends AppCompatActivity {
                 finish();
             }
         });
-        AlertDialog dialog = builder.create();
-        dialog.show();
-
-    }
-
-    private void showAttendingMembers() {
-        mGroupRef.child(mGroupId).child("events").child(mEventId).child("members").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                if (snapshot.exists()) {
-                    Iterator iterator = snapshot.getChildren().iterator();
-                    List<String> names = new ArrayList<>();
-                    while (iterator.hasNext()) {
-                        DataSnapshot dataSnapshot = (DataSnapshot) (iterator.next());
-                        String name = dataSnapshot.child("name").getValue().toString();
-                        names.add(name);
-                    }
-                    mNames.clear();
-                    mNames.addAll(names);
-                    adapter.notifyDataSetChanged();
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(NotificationResponseActivity.this, "Error in ShowAttending members " + error.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    private void InitUI() {
-        mNames = new ArrayList<>();
-        listView = findViewById(R.id.event_member_listView);
-        adapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_list_item_1, mNames);
-        listView.setAdapter(adapter);
-    }
-
-    public void NotJoining(View view) {
-        finish();
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        getEventFromDatabase();
-        showAttendingMembers();
-    }
-
-    public void setAlarm() {
-        if (scheduleObject != null) {
-            AlarmManager alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
-            Intent intent = new Intent(this, MyAlarmService.class);
-            intent.setAction("com.example.helloandroid.alarms");
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 101, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-            Calendar calendar = Calendar.getInstance();
-            calendar.set(Calendar.YEAR, Integer.parseInt(scheduleObject.getDateTime().getYear()));
-            calendar.set(Calendar.MONTH, Integer.parseInt(scheduleObject.getDateTime().getMonth()));
-            calendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(scheduleObject.getDateTime().getDay()));
-            calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(scheduleObject.getDateTime().getHour()));
-            calendar.set(Calendar.MINUTE, Integer.parseInt(scheduleObject.getDateTime().getMinute()));
-            calendar.set(Calendar.SECOND, Integer.parseInt(editText2.getText().toString()));
-            Toast.makeText(this, "Alarm set Successfully ....", Toast.LENGTH_SHORT).show();
-            Toast.makeText(this, calendar.get(Calendar.HOUR_OF_DAY) + " " + calendar.get(Calendar.MINUTE) + " " + calendar.get(Calendar.SECOND), Toast.LENGTH_SHORT).show();
-            alarmManager.setExact(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
-
-        } else {
-            Toast.makeText(this, "schedule object is null ", Toast.LENGTH_SHORT).show();
-        }
+        builder.create().show();
     }
 }
