@@ -108,6 +108,13 @@
 
     </RelativeLayout>
 
+    <ProgressBar
+        android:id="@+id/loading_bar_group_setting"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:layout_gravity="center_horizontal"/>
+
     <Button
         android:id="@+id/update_group_setting"
         android:layout_width="wrap_content"

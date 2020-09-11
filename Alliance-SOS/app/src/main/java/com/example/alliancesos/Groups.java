@@ -2,12 +2,20 @@ package com.example.alliancesos;
 
 public class Groups {
     private String groupName, id, admin;
+    private String image;
 
     public Groups(String n, String i, String ad) {
         groupName = n;
         id = i;
         admin = ad;
+    }
 
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
 
     public String getAdmin() {
