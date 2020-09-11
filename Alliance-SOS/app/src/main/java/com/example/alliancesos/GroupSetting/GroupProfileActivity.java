@@ -190,7 +190,6 @@ public class GroupProfileActivity extends AppCompatActivity {
         if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
             CropImage.ActivityResult result = CropImage.getActivityResult(data);
             final Uri photo = result.getUri();
-
             loadingBar.setVisibility(View.VISIBLE);
 
             final StorageReference filepath = mGroupProfileRef.child(mGroupId + ".jpg");
@@ -291,10 +290,13 @@ public class GroupProfileActivity extends AppCompatActivity {
     }
 
     private void getImage() {
+
+        loadingBar.setVisibility(View.VISIBLE);
         mRootRef.child("groups").child(mGroupId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 String url = snapshot.child("image").getValue().toString();
+                loadingBar.setVisibility(View.VISIBLE);
                 RequestCreator requestCreator = Picasso.get().load(url);
                 requestCreator.into(mBackGroupImage);
                 requestCreator.into(mGroupImage);

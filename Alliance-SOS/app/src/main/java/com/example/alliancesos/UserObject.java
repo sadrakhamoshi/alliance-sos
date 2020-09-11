@@ -12,9 +12,17 @@ public class UserObject {
     private String token;
     private String language;
     private String timeZone;
+    private String image;
     private boolean notDisturb;
     private boolean ringEnable;
 
+    public void setImage(String image) {
+        this.image = image;
+    }
+
+    public String getImage() {
+        return image;
+    }
 
     public <Type> void updateObject(String field, Type newVal) {
         switch (field) {
@@ -48,6 +56,7 @@ public class UserObject {
         notDisturb = false;
         ringEnable = true;
         language = "English";
+        image = "";
     }
 
     public UserObject() {

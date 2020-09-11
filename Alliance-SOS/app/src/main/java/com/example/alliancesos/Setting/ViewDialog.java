@@ -22,7 +22,7 @@ public class ViewDialog {
 
         dialog = new Dialog(activity);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setCancelable(false);
+        dialog.setCancelable(true);
         dialog.setContentView(R.layout.custome_loading_layout);
 
         ImageView gifImageView = dialog.findViewById(R.id.custom_loading_imageView);

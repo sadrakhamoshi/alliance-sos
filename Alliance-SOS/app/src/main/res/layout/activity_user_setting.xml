@@ -14,6 +14,7 @@
         android:layout_height="250dp">
 
         <ImageView
+            android:id="@+id/back_user_image"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center_horizontal"
@@ -32,11 +33,11 @@
             android:src="@drawable/edit_icon" />
 
         <ImageView
-            android:onClick="onExitEditMode"
             android:id="@+id/exit_edit_user_setting"
             android:layout_width="28dp"
             android:layout_height="28dp"
             android:layout_alignParentRight="true"
+            android:onClick="onExitEditMode"
             android:src="@drawable/check_icon"
             android:visibility="gone" />
 
@@ -44,6 +45,7 @@
             android:id="@+id/userImage_setting"
             android:layout_width="150dp"
             android:layout_height="150dp"
+            android:onClick="choseUserPhoto"
             android:layout_centerInParent="true"
             android:src="@drawable/example"
             app:civ_border_color="#FFFFFF"

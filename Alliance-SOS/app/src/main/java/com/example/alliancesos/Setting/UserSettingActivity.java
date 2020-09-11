@@ -1,11 +1,13 @@
 package com.example.alliancesos.Setting;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AlertDialog;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputFilter;
 import android.text.Spanned;
@@ -24,6 +26,7 @@ import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.example.alliancesos.R;
 import com.example.alliancesos.UserObject;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -36,6 +39,13 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.RequestCreator;
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,6 +53,8 @@ import java.util.Locale;
 import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 
 public class UserSettingActivity extends AppCompatActivity {
@@ -52,16 +64,20 @@ public class UserSettingActivity extends AppCompatActivity {
     private Button mUpdate_btn;
     private TextView mChosePhoto;
 
-
+    private ImageView mBackUserImage;
+    private CircleImageView mUserImage;
     private EditText mEmail, mPass, mUsername, mTime, mLanguage;
     private CheckBox mRingEnable;
 
     private String mUserId;
+    private String mUpdatedImageUrl;
     private UserObject mCurrUserInfo;
 
     private DatabaseReference mUserRef;
+    private StorageReference mUserImageProfileRef;
 
     private ViewDialog loadingDialog;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,9 +94,12 @@ public class UserSettingActivity extends AppCompatActivity {
 
     private void Initialize() {
         isEditMode = false;
-        mUserRef = FirebaseDatabase.getInstance().getReference().child("users");
         emailChange = false;
-        UIInit();
+        mUpdatedImageUrl = "";
+
+        mUserRef = FirebaseDatabase.getInstance().getReference().child("users");
+        mUserImageProfileRef = FirebaseStorage.getInstance().getReference().child("user-profile-images");
+        InitUI();
     }
 
     public void UpdateUserProfile(View view) {
@@ -230,8 +249,6 @@ public class UserSettingActivity extends AppCompatActivity {
     }
 
     private void getInfoOfCurrentUser() {
-        loadingDialog.showDialog();
-
         mUserRef.child(mUserId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -243,9 +260,18 @@ public class UserSettingActivity extends AppCompatActivity {
                     String pass = snapshot.child("password").getValue().toString();
                     String language = snapshot.child("language").getValue().toString();
                     String timeZone = snapshot.child("timeZone").getValue().toString();
+                    mUpdatedImageUrl = snapshot.child("image").getValue().toString();
                     mCurrUserInfo = new UserObject(id, userName, email, pass, token);
                     mCurrUserInfo.setLanguage(language);
                     mCurrUserInfo.setTimeZone(timeZone);
+                    if (!TextUtils.isEmpty(mUpdatedImageUrl)) {
+
+                        loadingDialog.showDialog();
+                        RequestCreator requestCreator = Picasso.get().load(mUpdatedImageUrl);
+                        requestCreator.into(mBackUserImage);
+                        requestCreator.into(mUserImage);
+                        loadingDialog.hideDialog();
+                    }
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -261,14 +287,6 @@ public class UserSettingActivity extends AppCompatActivity {
                 loadingDialog.hideDialog();
             }
         });
-        TimerTask task = new TimerTask() {
-            @Override
-            public void run() {
-                loadingDialog.hideDialog();
-            }
-        };
-        Timer timer = new Timer();
-        timer.schedule(task, 1500);
     }
 
     private void setInfoToUi() {
@@ -280,7 +298,10 @@ public class UserSettingActivity extends AppCompatActivity {
         mRingEnable.setChecked(true);
     }
 
-    private void UIInit() {
+    private void InitUI() {
+        mBackUserImage = findViewById(R.id.back_user_image);
+        mUserImage = findViewById(R.id.userImage_setting);
+
         mEditMode = findViewById(R.id.edit_user_setting);
         mExitEditMode = findViewById(R.id.exit_edit_user_setting);
         mUpdate_btn = findViewById(R.id.update_user_setting_btn);
@@ -426,7 +447,9 @@ public class UserSettingActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        getInfoOfCurrentUser();
+        if (!isEditMode) {
+            getInfoOfCurrentUser();
+        }
     }
 
     private void NotAllowedUseSpace() {
@@ -481,5 +504,74 @@ public class UserSettingActivity extends AppCompatActivity {
 
     public void onExitEditMode(View view) {
         exitEditMode();
+    }
+
+    public void choseUserPhoto(View view) {
+        if (isEditMode) {
+            CropImage.activity()
+                    .setGuidelines(CropImageView.Guidelines.ON)
+                    .setAspectRatio(1, 1)
+                    .start(UserSettingActivity.this);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode != RESULT_OK)
+            return;
+
+        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+            CropImage.ActivityResult result = CropImage.getActivityResult(data);
+            final Uri photo = result.getUri();
+            loadingDialog.showDialog();
+
+            final StorageReference photoPath = mUserImageProfileRef.child(mUserId + ".jpg");
+            photoPath.putFile(photo).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                    if (task.isSuccessful()) {
+
+                        photoPath.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Uri> task) {
+                                if (task.isSuccessful()) {
+
+                                    mUpdatedImageUrl = task.getResult().toString();
+                                    mUserRef.child(mUserId).child("image").setValue(mUpdatedImageUrl).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if (task.isSuccessful()) {
+                                                Glide.with(getApplicationContext())
+                                                        .load(photo)
+                                                        .into(mBackUserImage);
+
+                                                loadingDialog.hideDialog();
+
+                                                Glide.with(getApplicationContext())
+                                                        .load(photo)
+                                                        .into(mUserImage);
+
+                                            } else {
+                                                loadingDialog.hideDialog();
+                                                Toast.makeText(UserSettingActivity.this, "Error :" + task.getException(), Toast.LENGTH_SHORT).show();
+                                            }
+                                        }
+                                    });
+
+                                } else {
+                                    loadingDialog.hideDialog();
+                                    Toast.makeText(UserSettingActivity.this, "Error :" + task.getException(), Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+
+                    } else {
+                        loadingDialog.hideDialog();
+                        Toast.makeText(UserSettingActivity.this, "Error :" + task.getException(), Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+        }
     }
 }
