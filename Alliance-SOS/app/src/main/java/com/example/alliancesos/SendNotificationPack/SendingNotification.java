@@ -108,9 +108,16 @@ public class SendingNotification {
 
                     Member member = ((DataSnapshot) iterator.next()).getValue(Member.class);
                     String id = member.getId();
+
                     if (!mFrom_id.equals(id)) {
+
                         String userNameForThisGroup = member.getUserName();
-                        goToUsersRef(id, userNameForThisGroup);
+                        if (!member.isNotDisturb()) {
+                            goToUsersRef(id, userNameForThisGroup);
+                        } else {
+                            Toast.makeText(mContext, userNameForThisGroup + " is in Do not Disturb mode....", Toast.LENGTH_SHORT).show();
+                        }
+
                     } else {
                         Toast.makeText(mContext, "not For Your self..:)", Toast.LENGTH_SHORT).show();
                     }

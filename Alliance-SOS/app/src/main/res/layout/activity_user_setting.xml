@@ -21,28 +21,24 @@
             android:scaleType="fitXY"
             android:src="@drawable/example" />
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/userImage_setting"
-            android:layout_alignLeft="@id/userImage_setting"
-            android:layout_alignRight="@id/userImage_setting"
-            android:layout_marginTop="10dp"
-            android:drawableRight="@drawable/edit_icon"
-            android:orientation="vertical">
+        <ImageView
+            android:onClick="onEditMode"
+            android:id="@+id/edit_user_setting"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="5dp"
+            android:layout_marginRight="5dp"
+            android:src="@drawable/edit_icon" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:drawableRight="@drawable/edit_icon"
-                android:drawableTint="#000000"
-                android:gravity="center"
-                android:text="Edit Profile"
-                android:textColor="#000000" />
-
-        </LinearLayout>
-
+        <ImageView
+            android:onClick="onExitEditMode"
+            android:id="@+id/exit_edit_user_setting"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_alignParentRight="true"
+            android:src="@drawable/check_icon"
+            android:visibility="gone" />
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/userImage_setting"
@@ -52,6 +48,17 @@
             android:src="@drawable/example"
             app:civ_border_color="#FFFFFF"
             app:civ_border_width="4dp" />
+
+        <TextView
+            android:id="@+id/chose_photo_user_txt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="chose photo"
+            android:textColor="#B60000"
+            android:textSize="18sp"
+            android:textStyle="italic"
+            android:visibility="gone" />
 
     </RelativeLayout>
 
@@ -80,6 +87,7 @@
                     android:background="#00000000"
                     android:drawableLeft="@drawable/email_icon"
                     android:drawablePadding="10dp"
+                    android:enabled="false"
                     android:gravity="center_vertical"
                     android:hint="@string/email_hint" />
 
@@ -97,6 +105,7 @@
                     android:background="#00000000"
                     android:drawableLeft="@drawable/single_user_icon"
                     android:drawablePadding="10dp"
+                    android:enabled="false"
                     android:gravity="center_vertical"
                     android:hint="@string/username_hint" />
 
@@ -114,6 +123,7 @@
                     android:background="#00000000"
                     android:drawableLeft="@drawable/password_icon"
                     android:drawablePadding="10dp"
+                    android:enabled="false"
                     android:gravity="center_vertical"
                     android:hint="@string/password_hint"
                     android:textDirection="ltr" />
@@ -132,6 +142,7 @@
                     android:background="#00000000"
                     android:drawableLeft="@drawable/language_icon"
                     android:drawablePadding="10dp"
+                    android:enabled="false"
                     android:focusable="false"
                     android:gravity="center_vertical"
                     android:hint="Language"
@@ -151,6 +162,7 @@
                     android:background="#00000000"
                     android:drawableLeft="@drawable/time_zone_icon"
                     android:drawablePadding="10dp"
+                    android:enabled="false"
                     android:focusable="false"
                     android:gravity="center_vertical"
                     android:hint="TimeZone"
@@ -204,7 +216,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true" />
+                    android:layout_centerVertical="true"
+                    android:enabled="false" />
 
 
             </RelativeLayout>
@@ -229,7 +242,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true" />
+                    android:layout_centerVertical="true"
+                    android:enabled="false" />
 
 
             </RelativeLayout>
@@ -260,7 +274,7 @@
             </RelativeLayout>
 
             <Button
-                android:id="@+id/update_setting_btn"
+                android:id="@+id/update_user_setting_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
@@ -270,7 +284,8 @@
                 android:onClick="UpdateUserProfile"
                 android:text="Update"
                 android:textAllCaps="false"
-                android:textColor="#ffffff" />
+                android:textColor="#ffffff"
+                android:visibility="gone" />
 
         </LinearLayout>
 

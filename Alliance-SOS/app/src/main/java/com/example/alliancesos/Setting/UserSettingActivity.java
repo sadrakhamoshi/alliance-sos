@@ -4,32 +4,30 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AlertDialog;
 
-import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.InputFilter;
 import android.text.Spanned;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SearchView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.alliancesos.R;
 import com.example.alliancesos.UserObject;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.EmailAuthCredential;
 import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -49,7 +47,11 @@ import java.util.TimerTask;
 
 public class UserSettingActivity extends AppCompatActivity {
 
-    private boolean passChange, emailChange;
+    private boolean emailChange, isEditMode;
+    private ImageView mEditMode, mExitEditMode;
+    private Button mUpdate_btn;
+    private TextView mChosePhoto;
+
 
     private EditText mEmail, mPass, mUsername, mTime, mLanguage;
     private CheckBox mRingEnable;
@@ -75,8 +77,9 @@ public class UserSettingActivity extends AppCompatActivity {
     }
 
     private void Initialize() {
+        isEditMode = false;
         mUserRef = FirebaseDatabase.getInstance().getReference().child("users");
-        passChange = emailChange = false;
+        emailChange = false;
         UIInit();
     }
 
@@ -278,6 +281,11 @@ public class UserSettingActivity extends AppCompatActivity {
     }
 
     private void UIInit() {
+        mEditMode = findViewById(R.id.edit_user_setting);
+        mExitEditMode = findViewById(R.id.exit_edit_user_setting);
+        mUpdate_btn = findViewById(R.id.update_user_setting_btn);
+        mChosePhoto = findViewById(R.id.chose_photo_user_txt);
+
         mEmail = findViewById(R.id.email_setting);
         mPass = findViewById(R.id.password_setting);
         mUsername = findViewById(R.id.username_setting);
@@ -439,32 +447,39 @@ public class UserSettingActivity extends AppCompatActivity {
         mUsername.setFilters(filter1);
     }
 
-    private class GetInfoTask extends AsyncTask<Void, Void, Void> {
+    private void goToEditMode() {
+        isEditMode = true;
+        mEditMode.setVisibility(View.GONE);
+        mExitEditMode.setVisibility(View.VISIBLE);
+        mUpdate_btn.setVisibility(View.VISIBLE);
+        mEmail.setEnabled(true);
+        mPass.setEnabled(true);
+        mUsername.setEnabled(true);
+        mRingEnable.setEnabled(true);
+        mTime.setEnabled(true);
+        mLanguage.setEnabled(true);
+        mChosePhoto.setVisibility(View.VISIBLE);
+    }
 
-        private boolean successful;
-        private UserObject userObject;
+    private void exitEditMode() {
+        isEditMode = false;
+        mEditMode.setVisibility(View.VISIBLE);
+        mExitEditMode.setVisibility(View.GONE);
+        mUpdate_btn.setVisibility(View.GONE);
+        mEmail.setEnabled(false);
+        mPass.setEnabled(false);
+        mUsername.setEnabled(false);
+        mRingEnable.setEnabled(false);
+        mTime.setEnabled(false);
+        mLanguage.setEnabled(false);
+        mChosePhoto.setVisibility(View.GONE);
+    }
 
-        public GetInfoTask() {
-            userObject = null;
-            successful = true;
-        }
+    public void onEditMode(View view) {
+        goToEditMode();
+    }
 
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            loadingDialog.showDialog();
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            getInfoOfCurrentUser();
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-
-        }
+    public void onExitEditMode(View view) {
+        exitEditMode();
     }
 }

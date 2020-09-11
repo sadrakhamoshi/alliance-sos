@@ -53,7 +53,7 @@ public class GroupProfileActivity extends AppCompatActivity {
 
 
     private ImageView mEdit_image, mExit_image, mBackGroupImage;
-    private TextView mGroupName_txt;
+    private TextView mGroupName_txt, mChosePhoto_txt;
     private CheckBox mNoDisturb;
     private EditText mUsername_edt;
     private Button mUpdate_btn;
@@ -114,6 +114,7 @@ public class GroupProfileActivity extends AppCompatActivity {
         mUsername_edt.setEnabled(false);
         mExit_image.setVisibility(View.GONE);
         mEdit_image.setVisibility(View.VISIBLE);
+        mChosePhoto_txt.setVisibility(View.GONE);
         edit_mode = false;
     }
 
@@ -123,6 +124,7 @@ public class GroupProfileActivity extends AppCompatActivity {
         mUsername_edt.setEnabled(true);
         mExit_image.setVisibility(View.VISIBLE);
         mEdit_image.setVisibility(View.GONE);
+        mChosePhoto_txt.setVisibility(View.VISIBLE);
         edit_mode = true;
     }
 
@@ -134,6 +136,8 @@ public class GroupProfileActivity extends AppCompatActivity {
 
         mGroupName_txt = findViewById(R.id.groupName_group_setting);
         mGroupName_txt.setText(mGroupName);
+
+        mChosePhoto_txt = findViewById(R.id.chose_photo_group_txt);
 
         mNoDisturb = findViewById(R.id.disturb_group_setting);
         mUsername_edt = findViewById(R.id.username_group_setting);
@@ -207,8 +211,6 @@ public class GroupProfileActivity extends AppCompatActivity {
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
                                             if (task.isSuccessful()) {
-                                                loadingBar.setVisibility(View.GONE);
-//                                                Toast.makeText(GroupProfileActivity.this, "image Updated Successfully...", Toast.LENGTH_SHORT).show();
                                                 Glide.with(getApplicationContext())
                                                         .load(photo)
                                                         .into(mBackGroupImage);
@@ -216,6 +218,7 @@ public class GroupProfileActivity extends AppCompatActivity {
                                                 Glide.with(getApplicationContext())
                                                         .load(photo)
                                                         .into(mGroupImage);
+                                                loadingBar.setVisibility(View.GONE);
 
                                             } else {
                                                 loadingBar.setVisibility(View.GONE);
