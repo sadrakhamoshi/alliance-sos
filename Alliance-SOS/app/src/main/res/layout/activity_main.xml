@@ -1,68 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/gray"
-    android:orientation="vertical"
-    android:padding="10dp"
+    android:background="#FDD2D2"
     tools:context=".MainActivity">
-
-    <Button
-        android:id="@+id/log_out_btn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:backgroundTint="#FFFFFF"
-        android:text="LogOut" />
-    <!--    <Button-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:onClick="setAlarm"-->
-    <!--        android:text="setAlarm" />-->
-
-    <!--    <EditText-->
-    <!--        android:id="@+id/time_edt"-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:text=""/>-->
-    <!--    <EditText-->
-    <!--        android:id="@+id/time2_edt"-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:text=""/>-->
-
-    <ListView
-        android:id="@+id/list_view"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="10" />
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="5dp">
+        android:layout_height="match_parent"
+        android:layout_above="@id/create_group_btn"
+        android:background="#FDD2D2"
+        android:orientation="vertical">
 
-        <Button
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="10dp"
-            android:layout_weight="1"
-            android:backgroundTint="#FFFFFF"
-            android:onClick="gotoUserProfile"
-            android:text="User Setting"
-            android:textAllCaps="false" />
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:padding="10dp">
 
-        <Button
-            android:id="@+id/create_group_btn"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:backgroundTint="#FFFFFF"
-            android:text="Create Group"
-            android:textAllCaps="false" />
+            <TextView
+                android:id="@+id/main_username"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:textColor="#000000"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                tools:text="Kieren" />
+
+            <ImageView
+                android:layout_width="25sp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:onClick="logOut"
+                android:src="@drawable/logout_vector" />
+
+            <ImageView
+                android:layout_width="25sp"
+                android:layout_height="25sp"
+                android:layout_alignParentRight="true"
+                android:layout_centerHorizontal="true"
+                android:src="@drawable/refresh" />
+
+        </RelativeLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/group_pattern_recycle"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layoutDirection="ltr" />
+
+        <ListView
+            android:id="@+id/list_view"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="10" />
+
     </LinearLayout>
 
+    <Button
+        android:id="@+id/create_group_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="20sp"
+        android:background="@drawable/add_group_btn"
+        android:padding="15sp"
+        android:text="   Create New Group   "
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF" />
 
-</LinearLayout>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="20sp"
+        android:layout_toStartOf="@+id/create_group_btn"
+        android:background="@drawable/add_group_btn"
+        android:onClick="gotoUserProfile"
+        android:padding="8sp"
+        android:text="User Setting"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF" />
+
+
+</RelativeLayout>

@@ -2,10 +2,13 @@ package com.example.alliancesos;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -15,6 +18,8 @@ import com.example.alliancesos.SendNotificationPack.Token;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
@@ -22,21 +27,12 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 
-import java.sql.Time;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
 import java.util.TimeZone;
 
 public class SignUpPage extends AppCompatActivity {
 
     private EditText mEmail;
-    private EditText mPassword;
+    private TextInputEditText mPassword, mConfirmPassword;
     private EditText mUsername;
     private Button mSignUp;
 
@@ -81,6 +77,8 @@ public class SignUpPage extends AppCompatActivity {
         //views
         mEmail = findViewById(R.id.email_sign_up_page_edt_text);
         mPassword = findViewById(R.id.pass_sign_up_page_edt_text);
+        mConfirmPassword = findViewById(R.id.confirm_pass_sign_up_page_edt_text);
+
         mUsername = findViewById(R.id.username_sign_up_page_edt_text);
         mSignUp = findViewById(R.id.sign_up_btn);
         mSignUp.setOnClickListener(new View.OnClickListener() {
@@ -92,34 +90,46 @@ public class SignUpPage extends AppCompatActivity {
     }
 
     void CreateAccount() {
-        mFirebaseAuth.createUserWithEmailAndPassword(mEmail.getText().toString(), mPassword.getText().toString())
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            Toast.makeText(getApplicationContext(), "Signed in...", Toast.LENGTH_LONG).show();
+        if (checkSignUpCondition()) {
+            mFirebaseAuth.createUserWithEmailAndPassword(mEmail.getText().toString(), mPassword.getText().toString())
+                    .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if (task.isSuccessful()) {
+                                Toast.makeText(getApplicationContext(), "Signed in...", Toast.LENGTH_LONG).show();
+                                getTokenAndSignUp();
 
-                            getTokenAndSignUp();
-
-                        } else {
-                            Toast.makeText(getApplicationContext(), task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(getApplicationContext(), task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                            }
                         }
-                    }
-                });
-
+                    });
+        }
 
     }
 
-    private void addTokenToDatabase(String key) {
+    private boolean checkSignUpCondition() {
+        if (TextUtils.isEmpty(mEmail.getText()) || TextUtils.isEmpty(mPassword.getText()) || TextUtils.isEmpty(mUsername.getText()) || TextUtils.isEmpty(mConfirmPassword.getText())) {
+            MakeAlertDialogForInput("You Have to fill All Blanks...");
+            return false;
+        }
+        if (!mConfirmPassword.getText().toString().equals(mPassword.getText().toString())) {
+            MakeAlertDialogForInput("Password is Not Correct...");
+            return false;
+        }
+        return true;
+    }
 
-        mRootDatabase.child("Tokens").child(key).setValue(mToken).addOnCompleteListener(new OnCompleteListener<Void>() {
+    public void MakeAlertDialogForInput(String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getApplicationContext(), R.style.AlertDialog);
+        builder.setTitle("Alert");
+        builder.setIcon(R.drawable.sos_icon);
+        builder.setMessage(message);
+        builder.setCancelable(true);
+        builder.setNegativeButton("okay", new DialogInterface.OnClickListener() {
             @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if (task.isSuccessful()) {
-                    Toast.makeText(SignUpPage.this, "Token successfully added ...", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(SignUpPage.this, "Error in addTokenToDatabase ...", Toast.LENGTH_SHORT).show();
-                }
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
             }
         });
     }
@@ -139,10 +149,5 @@ public class SignUpPage extends AppCompatActivity {
                 mUserDatabaseRef.child(key).setValue(userObject);
             }
         });
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
     }
 }

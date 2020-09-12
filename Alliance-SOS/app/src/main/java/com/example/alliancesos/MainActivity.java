@@ -1,20 +1,14 @@
 package com.example.alliancesos;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-import android.app.AlarmManager;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
-import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -27,17 +21,18 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 
-import com.example.alliancesos.DeviceAlarm.MyAlarmService;
-import com.example.alliancesos.SendNotificationPack.NotificationResponseActivity;
+import com.example.alliancesos.Adapters.ShowGroup;
 import com.example.alliancesos.SendNotificationPack.Token;
 import com.example.alliancesos.Setting.UserSettingActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -47,25 +42,25 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
 
     private String mCurrentUserId, mCurrentUserName;
+
 
     private UserObject mCurrentUser;
 
     //database
     private DatabaseReference mRoot, mGroupsRef, mUsersRef;
 
-    private ListView groups_listView;
     private ArrayList<String> listOfGroupName, listOfGroupId;
-    private ArrayAdapter<String> arrayAdapter;
+
+    private ShowGroup mGroupAdapter;
+    private RecyclerView mGroup_rv;
+    private ChildEventListener mGroupChangeListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,6 +92,7 @@ public class MainActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
                     mCurrentUserName = snapshot.child("userName").getValue().toString();
+                    ((TextView) findViewById(R.id.main_username)).setText(mCurrentUserName);
                     Toast.makeText(MainActivity.this, "Current User Name Is " + mCurrentUserName, Toast.LENGTH_SHORT).show();
                 }
             }
@@ -109,45 +105,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void InitializeUI() {
-        groups_listView = findViewById(R.id.list_view);
         listOfGroupId = new ArrayList<>();
         listOfGroupName = new ArrayList<>();
 
-//        arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, listOfGroupId);
-        arrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, listOfGroupName);
-        groups_listView.setAdapter(arrayAdapter);
+        mGroupAdapter = new ShowGroup(MainActivity.this, listOfGroupName, listOfGroupId, mCurrentUserId, mCurrentUserName);
+        mGroup_rv = findViewById(R.id.group_pattern_recycle);
+        mGroup_rv.setAdapter(mGroupAdapter);
+        mGroup_rv.setLayoutManager(new LinearLayoutManager(MainActivity.this));
 
-        Button logOut = findViewById(R.id.log_out_btn);
         Button createGroup = findViewById(R.id.create_group_btn);
 
         createGroup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 RequestNewGroup();
-            }
-        });
-        logOut.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FirebaseAuth.getInstance().signOut();
-                Intent intent = new Intent(getApplicationContext(), LogInPage.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
-                finish();
-                return;
-            }
-        });
-        groups_listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent toGroupActivity = new Intent(getApplicationContext(), GroupActivity.class);
-
-                toGroupActivity.putExtra("groupName", listOfGroupName.get(position));
-                toGroupActivity.putExtra("groupId", listOfGroupId.get(position));
-                toGroupActivity.putExtra("currUserName", mCurrentUserName);
-                toGroupActivity.putExtra("currUserId", mCurrentUserId);
-
-                startActivity(toGroupActivity);
             }
         });
     }
@@ -195,38 +166,43 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showCurrentUserGroups() {
-        mUsersRef.child(mCurrentUserId).child("Groups").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                Iterator iterator = snapshot.getChildren().iterator();
+        attachedGroupListener();
+    }
 
-                List<String> all_groups_name = new ArrayList<>();
-                List<String> all_groups_id = new ArrayList<>();
-                try {
-                    while (iterator.hasNext()) {
-                        DataSnapshot dataSnapshot = ((DataSnapshot) iterator.next());
-                        String name = dataSnapshot.child("groupName").getValue().toString();
-                        String id = dataSnapshot.child("groupId").getValue().toString();
-
-                        all_groups_name.add(name);
-                        all_groups_id.add(id);
-                    }
-                } catch (Exception e) {
-                    Toast.makeText(MainActivity.this, "There is No group yet..." + "\n" + e.getMessage(), Toast.LENGTH_LONG).show();
+    private void attachedGroupListener() {
+        if (mGroupChangeListener == null) {
+            mGroupChangeListener = new ChildEventListener() {
+                @Override
+                public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                    String name = snapshot.child("groupName").getValue().toString();
+                    String id = snapshot.child("groupId").getValue().toString();
+                    mGroupAdapter.add(name, id);
                 }
-                listOfGroupName.clear();
-                listOfGroupId.clear();
-                listOfGroupId.addAll(all_groups_id);
-                listOfGroupName.addAll(all_groups_name);
-                arrayAdapter.notifyDataSetChanged();
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
+                @Override
+                public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
 
+                }
+
+                @Override
+                public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+                    String name = snapshot.child("groupName").getValue().toString();
+                    String id = snapshot.child("groupId").getValue().toString();
+                    mGroupAdapter.remove(name, id);
+                }
+
+                @Override
+                public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            };
+            mUsersRef.child(mCurrentUserId).child("Groups").addChildEventListener(mGroupChangeListener);
+        }
     }
 
     private void CreateNewGroup(final String groupName, final String groupId) {
@@ -338,5 +314,17 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(getApplicationContext(), UserSettingActivity.class);
         intent.putExtra("userId", mCurrentUserId);
         startActivity(intent);
+    }
+
+    public void logOut(View view) {
+        if (mGroupChangeListener != null) {
+            mGroupsRef.removeEventListener(mGroupChangeListener);
+        }
+        FirebaseAuth.getInstance().signOut();
+        Intent intent = new Intent(getApplicationContext(), LogInPage.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+        finish();
+        return;
     }
 }
