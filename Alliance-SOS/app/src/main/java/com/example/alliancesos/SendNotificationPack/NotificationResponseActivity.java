@@ -20,6 +20,7 @@ import com.example.alliancesos.DeviceAlarm.MyAlarmService;
 import com.example.alliancesos.MainActivity;
 import com.example.alliancesos.R;
 import com.example.alliancesos.ScheduleObject;
+import com.example.alliancesos.Utils.AlarmType;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -48,6 +49,8 @@ public class NotificationResponseActivity extends AppCompatActivity {
 
     private String mCurrUsername, mCurrUserId;
 
+    private Integer mRingOrNotify;
+
     private ScheduleObject scheduleObject;
 
     private String mFrom_TimeZoneId, mCurrent_TimezoneId;
@@ -74,6 +77,28 @@ public class NotificationResponseActivity extends AppCompatActivity {
         InitUI();
     }
 
+    private void getRingOrNotify() {
+        mRingOrNotify = AlarmType.NOTIFICATION;
+        mRootRef.child("users").child(mCurrUserId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    boolean type = snapshot.child("ringEnable").getValue(Boolean.class);
+                    if (type) {
+                        mRingOrNotify = AlarmType.RING;
+                    }
+                } else {
+                    Toast.makeText(NotificationResponseActivity.this, "current user not found...", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(NotificationResponseActivity.this, "canceled getting ringable.. " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     private void getExtra() {
         Bundle bundle = getIntent().getExtras();
         mEventId = bundle.getString("eventId");
@@ -84,6 +109,7 @@ public class NotificationResponseActivity extends AppCompatActivity {
         mGroupId = bundle.getString("groupId");
         mCurrUserId = bundle.getString("toId");
         mCurrUsername = bundle.getString("toName");
+        getRingOrNotify();
     }
 
     public void JoinEvent(View view) {
@@ -183,6 +209,7 @@ public class NotificationResponseActivity extends AppCompatActivity {
             AlarmManager alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
             Intent intent = new Intent(this, MyAlarmService.class);
             intent.setAction("com.example.helloandroid.alarms");
+            intent.putExtra("ringEnable", mRingOrNotify);
             PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 101, intent, PendingIntent.FLAG_UPDATE_CURRENT);
             Calendar calendar = ConvertTime();
             Toast.makeText(this, "Alarm set Successfully ....", Toast.LENGTH_SHORT).show();

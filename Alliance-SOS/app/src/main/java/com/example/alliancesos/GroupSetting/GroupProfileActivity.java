@@ -296,11 +296,13 @@ public class GroupProfileActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 String url = snapshot.child("image").getValue().toString();
-                loadingBar.setVisibility(View.VISIBLE);
-                RequestCreator requestCreator = Picasso.get().load(url);
-                requestCreator.into(mBackGroupImage);
-                requestCreator.into(mGroupImage);
-                loadingBar.setVisibility(View.GONE);
+                if(!TextUtils.isEmpty(url)){
+                    loadingBar.setVisibility(View.VISIBLE);
+                    RequestCreator requestCreator = Picasso.get().load(url);
+                    requestCreator.into(mBackGroupImage);
+                    requestCreator.into(mGroupImage);
+                    loadingBar.setVisibility(View.GONE);
+                }
             }
 
             @Override

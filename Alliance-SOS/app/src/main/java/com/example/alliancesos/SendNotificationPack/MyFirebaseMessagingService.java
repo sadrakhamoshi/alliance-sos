@@ -1,10 +1,12 @@
 package com.example.alliancesos.SendNotificationPack;
 
+import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.media.Ringtone;
@@ -18,6 +20,8 @@ import androidx.core.app.NotificationCompat;
 
 import com.example.alliancesos.R;
 import com.example.alliancesos.Utils.MessageType;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -70,38 +74,13 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     @Override
     public void onNewToken(@NonNull String s) {
         try {
-
-
             mRootRef = FirebaseDatabase.getInstance().getReference();
             mUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
             changeUserToken(s);
-            changeGroupMemberToken(s);
 
         } catch (Exception e) {
 //            Toast.makeText(mContext, e.getMessage(), Toast.LENGTH_SHORT).show();
         }
-    }
-
-    private void changeGroupMemberToken(final String s) {
-        mRootRef.child("users").child(mUserId).child("Groups").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    Iterator iterator = snapshot.getChildren().iterator();
-                    while (iterator.hasNext()) {
-
-                        DataSnapshot dataSnapshot = (DataSnapshot) (iterator.next());
-                        String groupId = dataSnapshot.child("groupId").getValue().toString();
-                        groupMemberToken(s, groupId);
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(mContext, "error in changeMessageMember " + error.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 
     private void groupMemberToken(String s, String groupId) {
@@ -110,7 +89,24 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private void changeUserToken(String s) {
         Token token = new Token(s);
-        mRootRef.child("users").child(mUserId).setValue(token);
+        mRootRef.child("users").child(mUserId).setValue(token).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (!task.isSuccessful()) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(mContext, R.style.AlertDialog);
+                    builder.setTitle("Alert");
+                    builder.setMessage("The token didn't updated ... check please" + "\n" + task.getException());
+                    builder.setIcon(R.drawable.sos_icon);
+                    builder.setNegativeButton("ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                        }
+                    });
+                    builder.create().show();
+                }
+            }
+        });
     }
 
     private void Initialize(RemoteMessage remoteMessage) {

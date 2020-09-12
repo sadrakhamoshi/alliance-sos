@@ -8,6 +8,7 @@ public class Groups {
         groupName = n;
         id = i;
         admin = ad;
+        image = "";
     }
 
     public String getImage() {

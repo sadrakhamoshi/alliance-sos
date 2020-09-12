@@ -78,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
 
         //auth
         mCurrentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        UpdateToken();
 
         //database
         mRoot = FirebaseDatabase.getInstance().getReference();
@@ -305,39 +306,17 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSuccess(InstanceIdResult instanceIdResult) {
                 Token newToken = new Token(instanceIdResult.getToken());
-                mUsersRef.child(mCurrentUserId).setValue(newToken);
-
-                changeGroupMemberToken(newToken.getToken());
-            }
-        });
-    }
-
-    private void changeGroupMemberToken(final String s) {
-        mUsersRef.child(mCurrentUserId).child("Groups").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    Iterator iterator = snapshot.getChildren().iterator();
-                    while (iterator.hasNext()) {
-
-                        DataSnapshot dataSnapshot = (DataSnapshot) (iterator.next());
-                        String groupId = dataSnapshot.child("groupId").getValue().toString();
-                        groupMemberToken(s, groupId);
+                mUsersRef.child(mCurrentUserId).child("token").setValue(newToken.getToken()).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (!task.isSuccessful()) {
+                            Toast.makeText(MainActivity.this, "couldn't update token :" + task.getException(), Toast.LENGTH_SHORT).show();
+                        }
                     }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(MainActivity.this, "error in changeMessageMember " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                });
             }
         });
     }
-
-    private void groupMemberToken(String s, String groupId) {
-        mGroupsRef.child(groupId).child("members").child(mCurrentUserId).child("token").setValue(s);
-    }
-
 
     @Override
     protected void onStart() {
