@@ -9,6 +9,7 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -68,17 +69,20 @@ public class LogInPage extends AppCompatActivity {
 
     void LogInWithEmail() {
         if (checkLogInCondition()) {
+            ((ProgressBar) findViewById(R.id.progress_logIn)).setVisibility(View.VISIBLE);
             mFirebaseAuth.signInWithEmailAndPassword(mEmail.getText().toString(), mPass.getText().toString())
                     .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
                                 Toast.makeText(getApplicationContext(), "Successfully Logged In", Toast.LENGTH_LONG).show();
+                                ((ProgressBar) findViewById(R.id.progress_logIn)).setVisibility(View.GONE);
 
                                 GoToMainPage();
 
                                 return;
                             } else {
+                                ((ProgressBar) findViewById(R.id.progress_logIn)).setVisibility(View.GONE);
                                 Toast.makeText(getApplicationContext(), task.getException().getMessage(), Toast.LENGTH_LONG).show();
                             }
                         }
