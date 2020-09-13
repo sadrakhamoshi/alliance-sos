@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.alliancesos.GroupActivity;
 import com.example.alliancesos.R;
+import com.example.alliancesos.UpComingEvent;
 
 import java.util.ArrayList;
 
@@ -21,14 +22,19 @@ public class ShowGroup extends RecyclerView.Adapter<ShowGroup.ViewHolder> {
 
     private Context mContext;
     private ArrayList<String> mGroupNames, mGroupIds;
+    private ArrayList<UpComingEvent> mUpComingEventArrayList;
     private String mUserId, mUsername;
 
-    public ShowGroup(Context context, ArrayList<String> names, ArrayList<String> ids, String userId, String username) {
+    public ShowGroup(Context context, ArrayList<String> names, ArrayList<String> ids, ArrayList<UpComingEvent> upComeEvent, String userId) {
         mContext = context;
+        mUpComingEventArrayList = upComeEvent;
         mUserId = userId;
-        mUsername = username;
         mGroupIds = ids;
         mGroupNames = names;
+    }
+
+    public void setUserName(String name) {
+        this.mUsername = name;
     }
 
     @NonNull
@@ -43,6 +49,10 @@ public class ShowGroup extends RecyclerView.Adapter<ShowGroup.ViewHolder> {
     public void onBindViewHolder(@NonNull ShowGroup.ViewHolder holder, final int position) {
         String name = mGroupNames.get(position);
         holder.groupName.setText(name);
+
+        UpComingEvent currEvent = mUpComingEventArrayList.get(position);
+        holder.groupEvent.setText("event: " + currEvent.getUpcomingName());
+        holder.groupTime.setText("Date: " + currEvent.getUpcomingTime());
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -59,14 +69,16 @@ public class ShowGroup extends RecyclerView.Adapter<ShowGroup.ViewHolder> {
         });
     }
 
-    public void add(String name, String id) {
+    public void add(String name, UpComingEvent upComingEvent, String id) {
         mGroupNames.add(name);
         mGroupIds.add(id);
+        mUpComingEventArrayList.add(upComingEvent);
         notifyDataSetChanged();
     }
 
-    public void remove(String name, String id) {
+    public void remove(String name, UpComingEvent upComingEvent, String id) {
         mGroupNames.remove(name);
+        mUpComingEventArrayList.remove(upComingEvent);
         mGroupIds.remove(id);
         notifyDataSetChanged();
     }

@@ -57,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
     private DatabaseReference mRoot, mGroupsRef, mUsersRef;
 
     private ArrayList<String> listOfGroupName, listOfGroupId;
+    private ArrayList<UpComingEvent> listOfUpcomingEvents;
 
     private ShowGroup mGroupAdapter;
     private RecyclerView mGroup_rv;
@@ -90,10 +91,29 @@ public class MainActivity extends AppCompatActivity {
         mGroupsRef = mRoot.child("groups");
         mUsersRef = mRoot.child("users");
 
-        getCurrentUserName();
 
         InitializeUI();
+        getCurrentUserName();
+    }
 
+    private void InitializeUI() {
+        listOfGroupId = new ArrayList<>();
+        listOfGroupName = new ArrayList<>();
+        listOfUpcomingEvents = new ArrayList<>();
+
+        mGroupAdapter = new ShowGroup(MainActivity.this, listOfGroupName, listOfGroupId, listOfUpcomingEvents, mCurrentUserId);
+        mGroup_rv = findViewById(R.id.group_pattern_recycle);
+        mGroup_rv.setAdapter(mGroupAdapter);
+        mGroup_rv.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+
+        Button createGroup = findViewById(R.id.create_group_btn);
+
+        createGroup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                RequestNewGroup();
+            }
+        });
     }
 
     private void getCurrentUserName() {
@@ -115,25 +135,6 @@ public class MainActivity extends AppCompatActivity {
             public void onCancelled(@NonNull DatabaseError error) {
                 Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
                 ((ProgressBar) findViewById(R.id.progress_main)).setVisibility(View.GONE);
-            }
-        });
-    }
-
-    private void InitializeUI() {
-        listOfGroupId = new ArrayList<>();
-        listOfGroupName = new ArrayList<>();
-
-        mGroupAdapter = new ShowGroup(MainActivity.this, listOfGroupName, listOfGroupId, mCurrentUserId, mCurrentUserName);
-        mGroup_rv = findViewById(R.id.group_pattern_recycle);
-        mGroup_rv.setAdapter(mGroupAdapter);
-        mGroup_rv.setLayoutManager(new LinearLayoutManager(MainActivity.this));
-
-        Button createGroup = findViewById(R.id.create_group_btn);
-
-        createGroup.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                RequestNewGroup();
             }
         });
     }
@@ -189,9 +190,26 @@ public class MainActivity extends AppCompatActivity {
             mGroupChangeListener = new ChildEventListener() {
                 @Override
                 public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                    String name = snapshot.child("groupName").getValue().toString();
-                    String id = snapshot.child("groupId").getValue().toString();
-                    mGroupAdapter.add(name, id);
+                    if (((ProgressBar) findViewById(R.id.progress_main)).getVisibility() != View.VISIBLE)
+                        ((ProgressBar) findViewById(R.id.progress_main)).setVisibility(View.VISIBLE);
+
+                    final String name = snapshot.child("groupName").getValue().toString();
+                    final String id = snapshot.child("groupId").getValue().toString();
+                    mGroupsRef.child(id).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            UpComingEvent event = snapshot.child("upComingEvent").getValue(UpComingEvent.class);
+                            mGroupAdapter.add(name, event, id);
+                            ((ProgressBar) findViewById(R.id.progress_main)).setVisibility(View.GONE);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                            Toast.makeText(MainActivity.this, "error in reading upComing: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                            ((ProgressBar) findViewById(R.id.progress_main)).setVisibility(View.GONE);
+                        }
+                    });
+
                 }
 
                 @Override
@@ -203,7 +221,7 @@ public class MainActivity extends AppCompatActivity {
                 public void onChildRemoved(@NonNull DataSnapshot snapshot) {
                     String name = snapshot.child("groupName").getValue().toString();
                     String id = snapshot.child("groupId").getValue().toString();
-                    mGroupAdapter.remove(name, id);
+//                    mGroupAdapter.remove(name, id);
                 }
 
                 @Override
@@ -264,30 +282,6 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     Toast.makeText(MainActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                 }
-            }
-        });
-    }
-
-    private void getCurrentUserInfo() {
-        mUsersRef.child(mCurrentUserId).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    String id = snapshot.child("id").getValue().toString();
-                    String userName = snapshot.child("userName").getValue().toString();
-                    String email = snapshot.child("email").getValue().toString();
-                    String token = snapshot.child("token").getValue().toString();
-                    String pass = snapshot.child("password").getValue().toString();
-                    mCurrentUserObject = new UserObject(id, userName, email, pass, token);
-                    Toast.makeText(MainActivity.this, "admin info gotten...", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(MainActivity.this, "Main activity not exist...", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(MainActivity.this, "Main activity " + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -388,7 +382,64 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... voids) {
             mCurrentUserName = mSnapShot.child("userName").getValue().toString();
+            mGroupAdapter.setUserName(mCurrentUserName);
             return null;
         }
+    }
+
+    public class getGroupsOfUsersTask extends AsyncTask<Void, Void, Void> {
+
+        private DataSnapshot mSnapShot;
+        public UpComingEvent mEvent;
+
+        public getGroupsOfUsersTask(DataSnapshot snapshot) {
+            mSnapShot = snapshot;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            if (((ProgressBar) findViewById(R.id.progress_main)).getVisibility() != View.VISIBLE)
+                ((ProgressBar) findViewById(R.id.progress_main)).setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            ((TextView) findViewById(R.id.main_username)).setText(mCurrentUserName);
+            if (((ProgressBar) findViewById(R.id.progress_main)).getVisibility() == View.VISIBLE)
+                ((ProgressBar) findViewById(R.id.progress_main)).setVisibility(View.GONE);
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            mEvent = mSnapShot.child("upComingEvent").getValue(UpComingEvent.class);
+            return null;
+        }
+    }
+
+
+    private void getCurrentUserInfo() {
+        mUsersRef.child(mCurrentUserId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    String id = snapshot.child("id").getValue().toString();
+                    String userName = snapshot.child("userName").getValue().toString();
+                    String email = snapshot.child("email").getValue().toString();
+                    String token = snapshot.child("token").getValue().toString();
+                    String pass = snapshot.child("password").getValue().toString();
+                    mCurrentUserObject = new UserObject(id, userName, email, pass, token);
+                    Toast.makeText(MainActivity.this, "admin info gotten...", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(MainActivity.this, "Main activity not exist...", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(MainActivity.this, "Main activity " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

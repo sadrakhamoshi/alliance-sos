@@ -7,15 +7,15 @@ import java.util.TimeZone;
 public class Event {
     private String eventId;
     private String createdBy;
-    private String createdTime;
+    private long timeInMillisecond;
     private String createdTimezoneId;
     private ScheduleObject scheduleObject;
 
-    public Event(String eventId, String writer, String created, ScheduleObject sch, String timezone) {
+    public Event(String eventId, String writer, long timeInMillisecond, ScheduleObject sch, String timezone) {
         scheduleObject = sch;
         this.eventId = eventId;
         createdBy = writer;
-        createdTime = created;
+        this.timeInMillisecond = timeInMillisecond;
         createdTimezoneId = timezone;
         if (TextUtils.isEmpty(createdTimezoneId)) {
             createdTimezoneId = TimeZone.getDefault().getID();
@@ -49,16 +49,16 @@ public class Event {
         return createdBy;
     }
 
-    public String getCreatedTime() {
-        return createdTime;
+    public long getTimeInMillisecond() {
+        return timeInMillisecond;
     }
 
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
     }
 
-    public void setCreatedTime(String createdTime) {
-        this.createdTime = createdTime;
+    public void setTimeInMillisecond(long timeInMillisecond) {
+        this.timeInMillisecond = timeInMillisecond;
     }
 
     public void setScheduleObject(ScheduleObject scheduleObject) {

@@ -27,6 +27,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 public class GroupActivity extends AppCompatActivity {
@@ -166,8 +167,7 @@ public class GroupActivity extends AppCompatActivity {
                                 String tmp = "";
                                 tmp += message.getScheduleObject().getTitle() + "\n";
                                 tmp += message.getScheduleObject().getDescription() + "\n";
-                                tmp += message.getCreatedBy() + "\n";
-                                tmp += message.getCreatedTime();
+                                tmp += message.getCreatedBy();
                                 set.add(tmp);
                             }
                         } catch (Exception e) {
@@ -176,6 +176,7 @@ public class GroupActivity extends AppCompatActivity {
                         mScheduleList.clear();
                         mScheduleList.addAll(set);
                         listView.setAdapter(arrayAdapter);
+//                        FindNextUpComingEventTask();
                     }
                 }
             }
