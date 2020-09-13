@@ -103,8 +103,6 @@ public class SignUpPage extends AppCompatActivity {
                                 Toast.makeText(getApplicationContext(), "Signed in...", Toast.LENGTH_LONG).show();
                                 pushDataInDatabase pushDataInDatabase = new pushDataInDatabase();
                                 pushDataInDatabase.execute();
-                                //getTokenAndSignUp();
-                                Intent activity = new Intent(SignUpPage.this, MainActivity.class);
 
                             } else {
                                 Toast.makeText(getApplicationContext(), task.getException().getMessage(), Toast.LENGTH_SHORT).show();
@@ -170,7 +168,6 @@ public class SignUpPage extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            ((ProgressBar) findViewById(R.id.progress_signUp_page)).setVisibility(View.VISIBLE);
             startActivity(new Intent(SignUpPage.this, MainActivity.class));
             finish();
             return;

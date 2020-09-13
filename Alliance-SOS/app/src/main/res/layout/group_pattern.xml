@@ -3,10 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_margin="8dp"
     android:background="@drawable/layout_border"
     android:layoutDirection="ltr"
     android:orientation="vertical"
-    android:layout_marginTop="15dp"
     android:padding="15dp"
     android:textDirection="ltr">
 

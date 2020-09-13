@@ -10,17 +10,16 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,6 +31,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -43,15 +43,15 @@ import com.google.firebase.iid.InstanceIdResult;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     private String mCurrentUserId, mCurrentUserName;
 
+    private FirebaseAuth.AuthStateListener mAuthStateListener;
+    private FirebaseAuth mFirebaseAuth;
 
-    private UserObject mCurrentUser;
+    private UserObject mCurrentUserObject;
 
     //database
     private DatabaseReference mRoot, mGroupsRef, mUsersRef;
@@ -73,6 +73,16 @@ public class MainActivity extends AppCompatActivity {
 
         //auth
         mCurrentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        mFirebaseAuth = FirebaseAuth.getInstance();
+        mAuthStateListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user == null) {
+                    gotToLoginPage();
+                }
+            }
+        };
         UpdateToken();
 
         //database
@@ -87,19 +97,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getCurrentUserName() {
+//        ((ProgressBar) findViewById(R.id.progress_main)).setVisibility(View.VISIBLE);
         mUsersRef.child(mCurrentUserId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    mCurrentUserName = snapshot.child("userName").getValue().toString();
-                    ((TextView) findViewById(R.id.main_username)).setText(mCurrentUserName);
-                    Toast.makeText(MainActivity.this, "Current User Name Is " + mCurrentUserName, Toast.LENGTH_SHORT).show();
+                    getCurrentUsernameTask getCurrentUsernameTask = new getCurrentUsernameTask(snapshot);
+                    getCurrentUsernameTask.execute();
+//                    mCurrentUserName = snapshot.child("userName").getValue().toString();
+//                    ((TextView) findViewById(R.id.main_username)).setText(mCurrentUserName);
+//                    Toast.makeText(MainActivity.this, "Current User Name Is " + mCurrentUserName, Toast.LENGTH_SHORT).show();
+//                    ((ProgressBar) findViewById(R.id.progress_main)).setVisibility(View.GONE);
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+                ((ProgressBar) findViewById(R.id.progress_main)).setVisibility(View.GONE);
             }
         });
     }
@@ -263,7 +278,7 @@ public class MainActivity extends AppCompatActivity {
                     String email = snapshot.child("email").getValue().toString();
                     String token = snapshot.child("token").getValue().toString();
                     String pass = snapshot.child("password").getValue().toString();
-                    mCurrentUser = new UserObject(id, userName, email, pass, token);
+                    mCurrentUserObject = new UserObject(id, userName, email, pass, token);
                     Toast.makeText(MainActivity.this, "admin info gotten...", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(MainActivity.this, "Main activity not exist...", Toast.LENGTH_SHORT).show();
@@ -298,7 +313,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         showCurrentUserGroups();
-        getCurrentUserInfo();
+//        getCurrentUserInfo();
         //permission
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (!Settings.System.canWrite(getApplicationContext())) {
@@ -307,6 +322,22 @@ public class MainActivity extends AppCompatActivity {
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivityForResult(intent, 200);
             }
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mAuthStateListener != null) {
+            mFirebaseAuth.addAuthStateListener(mAuthStateListener);
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (mAuthStateListener != null) {
+            mFirebaseAuth.removeAuthStateListener(mAuthStateListener);
         }
     }
 
@@ -321,10 +352,43 @@ public class MainActivity extends AppCompatActivity {
             mGroupsRef.removeEventListener(mGroupChangeListener);
         }
         FirebaseAuth.getInstance().signOut();
+        gotToLoginPage();
+        return;
+    }
+
+    private void gotToLoginPage() {
         Intent intent = new Intent(getApplicationContext(), LogInPage.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
         finish();
         return;
+    }
+
+    public class getCurrentUsernameTask extends AsyncTask<Void, Void, Void> {
+
+        private DataSnapshot mSnapShot;
+
+        public getCurrentUsernameTask(DataSnapshot snapshot) {
+            mSnapShot = snapshot;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            ((ProgressBar) findViewById(R.id.progress_main)).setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            ((TextView) findViewById(R.id.main_username)).setText(mCurrentUserName);
+            ((ProgressBar) findViewById(R.id.progress_main)).setVisibility(View.GONE);
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            mCurrentUserName = mSnapShot.child("userName").getValue().toString();
+            return null;
+        }
     }
 }
