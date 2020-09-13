@@ -5,13 +5,17 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.example.alliancesos.SendNotificationPack.Token;
@@ -97,7 +101,10 @@ public class SignUpPage extends AppCompatActivity {
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
                                 Toast.makeText(getApplicationContext(), "Signed in...", Toast.LENGTH_LONG).show();
-                                getTokenAndSignUp();
+                                pushDataInDatabase pushDataInDatabase = new pushDataInDatabase();
+                                pushDataInDatabase.execute();
+                                //getTokenAndSignUp();
+                                Intent activity = new Intent(SignUpPage.this, MainActivity.class);
 
                             } else {
                                 Toast.makeText(getApplicationContext(), task.getException().getMessage(), Toast.LENGTH_SHORT).show();
@@ -110,18 +117,18 @@ public class SignUpPage extends AppCompatActivity {
 
     private boolean checkSignUpCondition() {
         if (TextUtils.isEmpty(mEmail.getText()) || TextUtils.isEmpty(mPassword.getText()) || TextUtils.isEmpty(mUsername.getText()) || TextUtils.isEmpty(mConfirmPassword.getText())) {
-            MakeAlertDialogForInput("You Have to fill All Blanks...");
+            MakeAlertDialogForInput(SignUpPage.this, "You Have to fill All Blanks...");
             return false;
         }
         if (!mConfirmPassword.getText().toString().equals(mPassword.getText().toString())) {
-            MakeAlertDialogForInput("Password is Not Correct...");
+            MakeAlertDialogForInput(SignUpPage.this, "Password is Not Correct...");
             return false;
         }
         return true;
     }
 
-    public void MakeAlertDialogForInput(String message) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getApplicationContext(), R.style.AlertDialog);
+    public void MakeAlertDialogForInput(Context mContext, String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(mContext, R.style.AlertDialog);
         builder.setTitle("Alert");
         builder.setIcon(R.drawable.sos_icon);
         builder.setMessage(message);
@@ -132,6 +139,7 @@ public class SignUpPage extends AppCompatActivity {
                 dialog.cancel();
             }
         });
+        builder.create().show();
     }
 
     private void getTokenAndSignUp() {
@@ -149,5 +157,29 @@ public class SignUpPage extends AppCompatActivity {
                 mUserDatabaseRef.child(key).setValue(userObject);
             }
         });
+    }
+
+    public class pushDataInDatabase extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            ((ProgressBar) findViewById(R.id.progress_signUp_page)).setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            ((ProgressBar) findViewById(R.id.progress_signUp_page)).setVisibility(View.VISIBLE);
+            startActivity(new Intent(SignUpPage.this, MainActivity.class));
+            finish();
+            return;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            getTokenAndSignUp();
+            return null;
+        }
     }
 }

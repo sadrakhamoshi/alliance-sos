@@ -164,8 +164,8 @@ public class NotificationResponseActivity extends AppCompatActivity {
     }
 
     private void setTime() {
-        DateTime dateTime = scheduleObject.getDateTime();
-        String time = dateTime.getMonth() + "/" + dateTime.getDay() + "/" + dateTime.getYear() + "   " + dateTime.getHour() + ":" + dateTime.getMinute();
+        Calendar calendar = ConvertTime();
+        String time = calendar.getTime().toString();
         ((TextView) findViewById(R.id.noti_response_group_time)).setText("Date : " + time);
     }
 

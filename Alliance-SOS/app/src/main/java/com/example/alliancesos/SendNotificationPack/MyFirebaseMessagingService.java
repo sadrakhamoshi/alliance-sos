@@ -89,7 +89,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private void changeUserToken(String s) {
         Token token = new Token(s);
-        mRootRef.child("users").child(mUserId).setValue(token).addOnCompleteListener(new OnCompleteListener<Void>() {
+        mRootRef.child("users").child(mUserId).child("token").setValue(token.getToken()).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (!task.isSuccessful()) {

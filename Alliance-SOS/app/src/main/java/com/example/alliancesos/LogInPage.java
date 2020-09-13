@@ -89,7 +89,7 @@ public class LogInPage extends AppCompatActivity {
     private boolean checkLogInCondition() {
 
         if (TextUtils.isEmpty(mEmail.getText()) || TextUtils.isEmpty(mPass.getText())) {
-            new SignUpPage().MakeAlertDialogForInput("You Have Fill the Blanks...");
+            new SignUpPage().MakeAlertDialogForInput(LogInPage.this, "You Have Fill the Blanks...");
             return false;
         }
         return true;
