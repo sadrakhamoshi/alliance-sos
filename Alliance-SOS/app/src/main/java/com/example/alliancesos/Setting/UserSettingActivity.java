@@ -4,11 +4,24 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AlertDialog;
+import androidx.room.Room;
 
+import android.Manifest;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.media.AudioAttributes;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.InputFilter;
 import android.text.Spanned;
 import android.text.TextUtils;
@@ -27,8 +40,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.example.alliancesos.DbForRingtone.AppDatabase;
+import com.example.alliancesos.DbForRingtone.ringtone;
+import com.example.alliancesos.MainActivity;
 import com.example.alliancesos.R;
 import com.example.alliancesos.UserObject;
+import com.firebase.ui.auth.data.model.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.EmailAuthProvider;
@@ -47,6 +64,8 @@ import com.squareup.picasso.RequestCreator;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Locale;
@@ -58,6 +77,8 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 
 public class UserSettingActivity extends AppCompatActivity {
+
+    private static final int PICK_RING = 1;
 
     private boolean emailChange, isEditMode;
     private ImageView mEditMode, mExitEditMode;
@@ -77,12 +98,17 @@ public class UserSettingActivity extends AppCompatActivity {
     private StorageReference mUserImageProfileRef;
 
     private ViewDialog loadingDialog;
+    private AppDatabase appDatabase;
 
+    public static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 123;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_setting);
+
+
+        appDatabase = Room.databaseBuilder(UserSettingActivity.this, AppDatabase.class, "ringtone").build();
         loadingDialog = new ViewDialog(this);
 
         Intent fromGroup = getIntent();
@@ -90,6 +116,23 @@ public class UserSettingActivity extends AppCompatActivity {
             mUserId = fromGroup.getStringExtra("userId");
         }
         Initialize();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+            if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                if (shouldShowRequestPermissionRationale(
+                        Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                }
+                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                        MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+                return;
+            }
+        }
     }
 
     private void Initialize() {
@@ -572,6 +615,89 @@ public class UserSettingActivity extends AppCompatActivity {
                     }
                 }
             });
+        } else if (requestCode == PICK_RING) {
+            Uri uri = data.getData();
+            updateRingtoneTask updateRingtoneTask = new updateRingtoneTask(uri);
+            updateRingtoneTask.execute();
         }
     }
+
+    public void choseCustomRingtone(View view) {
+        if (isEditMode) {
+            Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
+            startActivityForResult(intent.createChooser(intent, "Music Files"), PICK_RING);
+        }
+    }
+
+
+    public void pickDoNotDisturb(View view) {
+        QuakeTask task = new QuakeTask(UserSettingActivity.this);
+        task.execute();
+    }
+
+    public class updateRingtoneTask extends AsyncTask<Void, Void, Void> {
+
+        public Uri newRing;
+
+        public updateRingtoneTask(Uri ring) {
+            newRing = ring;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            Toast.makeText(UserSettingActivity.this, "start", Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            Toast.makeText(UserSettingActivity.this, "finish", Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            String newPath = newRing.toString();
+            appDatabase.dao().updateRingtonePath(mUserId, newPath);
+            return null;
+        }
+    }
+
+    private class QuakeTask extends AsyncTask<Void, Void, Void> {
+
+        Context mcontext;
+        String uri;
+
+        public QuakeTask(Context con) {
+            mcontext = con;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            uri = appDatabase.dao().currentPath(mUserId).path;
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+
+            Toast.makeText(mcontext, uri, Toast.LENGTH_SHORT).show();
+            MediaPlayer mp = new MediaPlayer();
+            mp.setAudioAttributes(new AudioAttributes.Builder()
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                    .build());
+
+            mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            try {
+                mp.setDataSource(UserSettingActivity.this, Uri.parse(uri));
+                mp.prepare();
+                mp.start();
+            } catch (Exception e) {
+                Toast.makeText(mcontext, e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
 }

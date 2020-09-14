@@ -173,6 +173,7 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <RelativeLayout
+                android:onClick="pickDoNotDisturb"
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
                 android:layout_marginTop="15dp">
@@ -251,6 +252,8 @@
             </RelativeLayout>
 
             <RelativeLayout
+                android:onClick="choseCustomRingtone"
+
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
                 android:layout_marginTop="15dp">

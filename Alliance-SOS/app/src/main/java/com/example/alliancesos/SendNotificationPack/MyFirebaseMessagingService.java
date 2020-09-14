@@ -17,7 +17,9 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
+import androidx.room.Room;
 
+import com.example.alliancesos.DbForRingtone.AppDatabase;
 import com.example.alliancesos.R;
 import com.example.alliancesos.Utils.MessageType;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -54,7 +56,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     String title, message;
     String groupName, groupId, makeBy;
     String fromTimezoneId;
+    Uri uri;
     String eventId;
+    private AppDatabase appDatabase;
 
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
@@ -62,6 +66,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         type = Integer.valueOf(remoteMessage.getData().get("type"));
 
         mContext = getApplicationContext();
+        appDatabase = Room.databaseBuilder(mContext, AppDatabase.class, "ringtone").build();
         Initialize(remoteMessage);
 
         buildNotification(mContext);
@@ -116,6 +121,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         makeBy = remoteMessage.getData().get("makeBy");
         toId = remoteMessage.getData().get("toId");
 
+//        String path = appDatabase.dao().currentPath(toId).path;
         if (type == MessageType.SOS_TYPE) {
 
             notificationColor = Color.RED;
@@ -202,18 +208,23 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     }
 
     private void playRingtone() {
-        Uri alert = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-        mRingtone = RingtoneManager.getRingtone(getBaseContext(), alert);
-        mRingtone.play();
-        TimerTask task = new TimerTask() {
-            @Override
-            public void run() {
-                if (mRingtone.isPlaying()) {
-                    mRingtone.stop();
+        Uri alert = Uri.parse(appDatabase.dao().currentPath(toId).path);
+        if (alert != null) {
+            mRingtone = RingtoneManager.getRingtone(getBaseContext(), alert);
+            mRingtone.play();
+            TimerTask task = new TimerTask() {
+                @Override
+                public void run() {
+                    if (mRingtone.isPlaying()) {
+                        mRingtone.stop();
+                    }
                 }
-            }
-        };
-        Timer timer = new Timer();
-        timer.schedule(task, 8000);
+            };
+            Timer timer = new Timer();
+            timer.schedule(task, 5000);
+        } else {
+            throw new NullPointerException();
+        }
+
     }
 }
