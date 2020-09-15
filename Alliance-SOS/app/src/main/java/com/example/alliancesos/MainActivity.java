@@ -250,7 +250,9 @@ public class MainActivity extends AppCompatActivity {
                 if (task.isSuccessful()) {
                     Toast.makeText(MainActivity.this, groupId + "  created Successfully ...", Toast.LENGTH_SHORT).show();
 
-                    mGroupsRef.child(groupId).child("members").child(mCurrentUserId).setValue(new Member(mCurrentUserId, mCurrentUserName)).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    Member admin = new Member(mCurrentUserId, mCurrentUserName);
+                    admin.setCanChangeGroupImage(true);
+                    mGroupsRef.child(groupId).child("members").child(mCurrentUserId).setValue(admin).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {

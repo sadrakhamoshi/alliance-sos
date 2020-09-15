@@ -211,38 +211,6 @@ public class UserSettingActivity extends AppCompatActivity {
                         }
                     }
                 });
-//see before delete
-//        user.updateEmail(newInfo.getEmail()).addOnCompleteListener(new OnCompleteListener<Void>() {
-//            @Override
-//            public void onComplete(@NonNull Task<Void> task) {
-//                if (task.isSuccessful()) {
-//                    user.reauthenticate(EmailAuthProvider.getCredential(newInfo.getEmail(), newInfo.getPassword()))
-//                            .addOnCompleteListener(new OnCompleteListener<Void>() {
-//                                @Override
-//                                public void onComplete(@NonNull Task<Void> task) {
-//                                    if (task.isSuccessful()) {
-//                                        Updating(mUserId, "email", mCurrUserInfo.getEmail(), newInfo.getEmail());
-//                                        Toast.makeText(UserSettingActivity.this, "reAuthentication adn Update email database..", Toast.LENGTH_SHORT).show();
-//                                    } else {
-//                                        user.updateEmail(mCurrUserInfo.getEmail()).addOnCompleteListener(new OnCompleteListener<Void>() {
-//                                            @Override
-//                                            public void onComplete(@NonNull Task<Void> task) {
-//                                                if (task.isSuccessful()) {
-//                                                    Toast.makeText(UserSettingActivity.this, "turn back the email", Toast.LENGTH_SHORT).show();
-//                                                } else {
-//                                                    Toast.makeText(UserSettingActivity.this, "Could'nt turn back email", Toast.LENGTH_SHORT).show();
-//                                                }
-//                                            }
-//                                        });
-//                                        Toast.makeText(UserSettingActivity.this, "error in second onComplete update email", Toast.LENGTH_SHORT).show();
-//                                    }
-//                                }
-//                            });
-//                } else {
-//                    Toast.makeText(UserSettingActivity.this, task.getException().getMessage() + " error in Update email", Toast.LENGTH_SHORT).show();
-//                }
-//            }
-//        });
     }
 
     private void updatePassword(final UserObject newInfo) {
@@ -308,7 +276,6 @@ public class UserSettingActivity extends AppCompatActivity {
                     mCurrUserInfo.setLanguage(language);
                     mCurrUserInfo.setTimeZone(timeZone);
                     if (!TextUtils.isEmpty(mUpdatedImageUrl)) {
-
                         loadingDialog.showDialog();
                         RequestCreator requestCreator = Picasso.get().load(mUpdatedImageUrl);
                         requestCreator.into(mBackUserImage);
@@ -631,8 +598,9 @@ public class UserSettingActivity extends AppCompatActivity {
 
 
     public void pickDoNotDisturb(View view) {
-        QuakeTask task = new QuakeTask(UserSettingActivity.this);
-        task.execute();
+        if (isEditMode) {
+
+        }
     }
 
     public class updateRingtoneTask extends AsyncTask<Void, Void, Void> {
@@ -662,42 +630,42 @@ public class UserSettingActivity extends AppCompatActivity {
             return null;
         }
     }
-
-    private class QuakeTask extends AsyncTask<Void, Void, Void> {
-
-        Context mcontext;
-        String uri;
-
-        public QuakeTask(Context con) {
-            mcontext = con;
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            uri = appDatabase.dao().currentPath(mUserId).path;
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-
-            Toast.makeText(mcontext, uri, Toast.LENGTH_SHORT).show();
-            MediaPlayer mp = new MediaPlayer();
-            mp.setAudioAttributes(new AudioAttributes.Builder()
-                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                    .setUsage(AudioAttributes.USAGE_MEDIA)
-                    .build());
-
-            mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            try {
-                mp.setDataSource(UserSettingActivity.this, Uri.parse(uri));
-                mp.prepare();
-                mp.start();
-            } catch (Exception e) {
-                Toast.makeText(mcontext, e.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
+//
+//    private class QuakeTask extends AsyncTask<Void, Void, Void> {
+//
+//        Context mcontext;
+//        String uri;
+//
+//        public QuakeTask(Context con) {
+//            mcontext = con;
+//        }
+//
+//        @Override
+//        protected Void doInBackground(Void... voids) {
+//            uri = appDatabase.dao().currentPath(mUserId).path;
+//            return null;
+//        }
+//
+//        @Override
+//        protected void onPostExecute(Void aVoid) {
+//            super.onPostExecute(aVoid);
+//
+//            Toast.makeText(mcontext, uri, Toast.LENGTH_SHORT).show();
+//            MediaPlayer mp = new MediaPlayer();
+//            mp.setAudioAttributes(new AudioAttributes.Builder()
+//                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+//                    .setUsage(AudioAttributes.USAGE_MEDIA)
+//                    .build());
+//
+//            mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
+//            try {
+//                mp.setDataSource(UserSettingActivity.this, Uri.parse(uri));
+//                mp.prepare();
+//                mp.start();
+//            } catch (Exception e) {
+//                Toast.makeText(mcontext, e.getMessage(), Toast.LENGTH_SHORT).show();
+//            }
+//        }
+//    }
 
 }

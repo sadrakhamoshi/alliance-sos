@@ -62,7 +62,7 @@ public class GroupProfileActivity extends AppCompatActivity {
     private String mGroupId, mGroupName, mUserId;
 
     private String mUpdatedUsername;
-    private boolean mUpdatedNotDisturb;
+    private boolean mUpdatedNotDisturb, mCanChangeGroupImage;
 
     private DatabaseReference mRootRef;
     private StorageReference mGroupProfileRef;
@@ -150,9 +150,11 @@ public class GroupProfileActivity extends AppCompatActivity {
         String newUsername = mUsername_edt.getText().toString();
         boolean isCheck = mNoDisturb.isChecked();
         if (TextUtils.isEmpty(newUsername)) {
+
             Toast.makeText(this, "username can't be empty...", Toast.LENGTH_SHORT).show();
         } else {
             final Member newMember = new Member(mUserId, newUsername, isCheck);
+            newMember.setCanChangeGroupImage(mCanChangeGroupImage);
             mRootRef.child("groups").child(mGroupId).child("members").child(mUserId).setValue(newMember).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
@@ -170,7 +172,11 @@ public class GroupProfileActivity extends AppCompatActivity {
 
     public void pickImageForGroup(View view) {
         if (edit_mode) {
-            pickImageFromGallery();
+            if (!mCanChangeGroupImage) {
+                Toast.makeText(this, "You Don't have Admin Permission to change Image", Toast.LENGTH_LONG).show();
+            } else {
+                pickImageFromGallery();
+            }
         }
     }
 
@@ -275,6 +281,7 @@ public class GroupProfileActivity extends AppCompatActivity {
                 if (snapshot.exists()) {
                     mUpdatedNotDisturb = snapshot.child("notDisturb").getValue(Boolean.class);
                     mUpdatedUsername = snapshot.child("userName").getValue().toString();
+                    mCanChangeGroupImage = snapshot.child("canChangeGroupImage").getValue(Boolean.class);
                     mUsername_edt.setText(mUpdatedUsername);
                     mNoDisturb.setChecked(mUpdatedNotDisturb);
                 } else {
@@ -290,7 +297,6 @@ public class GroupProfileActivity extends AppCompatActivity {
     }
 
     private void getImage() {
-
         loadingBar.setVisibility(View.VISIBLE);
         mRootRef.child("groups").child(mGroupId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override

@@ -2,7 +2,8 @@ package com.example.alliancesos;
 
 public class Member {
     private String id, userName;
-    boolean notDisturb;
+    private boolean notDisturb;
+    private boolean canChangeGroupImage;
 
     public Member() {
     }
@@ -11,12 +12,22 @@ public class Member {
         this.id = id;
         this.userName = usernameForThisGroup;
         notDisturb = false;
+        canChangeGroupImage = false;
     }
 
     public Member(String id, String userNameForThisGroup, boolean ischeck) {
         this.id = id;
         this.userName = userNameForThisGroup;
         this.notDisturb = ischeck;
+        canChangeGroupImage = false;
+    }
+
+    public boolean isCanChangeGroupImage() {
+        return canChangeGroupImage;
+    }
+
+    public void setCanChangeGroupImage(boolean canChangeGroupImage) {
+        this.canChangeGroupImage = canChangeGroupImage;
     }
 
     public void setNotDisturb(boolean notDisturb) {
