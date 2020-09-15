@@ -596,6 +596,13 @@ public class UserSettingActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        if (isEditMode) {
+            exitEditMode();
+        }
+        super.onBackPressed();
+    }
 
     public void pickDoNotDisturb(View view) {
         if (isEditMode) {

@@ -224,7 +224,6 @@ public class MainActivity extends AppCompatActivity {
                 public void onChildRemoved(@NonNull DataSnapshot snapshot) {
                     String name = snapshot.child("groupName").getValue().toString();
                     String id = snapshot.child("groupId").getValue().toString();
-//                    mGroupAdapter.remove(name, id);
                 }
 
                 @Override
@@ -311,9 +310,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-//        showCurrentUserGroups();
-//        getCurrentUserInfo();
-        //permission
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (!Settings.System.canWrite(getApplicationContext())) {
                 Intent intent = new Intent(android.provider.Settings.ACTION_MANAGE_WRITE_SETTINGS);

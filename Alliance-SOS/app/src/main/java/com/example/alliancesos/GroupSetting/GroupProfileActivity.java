@@ -180,6 +180,13 @@ public class GroupProfileActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        if(edit_mode){
+            exitEditMode();
+        }
+        super.onBackPressed();
+    }
 
     private void pickImageFromGallery() {
         CropImage.activity()
