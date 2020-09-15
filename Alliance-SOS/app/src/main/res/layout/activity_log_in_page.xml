@@ -113,6 +113,7 @@
             android:layout_marginTop="16dp"
             android:background="@drawable/signup_btn"
             android:text="Login via Google"
+            android:onClick="logInViaGoogle"
             android:textAllCaps="false"
             android:textColor="#fff" />
 

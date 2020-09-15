@@ -146,8 +146,8 @@ public class NotificationResponseActivity extends AppCompatActivity {
                     try {
                         scheduleObject = snapshot.child("scheduleObject").getValue(ScheduleObject.class);
 
-                        setTime();
                         mFrom_TimeZoneId = snapshot.child("createdTimezoneId").getValue().toString();
+                        setTime();
                         Toast.makeText(NotificationResponseActivity.this, "get schedule object", Toast.LENGTH_SHORT).show();
 
                     } catch (Exception e) {
