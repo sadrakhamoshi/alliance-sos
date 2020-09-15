@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
         mRoot = FirebaseDatabase.getInstance().getReference();
         mGroupsRef = mRoot.child("groups");
         mUsersRef = mRoot.child("users");
-
+        showCurrentUserGroups();
 
         InitializeUI();
         getCurrentUserName();
@@ -188,6 +188,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void attachedGroupListener() {
+        ((ProgressBar) findViewById(R.id.progress_main)).setVisibility(View.VISIBLE);
         if (mGroupChangeListener == null) {
             mGroupChangeListener = new ChildEventListener() {
                 @Override
@@ -211,7 +212,7 @@ public class MainActivity extends AppCompatActivity {
                             ((ProgressBar) findViewById(R.id.progress_main)).setVisibility(View.GONE);
                         }
                     });
-
+                    ((ProgressBar) findViewById(R.id.progress_main)).setVisibility(View.GONE);
                 }
 
                 @Override
@@ -233,7 +234,7 @@ public class MainActivity extends AppCompatActivity {
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
-
+                    Toast.makeText(MainActivity.this, "Error in attach child to database :" + error.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             };
             mUsersRef.child(mCurrentUserId).child("Groups").addChildEventListener(mGroupChangeListener);
@@ -310,7 +311,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        showCurrentUserGroups();
+//        showCurrentUserGroups();
 //        getCurrentUserInfo();
         //permission
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -362,6 +363,16 @@ public class MainActivity extends AppCompatActivity {
         return;
     }
 
+    public void RefreshPage(View view) {
+        if (mGroupChangeListener != null) {
+            mGroupAdapter.clearAll();
+            mUsersRef.child(mCurrentUserId).child("Groups").removeEventListener(mGroupChangeListener);
+        }
+//        mUsersRef.child(mCurrentUserId).child("Groups").addChildEventListener(mGroupChangeListener);
+        RefreshTask task = new RefreshTask();
+        task.execute();
+    }
+
     public class getCurrentUsernameTask extends AsyncTask<Void, Void, Void> {
 
         private DataSnapshot mSnapShot;
@@ -373,7 +384,8 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            ((ProgressBar) findViewById(R.id.progress_main)).setVisibility(View.VISIBLE);
+            if (((ProgressBar) findViewById(R.id.progress_main)).getVisibility() != View.VISIBLE)
+                ((ProgressBar) findViewById(R.id.progress_main)).setVisibility(View.VISIBLE);
         }
 
         @Override
@@ -391,33 +403,25 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public class getGroupsOfUsersTask extends AsyncTask<Void, Void, Void> {
-
-        private DataSnapshot mSnapShot;
-        public UpComingEvent mEvent;
-
-        public getGroupsOfUsersTask(DataSnapshot snapshot) {
-            mSnapShot = snapshot;
-        }
+    public class RefreshTask extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            if (((ProgressBar) findViewById(R.id.progress_main)).getVisibility() != View.VISIBLE)
-                ((ProgressBar) findViewById(R.id.progress_main)).setVisibility(View.VISIBLE);
+            ((ProgressBar) findViewById(R.id.progress_main)).setVisibility(View.VISIBLE);
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            ((TextView) findViewById(R.id.main_username)).setText(mCurrentUserName);
-            if (((ProgressBar) findViewById(R.id.progress_main)).getVisibility() == View.VISIBLE)
-                ((ProgressBar) findViewById(R.id.progress_main)).setVisibility(View.GONE);
+            ((ProgressBar) findViewById(R.id.progress_main)).setVisibility(View.GONE);
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
-            mEvent = mSnapShot.child("upComingEvent").getValue(UpComingEvent.class);
+            if (mGroupChangeListener != null) {
+                mUsersRef.child(mCurrentUserId).child("Groups").addChildEventListener(mGroupChangeListener);
+            }
             return null;
         }
     }

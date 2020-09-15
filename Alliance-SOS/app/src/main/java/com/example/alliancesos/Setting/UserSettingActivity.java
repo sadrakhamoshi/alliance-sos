@@ -599,7 +599,36 @@ public class UserSettingActivity extends AppCompatActivity {
 
     public void pickDoNotDisturb(View view) {
         if (isEditMode) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(UserSettingActivity.this, R.style.AlertDialog);
+            LayoutInflater layoutInflater = LayoutInflater.from(UserSettingActivity.this);
+            View root = layoutInflater.inflate(R.layout.set_not_disturb_time, null, false);
+            final EditText start_hour = root.findViewById(R.id.start_hour_not_disturb);
+            final EditText end_hour = root.findViewById(R.id.end_hour_not_disturb);
 
+            builder.setTitle("Pick Time :");
+            builder.setIcon(R.drawable.time_zone_icon);
+            builder.setView(root);
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    if (TextUtils.isEmpty(start_hour.getText()) || TextUtils.isEmpty(end_hour.getText())) {
+                        Toast.makeText(UserSettingActivity.this, "both blank have to set", Toast.LENGTH_SHORT).show();
+                    } else if (Integer.valueOf(start_hour.getText().toString()) > 24 || Integer.valueOf(start_hour.getText().toString()) < 1) {
+                        Toast.makeText(UserSettingActivity.this, "Out Of range (1 < hour < 24)", Toast.LENGTH_SHORT).show();
+                    } else if (Integer.valueOf(end_hour.getText().toString()) > 24 || Integer.valueOf(end_hour.getText().toString()) < 1) {
+                        Toast.makeText(UserSettingActivity.this, "Out Of range (1 < hour < 24)", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(UserSettingActivity.this, "Successfully set Time, wil set to database", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.cancel();
+                }
+            });
+            builder.create().show();
         }
     }
 

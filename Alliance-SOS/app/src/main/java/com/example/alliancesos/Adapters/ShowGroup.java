@@ -83,6 +83,13 @@ public class ShowGroup extends RecyclerView.Adapter<ShowGroup.ViewHolder> {
         notifyDataSetChanged();
     }
 
+    public void clearAll() {
+        mGroupNames.clear();
+        mGroupIds.clear();
+        mUpComingEventArrayList.clear();
+        notifyDataSetChanged();
+    }
+
     @Override
     public int getItemCount() {
         return mGroupNames.size();

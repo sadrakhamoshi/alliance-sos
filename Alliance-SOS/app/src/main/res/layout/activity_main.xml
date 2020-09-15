@@ -41,6 +41,7 @@
                 android:layout_height="25sp"
                 android:layout_alignParentRight="true"
                 android:layout_centerHorizontal="true"
+                android:onClick="RefreshPage"
                 android:src="@drawable/refresh" />
 
         </RelativeLayout>
@@ -49,7 +50,8 @@
             android:id="@+id/progress_main"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal" />
+            android:layout_gravity="center_horizontal"
+            android:visibility="gone" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/group_pattern_recycle"
