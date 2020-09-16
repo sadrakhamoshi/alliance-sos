@@ -17,7 +17,6 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -117,7 +116,6 @@ public class SetScheduleActivity extends AppCompatActivity {
 
         InitializeTime_Date();
     }
-
 
     private void setupButtons() {
         //time

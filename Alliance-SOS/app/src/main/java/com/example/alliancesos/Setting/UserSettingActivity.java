@@ -42,6 +42,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.example.alliancesos.DbForRingtone.AppDatabase;
 import com.example.alliancesos.DbForRingtone.ringtone;
+import com.example.alliancesos.DoNotDisturb.NotDisturbActivity;
 import com.example.alliancesos.MainActivity;
 import com.example.alliancesos.R;
 import com.example.alliancesos.UserObject;
@@ -99,6 +100,7 @@ public class UserSettingActivity extends AppCompatActivity {
 
     private ViewDialog loadingDialog;
     private AppDatabase appDatabase;
+
 
     public static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 123;
 
@@ -454,59 +456,6 @@ public class UserSettingActivity extends AppCompatActivity {
 
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        if (!isEditMode) {
-            getInfoOfCurrentUser();
-        }
-    }
-
-    private void NotAllowedUseSpace() {
-        InputFilter filter = new InputFilter() {
-            public CharSequence filter(CharSequence source, int start, int end,
-                                       Spanned dest, int dstart, int dend) {
-                for (int i = start; i < end; i++) {
-                    if (Character.isWhitespace(source.charAt(i))) {
-                        Toast.makeText(getApplicationContext(), "Not Space For this Field", Toast.LENGTH_SHORT).show();
-                        return "";
-                    }
-                }
-                return null;
-            }
-        };
-        InputFilter[] filter1 = new InputFilter[]{filter};
-        mEmail.setFilters(filter1);
-        mUsername.setFilters(filter1);
-    }
-
-    private void goToEditMode() {
-        isEditMode = true;
-        mEditMode.setVisibility(View.GONE);
-        mExitEditMode.setVisibility(View.VISIBLE);
-        mUpdate_btn.setVisibility(View.VISIBLE);
-        mEmail.setEnabled(true);
-        mPass.setEnabled(true);
-        mUsername.setEnabled(true);
-        mRingEnable.setEnabled(true);
-        mTime.setEnabled(true);
-        mLanguage.setEnabled(true);
-        mChosePhoto.setVisibility(View.VISIBLE);
-    }
-
-    private void exitEditMode() {
-        isEditMode = false;
-        mEditMode.setVisibility(View.VISIBLE);
-        mExitEditMode.setVisibility(View.GONE);
-        mUpdate_btn.setVisibility(View.GONE);
-        mEmail.setEnabled(false);
-        mPass.setEnabled(false);
-        mUsername.setEnabled(false);
-        mRingEnable.setEnabled(false);
-        mTime.setEnabled(false);
-        mLanguage.setEnabled(false);
-        mChosePhoto.setVisibility(View.GONE);
-    }
 
     public void onEditMode(View view) {
         goToEditMode();
@@ -606,37 +555,47 @@ public class UserSettingActivity extends AppCompatActivity {
 
     public void pickDoNotDisturb(View view) {
         if (isEditMode) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(UserSettingActivity.this, R.style.AlertDialog);
-            LayoutInflater layoutInflater = LayoutInflater.from(UserSettingActivity.this);
-            View root = layoutInflater.inflate(R.layout.set_not_disturb_time, null, false);
-            final EditText start_hour = root.findViewById(R.id.start_hour_not_disturb);
-            final EditText end_hour = root.findViewById(R.id.end_hour_not_disturb);
-
-            builder.setTitle("Pick Time :");
-            builder.setIcon(R.drawable.time_zone_icon);
-            builder.setView(root);
-            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    if (TextUtils.isEmpty(start_hour.getText()) || TextUtils.isEmpty(end_hour.getText())) {
-                        Toast.makeText(UserSettingActivity.this, "both blank have to set", Toast.LENGTH_SHORT).show();
-                    } else if (Integer.valueOf(start_hour.getText().toString()) > 24 || Integer.valueOf(start_hour.getText().toString()) < 1) {
-                        Toast.makeText(UserSettingActivity.this, "Out Of range (1 < hour < 24)", Toast.LENGTH_SHORT).show();
-                    } else if (Integer.valueOf(end_hour.getText().toString()) > 24 || Integer.valueOf(end_hour.getText().toString()) < 1) {
-                        Toast.makeText(UserSettingActivity.this, "Out Of range (1 < hour < 24)", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(UserSettingActivity.this, "Successfully set Time, wil set to database", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
-            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.cancel();
-                }
-            });
-            builder.create().show();
+            Intent gotToNotDisturb = new Intent(UserSettingActivity.this, NotDisturbActivity.class);
+            gotToNotDisturb.putExtra("userId", mUserId);
+            startActivity(gotToNotDisturb);
         }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (!isEditMode) {
+            getInfoOfCurrentUser();
+        }
+    }
+
+
+    private void goToEditMode() {
+        isEditMode = true;
+        mEditMode.setVisibility(View.GONE);
+        mExitEditMode.setVisibility(View.VISIBLE);
+        mUpdate_btn.setVisibility(View.VISIBLE);
+        mEmail.setEnabled(true);
+        mPass.setEnabled(true);
+        mUsername.setEnabled(true);
+        mRingEnable.setEnabled(true);
+        mTime.setEnabled(true);
+        mLanguage.setEnabled(true);
+        mChosePhoto.setVisibility(View.VISIBLE);
+    }
+
+    private void exitEditMode() {
+        isEditMode = false;
+        mEditMode.setVisibility(View.VISIBLE);
+        mExitEditMode.setVisibility(View.GONE);
+        mUpdate_btn.setVisibility(View.GONE);
+        mEmail.setEnabled(false);
+        mPass.setEnabled(false);
+        mUsername.setEnabled(false);
+        mRingEnable.setEnabled(false);
+        mTime.setEnabled(false);
+        mLanguage.setEnabled(false);
+        mChosePhoto.setVisibility(View.GONE);
     }
 
     public class updateRingtoneTask extends AsyncTask<Void, Void, Void> {
@@ -666,42 +625,22 @@ public class UserSettingActivity extends AppCompatActivity {
             return null;
         }
     }
-//
-//    private class QuakeTask extends AsyncTask<Void, Void, Void> {
-//
-//        Context mcontext;
-//        String uri;
-//
-//        public QuakeTask(Context con) {
-//            mcontext = con;
-//        }
-//
-//        @Override
-//        protected Void doInBackground(Void... voids) {
-//            uri = appDatabase.dao().currentPath(mUserId).path;
-//            return null;
-//        }
-//
-//        @Override
-//        protected void onPostExecute(Void aVoid) {
-//            super.onPostExecute(aVoid);
-//
-//            Toast.makeText(mcontext, uri, Toast.LENGTH_SHORT).show();
-//            MediaPlayer mp = new MediaPlayer();
-//            mp.setAudioAttributes(new AudioAttributes.Builder()
-//                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-//                    .setUsage(AudioAttributes.USAGE_MEDIA)
-//                    .build());
-//
-//            mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
-//            try {
-//                mp.setDataSource(UserSettingActivity.this, Uri.parse(uri));
-//                mp.prepare();
-//                mp.start();
-//            } catch (Exception e) {
-//                Toast.makeText(mcontext, e.getMessage(), Toast.LENGTH_SHORT).show();
-//            }
-//        }
-//    }
 
+    private void NotAllowedUseSpace() {
+        InputFilter filter = new InputFilter() {
+            public CharSequence filter(CharSequence source, int start, int end,
+                                       Spanned dest, int dstart, int dend) {
+                for (int i = start; i < end; i++) {
+                    if (Character.isWhitespace(source.charAt(i))) {
+                        Toast.makeText(getApplicationContext(), "Not Space For this Field", Toast.LENGTH_SHORT).show();
+                        return "";
+                    }
+                }
+                return null;
+            }
+        };
+        InputFilter[] filter1 = new InputFilter[]{filter};
+        mEmail.setFilters(filter1);
+        mUsername.setFilters(filter1);
+    }
 }

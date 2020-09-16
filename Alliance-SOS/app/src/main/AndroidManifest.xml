@@ -10,7 +10,6 @@
     <uses-permission-sdk-23 android:name="android.permission.WRITE_SETTINGS" />
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
@@ -20,12 +19,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".GroupSetting.GroupProfileActivity"></activity>
-
+        <activity android:name=".DoNotDisturb.NotDisturbActivity"></activity>
+        <activity android:name=".GroupSetting.GroupProfileActivity" />
         <activity
             android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
             android:theme="@style/Base.Theme.AppCompat" />
-
         <activity android:name=".SendNotificationPack.InvitationResponseActivity" />
         <activity android:name=".Setting.UserSettingActivity" />
         <activity android:name=".SendNotificationPack.NotificationResponseActivity" />

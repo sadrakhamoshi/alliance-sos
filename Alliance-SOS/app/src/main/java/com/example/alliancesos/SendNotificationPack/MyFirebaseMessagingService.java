@@ -32,8 +32,14 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.example.alliancesos.DoNotDisturb.*;
 
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -58,7 +64,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     String fromTimezoneId;
     Uri uri;
     String eventId;
-    private AppDatabase appDatabase;
+    private AppDatabase appDatabase2;
 
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
@@ -66,13 +72,16 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         type = Integer.valueOf(remoteMessage.getData().get("type"));
 
         mContext = getApplicationContext();
-        appDatabase = Room.databaseBuilder(mContext, AppDatabase.class, "ringtone").build();
-        Initialize(remoteMessage);
+        appDatabase2 = Room.databaseBuilder(mContext, AppDatabase.class, "ringtone").build();
 
-        buildNotification(mContext);
+        if (checkDoNotDisturb()) {
+            Initialize(remoteMessage);
 
-        if (type == MessageType.SOS_TYPE) {
-            playRingtone();
+            buildNotification(mContext);
+
+            if (type == MessageType.SOS_TYPE) {
+                playRingtone();
+            }
         }
     }
 
@@ -86,10 +95,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         } catch (Exception e) {
 //            Toast.makeText(mContext, e.getMessage(), Toast.LENGTH_SHORT).show();
         }
-    }
-
-    private void groupMemberToken(String s, String groupId) {
-        mRootRef.child("groups").child(groupId).child("members").child(mUserId).child("token").setValue(s);
     }
 
     private void changeUserToken(String s) {
@@ -208,7 +213,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     }
 
     private void playRingtone() {
-        Uri alert = Uri.parse(appDatabase.dao().currentPath(toId).path);
+        Uri alert = Uri.parse(appDatabase2.dao().currentPath(toId).path);
         if (alert != null) {
             mRingtone = RingtoneManager.getRingtone(getBaseContext(), alert);
             mRingtone.play();
@@ -225,5 +230,40 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         } else {
             throw new NullPointerException();
         }
+    }
+
+    public boolean checkDoNotDisturb() {
+//        SimpleDateFormat sdf = new SimpleDateFormat("EEEE");
+//        Calendar calendar = Calendar.getInstance();
+//        Date dateTime = calendar.getTime();
+//        String dayOfWeek = sdf.format(dateTime);
+//
+//        List<notDisturbObject> allRules = appDatabase.disturbDao().getAllRules();
+//        for (notDisturbObject object :
+//                allRules) {
+//
+//            String day = object.day;
+//            if (day.equals(dayOfWeek)) {
+//                mRingtone = RingtoneManager.getRingtone(getBaseContext(), RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM));
+//                mRingtone.play();
+//                TimerTask task = new TimerTask() {
+//                    @Override
+//                    public void run() {
+//                        if (mRingtone.isPlaying()) {
+//                            mRingtone.stop();
+//                        }
+//                    }
+//                };
+//                Timer timer = new Timer();
+//                timer.schedule(task, 9000);
+//
+//                return false;
+//
+//            } else {
+//                return true;
+//            }
+//
+//        }
+        return true;
     }
 }

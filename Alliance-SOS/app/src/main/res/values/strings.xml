@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name" translatable="true">Alliance SOS</string>
+    <string name="app_name" translatable="true">xAlliance SOS</string>
     <string name="login_btn">LogIn</string>
     <string name="username_hint" translatable="true">Username</string>
     <string name="signup_btn" translatable="true">Sign Up</string>
@@ -10,6 +10,8 @@
     <string name="schedule_describe" translatable="true">More Description ...</string>
     <string name="schedule_date" translatable="true">Pick a Date ...</string>
     <string name="schedule_time">Pick a Time ...</string>
+    <string name="prefix">0</string>
+    <string name="rulesTableName">notDisturbObject</string>
     <string name="question" translatable="true">Are you In or Not ?</string>
     <string name="email_hint" translatable="true">Email</string>
     <string name="signUpwithgoogel" translatable="true">SginUp Via Google</string>
