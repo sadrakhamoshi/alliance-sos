@@ -21,6 +21,7 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.example.alliancesos.DbForRingtone.AppDatabase;
+import com.example.alliancesos.DbForRingtone.ChoiceApplication;
 import com.example.alliancesos.DbForRingtone.ringtone;
 import com.example.alliancesos.SendNotificationPack.Token;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -56,14 +57,19 @@ public class SignUpPage extends AppCompatActivity {
     private DatabaseReference mRootDatabase;
     private DatabaseReference mUserDatabaseRef;
 
-    private AppDatabase appDatabase;
+    private ChoiceApplication mChoiceDB;
     private Uri ring;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up_page);
-        appDatabase = Room.databaseBuilder(SignUpPage.this, AppDatabase.class, "ringtone").build();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                mChoiceDB = new ChoiceApplication(SignUpPage.this);
+            }
+        }).start();
 
         findViewById(R.id.google_sign_up_btn).setOnClickListener(new View.OnClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.O)
@@ -112,8 +118,6 @@ public class SignUpPage extends AppCompatActivity {
                                 Toast.makeText(getApplicationContext(), "Signed in...", Toast.LENGTH_LONG).show();
                                 pushDataInDatabase pushDataInDatabase = new pushDataInDatabase();
                                 pushDataInDatabase.execute();
-//                                addRingTask ringTask = new addRingTask();
-//                                ringTask.execute();
 
                             } else {
                                 Toast.makeText(getApplicationContext(), task.getException().getMessage(), Toast.LENGTH_SHORT).show();
@@ -169,30 +173,6 @@ public class SignUpPage extends AppCompatActivity {
         });
     }
 
-    public class addRingTask extends AsyncTask<Void, Void, Void> {
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            if (findViewById(R.id.progress_signUp_page).getVisibility() != View.VISIBLE)
-                findViewById(R.id.progress_signUp_page).setVisibility(View.VISIBLE);
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            ringtone ringtone = new ringtone(mUsername.getText().toString(), ring.getPath());
-            appDatabase.dao().insert(ringtone);
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            Toast.makeText(SignUpPage.this, "added to room", Toast.LENGTH_SHORT).show();
-            findViewById(R.id.progress_signUp_page).setVisibility(View.GONE);
-        }
-    }
-
     public class pushDataInDatabase extends AsyncTask<Void, Void, Void> {
 
         @Override
@@ -215,7 +195,7 @@ public class SignUpPage extends AppCompatActivity {
             ring = Uri.parse("android.resource://" + getPackageName() + "/raw/game");
             userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
             ringtone ringtone = new ringtone(userId, ring.toString());
-            appDatabase.dao().insert(ringtone);
+            mChoiceDB.appDatabase.dao().insert(ringtone);
             return null;
         }
     }

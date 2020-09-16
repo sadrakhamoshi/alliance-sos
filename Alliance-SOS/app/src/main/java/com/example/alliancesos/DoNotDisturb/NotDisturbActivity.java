@@ -4,23 +4,20 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.room.Room;
 
 import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import com.example.alliancesos.DbForRingtone.AppDatabase;
+import com.example.alliancesos.DbForRingtone.ChoiceApplication;
 import com.example.alliancesos.R;
 import com.example.alliancesos.Adapters.*;
 import com.example.alliancesos.Utils.WeekDay;
@@ -34,9 +31,11 @@ public class NotDisturbActivity extends AppCompatActivity {
     private RecyclerView mRecyclerView;
     private ArrayList<notDisturbObject> mRulesList;
 
-    private AppDatabase appDatabase;
-    String tmpTime;
+    private ChoiceApplication mChoiceDB;
+    boolean isStartTurn;
     private TimePickerDialog.OnTimeSetListener time;
+
+    private EditText mStart, mEnd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,8 +47,8 @@ public class NotDisturbActivity extends AppCompatActivity {
 
 
     private void Init() {
-        appDatabase = Room.databaseBuilder(NotDisturbActivity.this, AppDatabase.class, getString(R.string.rulesTableName)).build();
 
+        mChoiceDB = new ChoiceApplication(this);
         mRecyclerView = findViewById(R.id.not_disturbs_rv);
         mRulesList = new ArrayList<>();
         mRulesAdapter = new notDisturbRules(NotDisturbActivity.this, mRulesList);
@@ -59,7 +58,12 @@ public class NotDisturbActivity extends AppCompatActivity {
         time = new TimePickerDialog.OnTimeSetListener() {
             @Override
             public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                tmpTime = hourOfDay + ":" + minute;
+                String time = hourOfDay + ":" + minute;
+                if (isStartTurn) {
+                    mStart.setText(time);
+                } else {
+                    mEnd.setText(time);
+                }
             }
         };
     }
@@ -77,8 +81,8 @@ public class NotDisturbActivity extends AppCompatActivity {
                 Long curr = System.currentTimeMillis() / 1000;
                 String id = curr.intValue() + "";
                 String day = ((EditText) root.findViewById(R.id.pick_day_rules)).getText().toString();
-                String start = ((EditText) root.findViewById(R.id.start_rule)).getText().toString();
-                String end = ((EditText) root.findViewById(R.id.end_rule)).getText().toString();
+                String start = mStart.getText().toString();
+                String end = mEnd.getText().toString();
                 final notDisturbObject obj = new notDisturbObject(id, day, start, end);
                 obj.repeat = ((CheckBox) root.findViewById(R.id.check_rule)).isChecked();
                 runOnUiThread(new Runnable() {
@@ -106,21 +110,20 @@ public class NotDisturbActivity extends AppCompatActivity {
         dayView.setThreshold(1);
         dayView.setAdapter(adapter);
 
-        final EditText start, end;
-        start = root.findViewById(R.id.start_rule);
-        end = root.findViewById(R.id.end_rule);
-        start.setOnClickListener(new View.OnClickListener() {
+        mStart = root.findViewById(R.id.start_rule);
+        mEnd = root.findViewById(R.id.end_rule);
+        mStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                isStartTurn = true;
                 new TimePickerDialog(root.getContext(), time, 12, 30, true).show();
-                start.setText(tmpTime);
             }
         });
-        end.setOnClickListener(new View.OnClickListener() {
+        mEnd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                isStartTurn = false;
                 new TimePickerDialog(root.getContext(), time, 12, 30, true).show();
-                end.setText(tmpTime);
             }
         });
     }
@@ -140,17 +143,19 @@ public class NotDisturbActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Void aVoid) {
+            Toast.makeText(NotDisturbActivity.this, "finish", Toast.LENGTH_SHORT).show();
             super.onPostExecute(aVoid);
         }
 
         @Override
         protected void onPreExecute() {
+            Toast.makeText(NotDisturbActivity.this, "start", Toast.LENGTH_SHORT).show();
             super.onPreExecute();
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
-            // appDatabase.disturbDao().insert(object);
+            mChoiceDB.appDatabase.disturbDao().insert(object);
             return null;
         }
     }
@@ -183,7 +188,7 @@ public class NotDisturbActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            //allRules = appDatabase.disturbDao().getAllRules();
+            allRules = mChoiceDB.appDatabase.disturbDao().getAllRules();
 //            appDatabase.disturbDao().deleteAll();
             return null;
         }

@@ -20,6 +20,7 @@ import androidx.core.app.NotificationCompat;
 import androidx.room.Room;
 
 import com.example.alliancesos.DbForRingtone.AppDatabase;
+import com.example.alliancesos.DbForRingtone.ChoiceApplication;
 import com.example.alliancesos.R;
 import com.example.alliancesos.Utils.MessageType;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -61,10 +62,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     String toName, toId;
     String title, message;
     String groupName, groupId, makeBy;
-    String fromTimezoneId;
-    Uri uri;
     String eventId;
-    private AppDatabase appDatabase2;
+    private ChoiceApplication mChoiceDB;
 
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
@@ -72,7 +71,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         type = Integer.valueOf(remoteMessage.getData().get("type"));
 
         mContext = getApplicationContext();
-        appDatabase2 = Room.databaseBuilder(mContext, AppDatabase.class, "ringtone").build();
+
+        mChoiceDB = new ChoiceApplication(mContext);
 
         if (checkDoNotDisturb()) {
             Initialize(remoteMessage);
@@ -93,7 +93,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             changeUserToken(s);
 
         } catch (Exception e) {
-//            Toast.makeText(mContext, e.getMessage(), Toast.LENGTH_SHORT).show();
+
         }
     }
 
@@ -213,7 +213,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     }
 
     private void playRingtone() {
-        Uri alert = Uri.parse(appDatabase2.dao().currentPath(toId).path);
+        Uri alert = Uri.parse(mChoiceDB.appDatabase.dao().currentPath(toId).path);
         if (alert != null) {
             mRingtone = RingtoneManager.getRingtone(getBaseContext(), alert);
             mRingtone.play();

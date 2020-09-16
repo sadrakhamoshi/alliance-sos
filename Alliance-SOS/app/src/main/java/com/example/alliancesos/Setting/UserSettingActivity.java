@@ -41,6 +41,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.alliancesos.DbForRingtone.AppDatabase;
+import com.example.alliancesos.DbForRingtone.ChoiceApplication;
 import com.example.alliancesos.DbForRingtone.ringtone;
 import com.example.alliancesos.DoNotDisturb.NotDisturbActivity;
 import com.example.alliancesos.MainActivity;
@@ -99,7 +100,7 @@ public class UserSettingActivity extends AppCompatActivity {
     private StorageReference mUserImageProfileRef;
 
     private ViewDialog loadingDialog;
-    private AppDatabase appDatabase;
+    private ChoiceApplication mChoiceDB;
 
 
     public static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 123;
@@ -109,8 +110,13 @@ public class UserSettingActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_setting);
 
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                mChoiceDB = new ChoiceApplication(UserSettingActivity.this);
+            }
+        }).start();
 
-        appDatabase = Room.databaseBuilder(UserSettingActivity.this, AppDatabase.class, "ringtone").build();
         loadingDialog = new ViewDialog(this);
 
         Intent fromGroup = getIntent();
@@ -621,7 +627,7 @@ public class UserSettingActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... voids) {
             String newPath = newRing.toString();
-            appDatabase.dao().updateRingtonePath(mUserId, newPath);
+            mChoiceDB.appDatabase.dao().updateRingtonePath(mUserId, newPath);
             return null;
         }
     }

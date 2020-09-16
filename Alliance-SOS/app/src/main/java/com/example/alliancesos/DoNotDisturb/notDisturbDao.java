@@ -11,12 +11,12 @@ import java.util.List;
 
 @Dao
 public interface notDisturbDao {
-//    @Insert
-//    void insert(notDisturbObject rule);
-//
-//    @Query("SELECT * FROM notDisturbObject")
-//    List<notDisturbObject> getAllRules();
-//
-//    @Query("DELETE FROM notDisturbObject")
-//    void deleteAll();
+    @Insert
+    void insert(notDisturbObject rule);
+
+    @Query("SELECT * FROM notDisturbObject")
+    List<notDisturbObject> getAllRules();
+
+    @Query("DELETE FROM notDisturbObject")
+    void deleteAll();
 }
