@@ -1,23 +1,31 @@
 package com.example.alliancesos.SendNotificationPack;
 
+import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Vibrator;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
+import androidx.room.Room;
 
+import com.example.alliancesos.DbForRingtone.AppDatabase;
+import com.example.alliancesos.DbForRingtone.ChoiceApplication;
 import com.example.alliancesos.R;
 import com.example.alliancesos.Utils.MessageType;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -26,8 +34,16 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.example.alliancesos.DoNotDisturb.*;
 
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -49,8 +65,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     String toName, toId;
     String title, message;
     String groupName, groupId, makeBy;
-    String fromTimezoneId;
     String eventId;
+    private ChoiceApplication mChoiceDB;
 
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
@@ -58,59 +74,52 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         type = Integer.valueOf(remoteMessage.getData().get("type"));
 
         mContext = getApplicationContext();
-        Initialize(remoteMessage);
 
-        buildNotification(mContext);
+        mChoiceDB = new ChoiceApplication(mContext);
 
-        if (type == MessageType.SOS_TYPE) {
-            playRingtone();
+        if (checkDoNotDisturb()) {
+            Initialize(remoteMessage);
+
+            buildNotification(mContext);
+
+            if (type == MessageType.SOS_TYPE) {
+                playRingtone();
+            }
         }
     }
 
     @Override
     public void onNewToken(@NonNull String s) {
         try {
-
-
             mRootRef = FirebaseDatabase.getInstance().getReference();
             mUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
             changeUserToken(s);
-            changeGroupMemberToken(s);
 
         } catch (Exception e) {
-//            Toast.makeText(mContext, e.getMessage(), Toast.LENGTH_SHORT).show();
+
         }
-    }
-
-    private void changeGroupMemberToken(final String s) {
-        mRootRef.child("users").child(mUserId).child("Groups").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    Iterator iterator = snapshot.getChildren().iterator();
-                    while (iterator.hasNext()) {
-
-                        DataSnapshot dataSnapshot = (DataSnapshot) (iterator.next());
-                        String groupId = dataSnapshot.child("groupId").getValue().toString();
-                        groupMemberToken(s, groupId);
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(mContext, "error in changeMessageMember " + error.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    private void groupMemberToken(String s, String groupId) {
-        mRootRef.child("groups").child(groupId).child("members").child(mUserId).child("token").setValue(s);
     }
 
     private void changeUserToken(String s) {
         Token token = new Token(s);
-        mRootRef.child("users").child(mUserId).setValue(token);
+        mRootRef.child("users").child(mUserId).child("token").setValue(token.getToken()).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (!task.isSuccessful()) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(mContext, R.style.AlertDialog);
+                    builder.setTitle("Alert");
+                    builder.setMessage("The token didn't updated ... check please" + "\n" + task.getException());
+                    builder.setIcon(R.drawable.sos_icon);
+                    builder.setNegativeButton("ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                        }
+                    });
+                    builder.create().show();
+                }
+            }
+        });
     }
 
     private void Initialize(RemoteMessage remoteMessage) {
@@ -120,6 +129,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         makeBy = remoteMessage.getData().get("makeBy");
         toId = remoteMessage.getData().get("toId");
 
+//        String path = appDatabase.dao().currentPath(toId).path;
         if (type == MessageType.SOS_TYPE) {
 
             notificationColor = Color.RED;
@@ -206,18 +216,62 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     }
 
     private void playRingtone() {
-        Uri alert = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-        mRingtone = RingtoneManager.getRingtone(getBaseContext(), alert);
-        mRingtone.play();
-        TimerTask task = new TimerTask() {
-            @Override
-            public void run() {
-                if (mRingtone.isPlaying()) {
-                    mRingtone.stop();
+        Uri alert = Uri.parse(mChoiceDB.appDatabase.dao().currentPath(toId).path);
+        if (alert != null) {
+            mRingtone = RingtoneManager.getRingtone(getBaseContext(), alert);
+            mRingtone.play();
+            TimerTask task = new TimerTask() {
+                @Override
+                public void run() {
+                    if (mRingtone.isPlaying()) {
+                        mRingtone.stop();
+                    }
+                }
+            };
+            Timer timer = new Timer();
+            timer.schedule(task, 9000);
+        } else {
+            throw new NullPointerException();
+        }
+    }
+
+    public boolean checkDoNotDisturb() {
+        SimpleDateFormat sdf = new SimpleDateFormat("EEEE", Locale.ENGLISH);
+        Calendar calendar = Calendar.getInstance();
+        Integer hour = calendar.get(Calendar.HOUR_OF_DAY);
+        Integer minute = calendar.get(Calendar.MINUTE);
+        Date dateTime = calendar.getTime();
+        String dayOfWeek = sdf.format(dateTime);
+
+        List<notDisturbObject> allRules = mChoiceDB.appDatabase.disturbDao().getAllRules();
+        for (final notDisturbObject object :
+                allRules) {
+            String day = object.day;
+            Log.v("compare", day + " " + dayOfWeek);
+            if (day.equals(dayOfWeek)) {
+                HashMap<String, String> start = notDisturbObject.splitTime(object.from);
+                HashMap<String, String> end = notDisturbObject.splitTime(object.until);
+
+                if (checkTime(minute, hour, start, end)) {
+                    if (!object.repeat) {
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mChoiceDB.appDatabase.disturbDao().deleteRule(object);
+                            }
+                        }).start();
+                    }
+                    Log.v("do not disturb", "do not disturb");
+                    return false;
                 }
             }
-        };
-        Timer timer = new Timer();
-        timer.schedule(task, 8000);
+        }
+        return true;
+    }
+
+    private boolean checkTime(Integer minute, Integer hour, HashMap<String, String> start, HashMap<String, String> end) {
+        long tmp = minute * 60 + hour * 60 * 60;
+        return tmp < Integer.parseInt(end.get("minute")) * 60 + Integer.parseInt(end.get("hour")) * 60 * 60
+                && tmp > Integer.parseInt(start.get("hour")) * 60 * 60 + Integer.parseInt(start.get("minute")) * 60;
     }
 }

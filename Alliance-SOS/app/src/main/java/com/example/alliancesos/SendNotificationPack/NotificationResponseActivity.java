@@ -14,12 +14,15 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.alliancesos.DateTime;
 import com.example.alliancesos.DeviceAlarm.MyAlarmService;
 import com.example.alliancesos.MainActivity;
 import com.example.alliancesos.R;
 import com.example.alliancesos.ScheduleObject;
+import com.example.alliancesos.Utils.AlarmType;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -48,6 +51,8 @@ public class NotificationResponseActivity extends AppCompatActivity {
 
     private String mCurrUsername, mCurrUserId;
 
+    private Integer mRingOrNotify;
+
     private ScheduleObject scheduleObject;
 
     private String mFrom_TimeZoneId, mCurrent_TimezoneId;
@@ -74,6 +79,28 @@ public class NotificationResponseActivity extends AppCompatActivity {
         InitUI();
     }
 
+    private void getRingOrNotify() {
+        mRingOrNotify = AlarmType.NOTIFICATION;
+        mRootRef.child("users").child(mCurrUserId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    boolean type = snapshot.child("ringEnable").getValue(Boolean.class);
+                    if (type) {
+                        mRingOrNotify = AlarmType.RING;
+                    }
+                } else {
+                    Toast.makeText(NotificationResponseActivity.this, "current user not found...", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(NotificationResponseActivity.this, "canceled getting ringable.. " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     private void getExtra() {
         Bundle bundle = getIntent().getExtras();
         mEventId = bundle.getString("eventId");
@@ -82,8 +109,14 @@ public class NotificationResponseActivity extends AppCompatActivity {
             return;
         }
         mGroupId = bundle.getString("groupId");
+        setGroupId();
         mCurrUserId = bundle.getString("toId");
         mCurrUsername = bundle.getString("toName");
+        getRingOrNotify();
+    }
+
+    private void setGroupId() {
+        ((TextView) findViewById(R.id.notif_response_groupname)).setText("The Event Is Created From : " + mGroupId);
     }
 
     public void JoinEvent(View view) {
@@ -112,7 +145,9 @@ public class NotificationResponseActivity extends AppCompatActivity {
 
                     try {
                         scheduleObject = snapshot.child("scheduleObject").getValue(ScheduleObject.class);
+
                         mFrom_TimeZoneId = snapshot.child("createdTimezoneId").getValue().toString();
+                        setTime();
                         Toast.makeText(NotificationResponseActivity.this, "get schedule object", Toast.LENGTH_SHORT).show();
 
                     } catch (Exception e) {
@@ -126,6 +161,12 @@ public class NotificationResponseActivity extends AppCompatActivity {
                 Toast.makeText(NotificationResponseActivity.this, "Error in getEventfromDatabase" + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void setTime() {
+        Calendar calendar = ConvertTime();
+        String time = calendar.getTime().toString();
+        ((TextView) findViewById(R.id.noti_response_group_time)).setText("Date : " + time);
     }
 
     private void showAttendingMembers() {
@@ -183,6 +224,7 @@ public class NotificationResponseActivity extends AppCompatActivity {
             AlarmManager alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
             Intent intent = new Intent(this, MyAlarmService.class);
             intent.setAction("com.example.helloandroid.alarms");
+            intent.putExtra("ringEnable", mRingOrNotify);
             PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 101, intent, PendingIntent.FLAG_UPDATE_CURRENT);
             Calendar calendar = ConvertTime();
             Toast.makeText(this, "Alarm set Successfully ....", Toast.LENGTH_SHORT).show();

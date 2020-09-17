@@ -9,34 +9,33 @@ import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.example.alliancesos.SendNotificationPack.DataToSend;
 import com.example.alliancesos.SendNotificationPack.SendingNotification;
-import com.example.alliancesos.SendNotificationPack.Token;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.iid.FirebaseInstanceId;
-import com.google.firebase.iid.InstanceIdResult;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Locale;
 
 public class SetScheduleActivity extends AppCompatActivity {
@@ -118,7 +117,6 @@ public class SetScheduleActivity extends AppCompatActivity {
         InitializeTime_Date();
     }
 
-
     private void setupButtons() {
         //time
         mTime_edt.setOnClickListener(new View.OnClickListener() {
@@ -169,14 +167,13 @@ public class SetScheduleActivity extends AppCompatActivity {
                 DateTime dateTime = new DateTime(mYear, mMonth, mDay, mHour, mMinute);
                 ScheduleObject scheduleObject = new ScheduleObject(title, description);
                 scheduleObject.setDateTime(dateTime);
-
-                Date c = Calendar.getInstance().getTime();
-                SimpleDateFormat df = new SimpleDateFormat("dd-MMM-yyyy", Locale.getDefault());
-                String formattedDate = df.format(c);
-
-                mEvent = new Event("", "", formattedDate, scheduleObject, mAuthorTimezone);
-
-                sendMessage();
+                try {
+                    Date formattedDate = computeScheduleInMilliSecond(scheduleObject.getDateTime());
+                    mEvent = new Event("", mAuthorUserName, formattedDate.getTime() * -1, scheduleObject, mAuthorTimezone);
+                    sendMessage();
+                } catch (Exception e) {
+                    Toast.makeText(SetScheduleActivity.this, "Error in Parsing catch : " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
 
             }
         });
@@ -187,6 +184,16 @@ public class SetScheduleActivity extends AppCompatActivity {
             }
         });
         builder.show();
+    }
+
+    private Date computeScheduleInMilliSecond(DateTime dateTime) throws ParseException {
+
+//        String dtStart = "2010-10-15T09:27:37Z";
+        String dt = dateTime.getYear() + "-" + dateTime.getMonth() + "-" + dateTime.getDay() + "T" + dateTime.getHour() + ":" + dateTime.getMinute() + ":0Z";
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+
+        Date date = format.parse(dt);
+        return date;
     }
 
     private void sendMessage() {
@@ -205,17 +212,22 @@ public class SetScheduleActivity extends AppCompatActivity {
                 if (task.isSuccessful()) {
                     HashMap<String, String> hashMap = new HashMap<>();
                     hashMap.put("id", mAuthorId);
+                    //adding event creator to member of event
+                    ((ProgressBar) findViewById(R.id.progress_set_schedule)).setVisibility(View.VISIBLE);
+
                     mGroupsRef.child(mGroupId).child("events").child(key).child("members").child(mAuthorId).setValue(hashMap).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
-
                             if (task.isSuccessful()) {
-                                Toast.makeText(SetScheduleActivity.this, "Message Successfully added to Database...", Toast.LENGTH_SHORT).show();
+                                SortUpcomingEventTask sort = new SortUpcomingEventTask();
+                                sort.execute();
+//                                Toast.makeText(SetScheduleActivity.this, "Message Successfully added to Database...", Toast.LENGTH_SHORT).show();
                             } else {
                                 Toast.makeText(SetScheduleActivity.this, "Can't add Author to event members...", Toast.LENGTH_SHORT).show();
                             }
                         }
                     });
+
                 } else {
                     Toast.makeText(SetScheduleActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                 }
@@ -273,5 +285,55 @@ public class SetScheduleActivity extends AppCompatActivity {
         String myFormat = "MM/dd/yy"; //In which you need put here
         SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
         mDate_edt.setText(sdf.format(mCalendar.getTime()));
+    }
+
+    public class SortUpcomingEventTask extends AsyncTask<Void, Void, Void> {
+
+        public String errorMessage;
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            ((ProgressBar) findViewById(R.id.progress_set_schedule)).setVisibility(View.GONE);
+            if (!TextUtils.isEmpty(errorMessage)) {
+                Toast.makeText(SetScheduleActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(SetScheduleActivity.this, "successfully  done ...", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            errorMessage = "";
+            ((ProgressBar) findViewById(R.id.progress_set_schedule)).setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            final Query query = mGroupsRef.child(mGroupId).child("events").orderByChild("timeInMillisecond");
+            query.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    String name = snapshot.child(mEvent.getEventId()).child("scheduleObject").child("title").getValue().toString();
+                    DateTime date = snapshot.child(mEvent.getEventId()).child("scheduleObject").child("dateTime").getValue(DateTime.class);
+                    String time = DateTime.DisplayTime(date);
+                    mGroupsRef.child(mGroupId).child("upComingEvent").setValue(new UpComingEvent(name, time)).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (!task.isSuccessful()) {
+                                errorMessage = "error in sortUpcoming " + task.getException();
+                            }
+                        }
+                    });
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    errorMessage = "error in sortUpcoming " + error.getMessage();
+                }
+            });
+            return null;
+        }
     }
 }

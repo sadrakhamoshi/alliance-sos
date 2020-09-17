@@ -7,6 +7,17 @@
     android:background="#FDD2D2"
     tools:context=".SignUpPage">
 
+    <ProgressBar
+        android:id="@+id/progress_signUp_page"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:progressTint="@color/red"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <LinearLayout
         android:id="@+id/linearLayout2"
         android:layout_width="match_parent"
@@ -51,30 +62,38 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:layout_marginTop="7dp">
+            android:layout_marginTop="7dp"
+            android:layoutDirection="ltr"
+            app:passwordToggleEnabled="true"
 
-            <EditText
+            app:passwordToggleTint="@color/colorAccent">
+
+            <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/pass_sign_up_page_edt_text"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:textDirection="ltr"
                 android:hint="@string/password_hint"
-                android:inputType="number"
-                android:padding="3dp" />
+                android:inputType="textPassword"
+                android:padding="3dp"
+                android:textDirection="ltr" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:layout_marginTop="7dp">
+            android:layout_marginTop="7dp"
+            android:layoutDirection="ltr"
+            app:passwordToggleEnabled="true"
 
-            <EditText
+            app:passwordToggleTint="@color/colorAccent">
+
+            <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/confirm_pass_sign_up_page_edt_text"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:hint="@string/confirm_password_hint"
-                android:inputType="number"
+                android:inputType="textPassword"
                 android:padding="3dp" />
 
         </com.google.android.material.textfield.TextInputLayout>
@@ -138,9 +157,9 @@
     </LinearLayout>
 
     <ImageView
-        android:layout_marginTop="20dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
         android:src="@drawable/pngwave"
         app:layout_constraintBottom_toTopOf="@+id/linearLayout2"
         app:layout_constraintEnd_toEndOf="parent"

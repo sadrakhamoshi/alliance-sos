@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/not_disturb"
+    android:orientation="vertical"
+    android:padding="5dp"
+    tools:context=".DoNotDisturb.NotDisturbActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ProgressBar
+            android:id="@+id/progress_notDisturb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+
+        <ImageView
+            android:layout_width="27dp"
+            android:layout_height="27dp"
+            android:layout_alignParentLeft="true"
+            android:onClick="goBackToUserSetting"
+            android:src="@drawable/back_vector"
+            app:tint="#FFFFFF" />
+
+        <ImageView
+            android:layout_width="27dp"
+            android:layout_height="27dp"
+            android:layout_alignParentRight="true"
+            android:onClick="addNewNotDisturbRule"
+            android:src="@drawable/add_vector"
+            app:tint="#FFFFFF" />
+    </RelativeLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/not_disturbs_rv"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="20dp" />
+
+
+</LinearLayout>

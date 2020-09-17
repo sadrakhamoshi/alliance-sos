@@ -53,4 +53,9 @@ public class DateTime {
     public void setYear(String year) {
         this.year = year;
     }
+
+    public static String DisplayTime(DateTime dateTime) {
+        String result = dateTime.getYear() + "-" + dateTime.getMonth() + "-" + dateTime.getDay() + " " + dateTime.getHour() + ":" + dateTime.getMinute();
+        return result;
+    }
 }

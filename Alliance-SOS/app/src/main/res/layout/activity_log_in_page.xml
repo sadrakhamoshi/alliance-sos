@@ -7,6 +7,17 @@
     android:background="#FDD2D2"
     tools:context=".LogInPage">
 
+    <ProgressBar
+        android:id="@+id/progress_logIn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.79" />
+
 
     <LinearLayout
         android:id="@+id/linearLayout"
@@ -35,14 +46,17 @@
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
-            android:layout_height="56dp">
+            android:layout_height="56dp"
+            android:layoutDirection="ltr"
+            app:passwordToggleEnabled="true"
+            app:passwordToggleTint="@color/colorAccent">
 
-            <EditText
+            <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/pass_edt_text"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:hint="@string/password_hint"
-                android:inputType="number"
+                android:inputType="textPassword"
                 android:textDirection="ltr" />
 
         </com.google.android.material.textfield.TextInputLayout>
@@ -99,6 +113,7 @@
             android:layout_marginTop="16dp"
             android:background="@drawable/signup_btn"
             android:text="Login via Google"
+            android:onClick="logInViaGoogle"
             android:textAllCaps="false"
             android:textColor="#fff" />
 

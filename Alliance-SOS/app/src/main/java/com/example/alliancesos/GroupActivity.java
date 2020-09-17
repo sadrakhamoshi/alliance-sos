@@ -13,6 +13,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.alliancesos.GroupSetting.GroupProfileActivity;
 import com.example.alliancesos.SendNotificationPack.DataToSend;
 import com.example.alliancesos.SendNotificationPack.SendingNotification;
 import com.example.alliancesos.Setting.UserSettingActivity;
@@ -26,6 +27,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 public class GroupActivity extends AppCompatActivity {
@@ -125,8 +127,12 @@ public class GroupActivity extends AppCompatActivity {
     }
 
     public void gotoGroupSetting(View view) {
-        Toast.makeText(this, "will go to groupSetting us Activity", Toast.LENGTH_SHORT).show();
+        Intent goToGroupProfile = new Intent(getApplicationContext(), GroupProfileActivity.class);
+        goToGroupProfile.putExtra("groupId", mCurrentGroupId);
+        goToGroupProfile.putExtra("groupName", mCurrentGroupName);
+        goToGroupProfile.putExtra("userId", mCurrentUserId);
 
+        startActivity(goToGroupProfile);
     }
 
 
@@ -161,8 +167,7 @@ public class GroupActivity extends AppCompatActivity {
                                 String tmp = "";
                                 tmp += message.getScheduleObject().getTitle() + "\n";
                                 tmp += message.getScheduleObject().getDescription() + "\n";
-                                tmp += message.getCreatedBy() + "\n";
-                                tmp += message.getCreatedTime();
+                                tmp += message.getCreatedBy();
                                 set.add(tmp);
                             }
                         } catch (Exception e) {
@@ -171,6 +176,7 @@ public class GroupActivity extends AppCompatActivity {
                         mScheduleList.clear();
                         mScheduleList.addAll(set);
                         listView.setAdapter(arrayAdapter);
+//                        FindNextUpComingEventTask();
                     }
                 }
             }

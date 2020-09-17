@@ -1,35 +1,55 @@
 package com.example.alliancesos.Setting;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AlertDialog;
+import androidx.room.Room;
 
-import android.app.Dialog;
+import android.Manifest;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.media.AudioAttributes;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.InputFilter;
 import android.text.Spanned;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SearchView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.example.alliancesos.DbForRingtone.AppDatabase;
+import com.example.alliancesos.DbForRingtone.ChoiceApplication;
+import com.example.alliancesos.DbForRingtone.ringtone;
+import com.example.alliancesos.DoNotDisturb.NotDisturbActivity;
+import com.example.alliancesos.MainActivity;
 import com.example.alliancesos.R;
 import com.example.alliancesos.UserObject;
+import com.firebase.ui.auth.data.model.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.EmailAuthCredential;
 import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -38,7 +58,16 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.RequestCreator;
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageView;
 
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Locale;
@@ -46,25 +75,48 @@ import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+
 
 public class UserSettingActivity extends AppCompatActivity {
 
-    private boolean passChange, emailChange;
+    private static final int PICK_RING = 1;
 
+    private boolean emailChange, isEditMode;
+    private ImageView mEditMode, mExitEditMode;
+    private Button mUpdate_btn;
+    private TextView mChosePhoto;
+
+    private ImageView mBackUserImage;
+    private CircleImageView mUserImage;
     private EditText mEmail, mPass, mUsername, mTime, mLanguage;
     private CheckBox mRingEnable;
 
     private String mUserId;
+    private String mUpdatedImageUrl;
     private UserObject mCurrUserInfo;
 
     private DatabaseReference mUserRef;
+    private StorageReference mUserImageProfileRef;
 
     private ViewDialog loadingDialog;
+    private ChoiceApplication mChoiceDB;
+
+
+    public static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 123;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_setting);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                mChoiceDB = new ChoiceApplication(UserSettingActivity.this);
+            }
+        }).start();
+
         loadingDialog = new ViewDialog(this);
 
         Intent fromGroup = getIntent();
@@ -74,10 +126,31 @@ public class UserSettingActivity extends AppCompatActivity {
         Initialize();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+            if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                if (shouldShowRequestPermissionRationale(
+                        Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                }
+                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                        MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+                return;
+            }
+        }
+    }
+
     private void Initialize() {
+        isEditMode = false;
+        emailChange = false;
+        mUpdatedImageUrl = "";
+
         mUserRef = FirebaseDatabase.getInstance().getReference().child("users");
-        passChange = emailChange = false;
-        UIInit();
+        mUserImageProfileRef = FirebaseStorage.getInstance().getReference().child("user-profile-images");
+        InitUI();
     }
 
     public void UpdateUserProfile(View view) {
@@ -146,38 +219,6 @@ public class UserSettingActivity extends AppCompatActivity {
                         }
                     }
                 });
-//see before delete
-//        user.updateEmail(newInfo.getEmail()).addOnCompleteListener(new OnCompleteListener<Void>() {
-//            @Override
-//            public void onComplete(@NonNull Task<Void> task) {
-//                if (task.isSuccessful()) {
-//                    user.reauthenticate(EmailAuthProvider.getCredential(newInfo.getEmail(), newInfo.getPassword()))
-//                            .addOnCompleteListener(new OnCompleteListener<Void>() {
-//                                @Override
-//                                public void onComplete(@NonNull Task<Void> task) {
-//                                    if (task.isSuccessful()) {
-//                                        Updating(mUserId, "email", mCurrUserInfo.getEmail(), newInfo.getEmail());
-//                                        Toast.makeText(UserSettingActivity.this, "reAuthentication adn Update email database..", Toast.LENGTH_SHORT).show();
-//                                    } else {
-//                                        user.updateEmail(mCurrUserInfo.getEmail()).addOnCompleteListener(new OnCompleteListener<Void>() {
-//                                            @Override
-//                                            public void onComplete(@NonNull Task<Void> task) {
-//                                                if (task.isSuccessful()) {
-//                                                    Toast.makeText(UserSettingActivity.this, "turn back the email", Toast.LENGTH_SHORT).show();
-//                                                } else {
-//                                                    Toast.makeText(UserSettingActivity.this, "Could'nt turn back email", Toast.LENGTH_SHORT).show();
-//                                                }
-//                                            }
-//                                        });
-//                                        Toast.makeText(UserSettingActivity.this, "error in second onComplete update email", Toast.LENGTH_SHORT).show();
-//                                    }
-//                                }
-//                            });
-//                } else {
-//                    Toast.makeText(UserSettingActivity.this, task.getException().getMessage() + " error in Update email", Toast.LENGTH_SHORT).show();
-//                }
-//            }
-//        });
     }
 
     private void updatePassword(final UserObject newInfo) {
@@ -227,8 +268,6 @@ public class UserSettingActivity extends AppCompatActivity {
     }
 
     private void getInfoOfCurrentUser() {
-        loadingDialog.showDialog();
-
         mUserRef.child(mUserId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -240,9 +279,17 @@ public class UserSettingActivity extends AppCompatActivity {
                     String pass = snapshot.child("password").getValue().toString();
                     String language = snapshot.child("language").getValue().toString();
                     String timeZone = snapshot.child("timeZone").getValue().toString();
+                    mUpdatedImageUrl = snapshot.child("image").getValue().toString();
                     mCurrUserInfo = new UserObject(id, userName, email, pass, token);
                     mCurrUserInfo.setLanguage(language);
                     mCurrUserInfo.setTimeZone(timeZone);
+                    if (!TextUtils.isEmpty(mUpdatedImageUrl)) {
+                        loadingDialog.showDialog();
+                        RequestCreator requestCreator = Picasso.get().load(mUpdatedImageUrl);
+                        requestCreator.into(mBackUserImage);
+                        requestCreator.into(mUserImage);
+                        loadingDialog.hideDialog();
+                    }
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -258,14 +305,6 @@ public class UserSettingActivity extends AppCompatActivity {
                 loadingDialog.hideDialog();
             }
         });
-        TimerTask task = new TimerTask() {
-            @Override
-            public void run() {
-                loadingDialog.hideDialog();
-            }
-        };
-        Timer timer = new Timer();
-        timer.schedule(task, 1500);
     }
 
     private void setInfoToUi() {
@@ -277,7 +316,15 @@ public class UserSettingActivity extends AppCompatActivity {
         mRingEnable.setChecked(true);
     }
 
-    private void UIInit() {
+    private void InitUI() {
+        mBackUserImage = findViewById(R.id.back_user_image);
+        mUserImage = findViewById(R.id.userImage_setting);
+
+        mEditMode = findViewById(R.id.edit_user_setting);
+        mExitEditMode = findViewById(R.id.exit_edit_user_setting);
+        mUpdate_btn = findViewById(R.id.update_user_setting_btn);
+        mChosePhoto = findViewById(R.id.chose_photo_user_txt);
+
         mEmail = findViewById(R.id.email_setting);
         mPass = findViewById(R.id.password_setting);
         mUsername = findViewById(R.id.username_setting);
@@ -415,10 +462,174 @@ public class UserSettingActivity extends AppCompatActivity {
 
     }
 
+
+    public void onEditMode(View view) {
+        goToEditMode();
+    }
+
+    public void onExitEditMode(View view) {
+        exitEditMode();
+    }
+
+    public void choseUserPhoto(View view) {
+        if (isEditMode) {
+            CropImage.activity()
+                    .setGuidelines(CropImageView.Guidelines.ON)
+                    .setAspectRatio(1, 1)
+                    .start(UserSettingActivity.this);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode != RESULT_OK)
+            return;
+
+        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+            CropImage.ActivityResult result = CropImage.getActivityResult(data);
+            final Uri photo = result.getUri();
+            loadingDialog.showDialog();
+
+            final StorageReference photoPath = mUserImageProfileRef.child(mUserId + ".jpg");
+            photoPath.putFile(photo).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                    if (task.isSuccessful()) {
+
+                        photoPath.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Uri> task) {
+                                if (task.isSuccessful()) {
+
+                                    mUpdatedImageUrl = task.getResult().toString();
+                                    mUserRef.child(mUserId).child("image").setValue(mUpdatedImageUrl).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if (task.isSuccessful()) {
+                                                Glide.with(getApplicationContext())
+                                                        .load(photo)
+                                                        .into(mBackUserImage);
+
+                                                loadingDialog.hideDialog();
+
+                                                Glide.with(getApplicationContext())
+                                                        .load(photo)
+                                                        .into(mUserImage);
+
+                                            } else {
+                                                loadingDialog.hideDialog();
+                                                Toast.makeText(UserSettingActivity.this, "Error :" + task.getException(), Toast.LENGTH_SHORT).show();
+                                            }
+                                        }
+                                    });
+
+                                } else {
+                                    loadingDialog.hideDialog();
+                                    Toast.makeText(UserSettingActivity.this, "Error :" + task.getException(), Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+
+                    } else {
+                        loadingDialog.hideDialog();
+                        Toast.makeText(UserSettingActivity.this, "Error :" + task.getException(), Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+        } else if (requestCode == PICK_RING) {
+            Uri uri = data.getData();
+            updateRingtoneTask updateRingtoneTask = new updateRingtoneTask(uri);
+            updateRingtoneTask.execute();
+        }
+    }
+
+    public void choseCustomRingtone(View view) {
+        if (isEditMode) {
+            Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
+            startActivityForResult(intent.createChooser(intent, "Music Files"), PICK_RING);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (isEditMode) {
+            exitEditMode();
+        }
+        super.onBackPressed();
+    }
+
+    public void pickDoNotDisturb(View view) {
+        if (isEditMode) {
+            Intent gotToNotDisturb = new Intent(UserSettingActivity.this, NotDisturbActivity.class);
+            gotToNotDisturb.putExtra("userId", mUserId);
+            startActivity(gotToNotDisturb);
+        }
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
-        getInfoOfCurrentUser();
+        if (!isEditMode) {
+            getInfoOfCurrentUser();
+        }
+    }
+
+
+    private void goToEditMode() {
+        isEditMode = true;
+        mEditMode.setVisibility(View.GONE);
+        mExitEditMode.setVisibility(View.VISIBLE);
+        mUpdate_btn.setVisibility(View.VISIBLE);
+        mEmail.setEnabled(true);
+        mPass.setEnabled(true);
+        mUsername.setEnabled(true);
+        mRingEnable.setEnabled(true);
+        mTime.setEnabled(true);
+        mLanguage.setEnabled(true);
+        mChosePhoto.setVisibility(View.VISIBLE);
+    }
+
+    private void exitEditMode() {
+        isEditMode = false;
+        mEditMode.setVisibility(View.VISIBLE);
+        mExitEditMode.setVisibility(View.GONE);
+        mUpdate_btn.setVisibility(View.GONE);
+        mEmail.setEnabled(false);
+        mPass.setEnabled(false);
+        mUsername.setEnabled(false);
+        mRingEnable.setEnabled(false);
+        mTime.setEnabled(false);
+        mLanguage.setEnabled(false);
+        mChosePhoto.setVisibility(View.GONE);
+    }
+
+    public class updateRingtoneTask extends AsyncTask<Void, Void, Void> {
+
+        public Uri newRing;
+
+        public updateRingtoneTask(Uri ring) {
+            newRing = ring;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            Toast.makeText(UserSettingActivity.this, "start", Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            Toast.makeText(UserSettingActivity.this, "finish", Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            String newPath = newRing.toString();
+            mChoiceDB.appDatabase.dao().updateRingtonePath(mUserId, newPath);
+            return null;
+        }
     }
 
     private void NotAllowedUseSpace() {
@@ -437,34 +648,5 @@ public class UserSettingActivity extends AppCompatActivity {
         InputFilter[] filter1 = new InputFilter[]{filter};
         mEmail.setFilters(filter1);
         mUsername.setFilters(filter1);
-    }
-
-    private class GetInfoTask extends AsyncTask<Void, Void, Void> {
-
-        private boolean successful;
-        private UserObject userObject;
-
-        public GetInfoTask() {
-            userObject = null;
-            successful = true;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            loadingDialog.showDialog();
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            getInfoOfCurrentUser();
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-
-        }
     }
 }

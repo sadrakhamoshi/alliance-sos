@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFD3CF"
+    android:orientation="vertical"
+    tools:context=".GroupSetting.GroupProfileActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="250dp">
+
+        <ImageView
+            android:id="@+id/back_groupImage_group_setting"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_horizontal"
+            android:foreground="@drawable/profile_background"
+            android:scaleType="fitXY"
+            android:src="@drawable/example" />
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/groupImage_group_setting"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_centerInParent="true"
+            android:onClick="pickImageForGroup"
+            android:src="@drawable/example"
+            app:civ_border_color="#FFFFFF"
+            app:civ_border_width="4dp" />
+
+        <TextView
+            android:id="@+id/chose_photo_group_txt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="chose photo"
+            android:textColor="#B60000"
+            android:textSize="18sp"
+            android:textStyle="italic"
+            android:visibility="gone" />
+
+        <ImageView
+            android:id="@+id/edit_group_setting"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="5dp"
+            android:layout_marginRight="5dp"
+            android:src="@drawable/edit_icon"
+            app:tint="@color/red" />
+
+        <ImageView
+            android:id="@+id/exit_edit_group_setting"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_alignParentRight="true"
+            android:src="@drawable/check_icon"
+            android:visibility="gone"
+            app:tint="@color/red" />
+
+        <TextView
+            android:id="@+id/groupName_group_setting"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/groupImage_group_setting"
+            android:gravity="center"
+            android:text="Group Name"
+            android:textColor="@color/red"
+            android:textSize="20sp"
+            android:textStyle="italic" />
+
+    </RelativeLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginTop="15dp">
+
+        <EditText
+            android:id="@+id/username_group_setting"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#00000000"
+            android:drawableLeft="@drawable/single_user_icon"
+            android:drawablePadding="10dp"
+            android:enabled="false"
+            android:gravity="center_vertical"
+            android:hint="Username For this group.."
+            android:padding="10dp" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginTop="15dp"
+        android:padding="10dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#00000000"
+            android:drawableLeft="@drawable/alarm_off_icon"
+            android:drawablePadding="10dp"
+            android:gravity="center_vertical"
+            android:text="Do Not Disturb"
+            android:textSize="17sp" />
+
+        <CheckBox
+            android:id="@+id/disturb_group_setting"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:enabled="false" />
+
+    </RelativeLayout>
+
+    <ProgressBar
+        android:id="@+id/loading_bar_group_setting"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:visibility="gone" />
+
+    <Button
+        android:id="@+id/update_group_setting"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="40dp"
+        android:background="@drawable/login_btn"
+        android:onClick="updateGroupProfile"
+        android:text="Update"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        android:visibility="gone" />
+
+
+</LinearLayout>
