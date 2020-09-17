@@ -13,6 +13,7 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Vibrator;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -39,8 +40,10 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -233,37 +236,42 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     }
 
     public boolean checkDoNotDisturb() {
-//        SimpleDateFormat sdf = new SimpleDateFormat("EEEE");
-//        Calendar calendar = Calendar.getInstance();
-//        Date dateTime = calendar.getTime();
-//        String dayOfWeek = sdf.format(dateTime);
-//
-//        List<notDisturbObject> allRules = appDatabase.disturbDao().getAllRules();
-//        for (notDisturbObject object :
-//                allRules) {
-//
-//            String day = object.day;
-//            if (day.equals(dayOfWeek)) {
-//                mRingtone = RingtoneManager.getRingtone(getBaseContext(), RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM));
-//                mRingtone.play();
-//                TimerTask task = new TimerTask() {
-//                    @Override
-//                    public void run() {
-//                        if (mRingtone.isPlaying()) {
-//                            mRingtone.stop();
-//                        }
-//                    }
-//                };
-//                Timer timer = new Timer();
-//                timer.schedule(task, 9000);
-//
-//                return false;
-//
-//            } else {
-//                return true;
-//            }
-//
-//        }
+        SimpleDateFormat sdf = new SimpleDateFormat("EEEE", Locale.ENGLISH);
+        Calendar calendar = Calendar.getInstance();
+        Integer hour = calendar.get(Calendar.HOUR_OF_DAY);
+        Integer minute = calendar.get(Calendar.MINUTE);
+        Date dateTime = calendar.getTime();
+        String dayOfWeek = sdf.format(dateTime);
+
+        List<notDisturbObject> allRules = mChoiceDB.appDatabase.disturbDao().getAllRules();
+        for (final notDisturbObject object :
+                allRules) {
+            String day = object.day;
+            Log.v("compare", day + " " + dayOfWeek);
+            if (day.equals(dayOfWeek)) {
+                HashMap<String, String> start = notDisturbObject.splitTime(object.from);
+                HashMap<String, String> end = notDisturbObject.splitTime(object.until);
+
+                if (checkTime(minute, hour, start, end)) {
+                    if (!object.repeat) {
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mChoiceDB.appDatabase.disturbDao().deleteRule(object);
+                            }
+                        }).start();
+                    }
+                    Log.v("do not disturb", "do not disturb");
+                    return false;
+                }
+            }
+        }
         return true;
+    }
+
+    private boolean checkTime(Integer minute, Integer hour, HashMap<String, String> start, HashMap<String, String> end) {
+        long tmp = minute * 60 + hour * 60 * 60;
+        return tmp < Integer.parseInt(end.get("minute")) * 60 + Integer.parseInt(end.get("hour")) * 60 * 60
+                && tmp > Integer.parseInt(start.get("hour")) * 60 * 60 + Integer.parseInt(start.get("minute")) * 60;
     }
 }

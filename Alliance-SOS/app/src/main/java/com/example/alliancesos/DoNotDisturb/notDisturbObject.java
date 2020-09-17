@@ -46,7 +46,7 @@ public class notDisturbObject {
         this.repeat = false;
     }
 
-    public HashMap<String, String> splitTime(String input) {
+    public static HashMap<String, String> splitTime(String input) {
         String[] result = input.split(":");
         HashMap<String, String> res = new HashMap<>();
         res.put("hour", result[0]);
