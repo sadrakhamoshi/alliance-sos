@@ -55,7 +55,7 @@ public class NotDisturbActivity extends AppCompatActivity {
         mChoiceDB = new ChoiceApplication(this);
         mRecyclerView = findViewById(R.id.not_disturbs_rv);
         mRulesList = new ArrayList<>();
-        mRulesAdapter = new notDisturbRules(NotDisturbActivity.this, mRulesList);
+        mRulesAdapter = new notDisturbRules(NotDisturbActivity.this, mRulesList, mChoiceDB);
         mRecyclerView.setAdapter(mRulesAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(NotDisturbActivity.this));
     }

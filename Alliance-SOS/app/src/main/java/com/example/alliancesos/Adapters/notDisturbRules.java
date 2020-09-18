@@ -16,6 +16,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.SwitchCompat;
@@ -23,6 +24,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.Room;
 
 import com.example.alliancesos.DbForRingtone.AppDatabase;
+import com.example.alliancesos.DbForRingtone.ChoiceApplication;
 import com.example.alliancesos.DoNotDisturb.notDisturbObject;
 import com.example.alliancesos.R;
 import com.example.alliancesos.Utils.WeekDay;
@@ -34,11 +36,12 @@ public class notDisturbRules extends RecyclerView.Adapter<notDisturbRules.ViewHo
 
     private ArrayList<notDisturbObject> rulesList;
     private Context mContext;
+    private ChoiceApplication mChoice;
 
-
-    public notDisturbRules(final Context context, ArrayList<notDisturbObject> objects) {
+    public notDisturbRules(final Context context, ArrayList<notDisturbObject> objects, ChoiceApplication mDb) {
         mContext = context;
         rulesList = objects;
+        mChoice = mDb;
     }
 
     @NonNull
@@ -57,13 +60,26 @@ public class notDisturbRules extends RecyclerView.Adapter<notDisturbRules.ViewHo
     @Override
     public void onBindViewHolder(@NonNull final notDisturbRules.ViewHolder holder, int position) {
         final notDisturbObject current = rulesList.get(position);
-
         holder.day.setText(current.day);
         holder.until.setText(current.until);
         holder.from.setText(current.from);
         holder.repeat.setChecked(current.daily);
         holder.repeat.setEnabled(false);
         holder.daily.setEnabled(false);
+        holder.delete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mChoice.appDatabase.disturbDao().deleteRule(current);
+                        rulesList.remove(current);
+                    }
+                }).start();
+                Toast.makeText(mContext, "Refresh the Page ...", Toast.LENGTH_SHORT).show();
+            }
+        });
+
     }
 
     public void add(notDisturbObject newObj) {
@@ -81,6 +97,7 @@ public class notDisturbRules extends RecyclerView.Adapter<notDisturbRules.ViewHo
         TextView from, until;
         TextView day;
         CheckBox repeat, daily;
+        ImageView delete;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -89,6 +106,7 @@ public class notDisturbRules extends RecyclerView.Adapter<notDisturbRules.ViewHo
             daily = itemView.findViewById(R.id.daily_switch);
             repeat = itemView.findViewById(R.id.repeat_switch);
             day = itemView.findViewById(R.id.day_do_not_disturb);
+            delete = itemView.findViewById(R.id.delete_do_not_disturb);
         }
     }
 }

@@ -77,15 +77,19 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         mContext = getApplicationContext();
 
         mChoiceDB = new ChoiceApplication(mContext);
-        boolean isNotInRules = checkDoNotDisturb();
 
-        if (isNotInRules || type == MessageType.INVITATION_TYPE) {
+        if (type == MessageType.INVITATION_TYPE) {
             Initialize(remoteMessage);
-
             buildNotification(mContext);
 
-            if (type == MessageType.SOS_TYPE) {
-                playRingtone();
+        } else {
+            boolean isNotInRules = checkDoNotDisturb();
+            if (isNotInRules) {
+                Initialize(remoteMessage);
+                buildNotification(mContext);
+                if (type == MessageType.SOS_TYPE) {
+                    playRingtone();
+                }
             }
         }
 
@@ -214,9 +218,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private void playRingtone() {
         ringtone ring = mChoiceDB.appDatabase.dao().currentPath(toId);
-        if (ring == null) {
-            Log.v("error-", "ring.path");
-        }
+
         Uri alert = Uri.parse(ring.path);
         if (alert != null) {
             mRingtone = RingtoneManager.getRingtone(getBaseContext(), alert);
