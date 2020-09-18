@@ -52,7 +52,7 @@ public class PickNotDisturbActivity extends AppCompatActivity {
             public void onDateSet(DatePicker view, int year, int monthOfYear,
                                   int dayOfMonth) {
                 // TODO Auto-generated method stub
-                String format = monthOfYear + "/" + dayOfMonth + "/" + year;
+                String format = year + "/" + monthOfYear + "/" + dayOfMonth;
                 mDate.setText(format);
             }
         };

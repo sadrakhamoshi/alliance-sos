@@ -46,11 +46,14 @@ public class notDisturbObject {
         this.daily = false;
     }
 
-    public static HashMap<String, String> splitTime(String input) {
+    public static String[] splitTime(String input) {
         String[] result = input.split(":");
-        HashMap<String, String> res = new HashMap<>();
-        res.put("hour", result[0]);
-        res.put("minute", result[1]);
-        return res;
+        return result;
     }
+
+    public static String[] splitDate(String input) {
+        String[] result = input.split("/");
+        return result;
+    }
+
 }

@@ -22,6 +22,7 @@ import androidx.room.Room;
 
 import com.example.alliancesos.DbForRingtone.AppDatabase;
 import com.example.alliancesos.DbForRingtone.ChoiceApplication;
+import com.example.alliancesos.DbForRingtone.ringtone;
 import com.example.alliancesos.R;
 import com.example.alliancesos.Utils.MessageType;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -76,8 +77,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         mContext = getApplicationContext();
 
         mChoiceDB = new ChoiceApplication(mContext);
+        boolean isNotInRules = checkDoNotDisturb();
 
-        if (checkDoNotDisturb() || type == MessageType.INVITATION_TYPE) {
+        if (isNotInRules || type == MessageType.INVITATION_TYPE) {
             Initialize(remoteMessage);
 
             buildNotification(mContext);
@@ -86,6 +88,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 playRingtone();
             }
         }
+
     }
 
     @Override
@@ -210,7 +213,11 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     }
 
     private void playRingtone() {
-        Uri alert = Uri.parse(mChoiceDB.appDatabase.dao().currentPath(toId).path);
+        ringtone ring = mChoiceDB.appDatabase.dao().currentPath(toId);
+        if (ring == null) {
+            Log.v("error-", "ring.path");
+        }
+        Uri alert = Uri.parse(ring.path);
         if (alert != null) {
             mRingtone = RingtoneManager.getRingtone(getBaseContext(), alert);
             mRingtone.play();
@@ -232,41 +239,38 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     public boolean checkDoNotDisturb() {
         List<notDisturbObject> allRules = mChoiceDB.appDatabase.disturbDao().getAllRules();
 
-        SimpleDateFormat sdf = new SimpleDateFormat("EEEE", Locale.ENGLISH);
         Calendar calendar = Calendar.getInstance();
-        Integer hour = calendar.get(Calendar.HOUR_OF_DAY);
-        Integer minute = calendar.get(Calendar.MINUTE);
-        Date dateTime = calendar.getTime();
-        String dayOfWeek = sdf.format(dateTime);
+        calendar.set(Calendar.SECOND, 0);
 
         for (final notDisturbObject object :
                 allRules) {
-            String day = object.day;
-            Log.v("compare", day + " " + dayOfWeek);
-            if (day.equals(dayOfWeek)) {
-                HashMap<String, String> start = notDisturbObject.splitTime(object.from);
-                HashMap<String, String> end = notDisturbObject.splitTime(object.until);
 
-                if (checkTime(minute, hour, start, end)) {
-                    if (!object.daily) {
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                mChoiceDB.appDatabase.disturbDao().deleteRule(object);
-                            }
-                        }).start();
-                    }
-                    Log.v("do not disturb", "do not disturb");
-                    return false;
-                }
+            boolean isIn = checkTime(object, calendar);
+            if (isIn) {
+
+                Log.v("do not disturb", "do not disturb");
+                return false;
             }
         }
         return true;
     }
 
-    private boolean checkTime(Integer minute, Integer hour, HashMap<String, String> start, HashMap<String, String> end) {
-        long tmp = minute * 60 + hour * 60 * 60;
-        return tmp < Integer.parseInt(end.get("minute")) * 60 + Integer.parseInt(end.get("hour")) * 60 * 60
-                && tmp > Integer.parseInt(start.get("hour")) * 60 * 60 + Integer.parseInt(start.get("minute")) * 60;
+    private boolean checkTime(notDisturbObject target, Calendar calendar) {
+        Date start = createInstance(notDisturbObject.splitDate(target.day), notDisturbObject.splitTime(target.from));
+        Date end = createInstance(notDisturbObject.splitDate(target.day), notDisturbObject.splitTime(target.until));
+        Date curr = calendar.getTime();
+        return curr.after(start) && curr.before(end);
     }
+
+    public Date createInstance(String[] dates, String[] time) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.YEAR, Integer.parseInt(dates[0]));
+        calendar.set(Calendar.MONTH, Integer.parseInt(dates[1]));
+        calendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(dates[2]));
+        calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(time[0]));
+        calendar.set(Calendar.MINUTE, Integer.parseInt(time[1]));
+        calendar.set(Calendar.SECOND, 0);
+        return calendar.getTime();
+    }
+
 }
