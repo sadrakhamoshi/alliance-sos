@@ -77,7 +77,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         mChoiceDB = new ChoiceApplication(mContext);
 
-        if (checkDoNotDisturb()) {
+        if (checkDoNotDisturb() || type == MessageType.INVITATION_TYPE) {
             Initialize(remoteMessage);
 
             buildNotification(mContext);
@@ -174,6 +174,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         if (type == MessageType.NOTIFICATION_TYPE) {
             builder.setSound(alarmSound);
         }
+
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
@@ -229,6 +230,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     }
 
     public boolean checkDoNotDisturb() {
+        List<notDisturbObject> allRules = mChoiceDB.appDatabase.disturbDao().getAllRules();
+
         SimpleDateFormat sdf = new SimpleDateFormat("EEEE", Locale.ENGLISH);
         Calendar calendar = Calendar.getInstance();
         Integer hour = calendar.get(Calendar.HOUR_OF_DAY);
@@ -236,7 +239,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         Date dateTime = calendar.getTime();
         String dayOfWeek = sdf.format(dateTime);
 
-        List<notDisturbObject> allRules = mChoiceDB.appDatabase.disturbDao().getAllRules();
         for (final notDisturbObject object :
                 allRules) {
             String day = object.day;
