@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name" translatable="true">xAlliance SOS</string>
+    <string name="app_name" translatable="true">Alliance SOS</string>
     <string name="login_btn">LogIn</string>
     <string name="username_hint" translatable="true">Username</string>
     <string name="signup_btn" translatable="true">Sign Up</string>

@@ -11,10 +11,6 @@ import java.util.HashMap;
 @Entity
 public class notDisturbObject {
 
-    public notDisturbObject(String id) {
-        repeat = false;
-        this.id = id;
-    }
 
     public notDisturbObject() {
 
@@ -31,8 +27,11 @@ public class notDisturbObject {
     @ColumnInfo(name = "until")
     public String until;
 
-    @ColumnInfo(name = "repeat")
-    public boolean repeat;
+    @ColumnInfo(name = "daily")
+    public boolean daily;
+
+    @ColumnInfo(name = "repeated")
+    public boolean repeated;
 
     @ColumnInfo(name = "day")
     public String day;
@@ -43,7 +42,8 @@ public class notDisturbObject {
         this.id = id;
         this.from = from;
         this.until = until;
-        this.repeat = false;
+        repeated = false;
+        this.daily = false;
     }
 
     public static HashMap<String, String> splitTime(String input) {

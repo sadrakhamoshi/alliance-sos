@@ -158,11 +158,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private void buildNotification(Context context) {
 
         PendingIntent pendingIntent = getPendingIntent(context);
-
-        //Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.ic3);
-
         Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-
         NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(getApplicationContext(), "CHANNEL_ID")
                         .setColorized(true)
@@ -182,10 +178,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             int importance = NotificationManager.IMPORTANCE_HIGH;
-            NotificationChannel notificationChannel = new
-                    NotificationChannel(NOTIFICATION_CHANNEL_ID, getString(R.string.notificationChannel_name), importance);
-            notificationChannel.enableLights(true);
-            notificationChannel.setLightColor(Color.RED);
+            NotificationChannel notificationChannel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, getString(R.string.notificationChannel_name), importance);
             builder.setChannelId(NOTIFICATION_CHANNEL_ID);
             assert notificationManager != null;
             notificationManager.createNotificationChannel(notificationChannel);
@@ -253,7 +246,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 HashMap<String, String> end = notDisturbObject.splitTime(object.until);
 
                 if (checkTime(minute, hour, start, end)) {
-                    if (!object.repeat) {
+                    if (!object.daily) {
                         new Thread(new Runnable() {
                             @Override
                             public void run() {

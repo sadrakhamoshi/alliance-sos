@@ -17,11 +17,11 @@ public class ChoiceApplication {
     }
 
     private static Migration createMigration() {
-        return new Migration(1, 2) {
+        return new Migration(2, 3) {
             @Override
             public void migrate(SupportSQLiteDatabase database) {
-                database.execSQL("CREATE TABLE IF NOT EXISTS `notDisturbObject` (`id` STRING, "
-                        + "`from` STRING, " + "`until` STRING, " + "`repeat` BOOLEAN, " + "`day` STRING , PRIMARY KEY(`id`))");
+                database.execSQL("CREATE TABLE IF NOT EXISTS `notDisturb` (`id` STRING, "
+                        + "`from` STRING, " + "`until` STRING, " + "`daily` BOOLEAN, " + "`repeated` BOOLEAN, " + "`day` STRING , PRIMARY KEY(`id`))");
             }
         };
     }

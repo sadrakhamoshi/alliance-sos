@@ -17,7 +17,16 @@
             android:id="@+id/progress_notDisturb"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
             android:visibility="gone" />
+
+        <ImageView
+            android:layout_width="25sp"
+            android:layout_height="25sp"
+            android:layout_centerInParent="true"
+            android:onClick="refreshNotDisturb"
+            android:src="@drawable/refresh"
+            app:tint="#FFFFFF" />
 
         <ImageView
             android:layout_width="27dp"

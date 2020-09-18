@@ -36,4 +36,10 @@ public class ScheduleObject {
     public void setTitle(String title) {
         this.title = title;
     }
+
+    public String GetDate() {
+        DateTime dateTime = this.getDateTime();
+        String res = dateTime.getYear() + "/" + dateTime.getMonth() + "/" + dateTime.getDay() + " " + dateTime.getHour() + ":" + dateTime.getMinute();
+        return res;
+    }
 }

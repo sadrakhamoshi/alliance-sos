@@ -49,6 +49,10 @@ public class notDisturbRules extends RecyclerView.Adapter<notDisturbRules.ViewHo
         return holder;
     }
 
+    public void RemoveAll() {
+        rulesList.clear();
+        notifyDataSetChanged();
+    }
 
     @Override
     public void onBindViewHolder(@NonNull final notDisturbRules.ViewHolder holder, int position) {
@@ -57,13 +61,9 @@ public class notDisturbRules extends RecyclerView.Adapter<notDisturbRules.ViewHo
         holder.day.setText(current.day);
         holder.until.setText(current.until);
         holder.from.setText(current.from);
-        holder.repeat.setChecked(current.repeat);
+        holder.repeat.setChecked(current.daily);
         holder.repeat.setEnabled(false);
-    }
-
-    public void addAll(List<notDisturbObject> list) {
-        rulesList.addAll(list);
-        notifyDataSetChanged();
+        holder.daily.setEnabled(false);
     }
 
     public void add(notDisturbObject newObj) {
@@ -80,12 +80,13 @@ public class notDisturbRules extends RecyclerView.Adapter<notDisturbRules.ViewHo
 
         TextView from, until;
         TextView day;
-        CheckBox repeat;
+        CheckBox repeat, daily;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             from = itemView.findViewById(R.id.from_do_not_disturb);
             until = itemView.findViewById(R.id.until_do_not_disturb);
+            daily = itemView.findViewById(R.id.daily_switch);
             repeat = itemView.findViewById(R.id.repeat_switch);
             day = itemView.findViewById(R.id.day_do_not_disturb);
         }
