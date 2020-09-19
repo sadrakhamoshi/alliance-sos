@@ -73,6 +73,18 @@
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/is_passed_do_not_disturb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@id/day_do_not_disturb"
+            android:layout_alignBottom="@id/day_do_not_disturb"
+            android:layout_marginLeft="20dp"
+            android:layout_toRightOf="@id/day_do_not_disturb"
+            android:gravity="center"
+            tools:text="passed" />
+
+
+        <TextView
             android:id="@+id/day_in_Week_do_not_disturb"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

@@ -249,24 +249,10 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
             boolean isIn = checkTime(object, calendar);
             if (isIn) {
-                checkForDeleteRule(object);
                 return false;
             }
         }
         return true;
-    }
-
-    private void checkForDeleteRule(final notDisturbObject object) {
-        boolean isDaily = object.daily;
-        boolean isRepeated = object.repeated;
-        if ((!isDaily) && (!isRepeated)) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    mChoiceDB.appDatabase.disturbDao().deleteRule(object);
-                }
-            }).start();
-        }
     }
 
     private boolean checkTime(notDisturbObject target, Calendar calendar) {
