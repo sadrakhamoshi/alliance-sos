@@ -10,6 +10,13 @@
 
     tools:context=".SendNotificationPack.NotificationResponseActivity">
 
+    <ProgressBar
+        android:id="@+id/progress_notif_response"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:visibility="gone" />
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -91,11 +98,12 @@
         android:textSize="20sp"
         android:textStyle="bold" />
 
+
     <ListView
         android:id="@+id/event_member_listView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="15dp"
         android:background="@drawable/groups_background"
         android:layoutDirection="ltr"
         android:padding="10dp"

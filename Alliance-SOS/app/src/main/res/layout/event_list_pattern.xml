@@ -96,13 +96,6 @@
             android:layout_centerVertical="true"
             android:src="@drawable/right_arrow" />
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:layout_below="@id/date_layout"
-            android:layout_marginTop="5dp"
-            android:background="@color/mellow_red" />
-
     </RelativeLayout>
 
 </androidx.cardview.widget.CardView>
