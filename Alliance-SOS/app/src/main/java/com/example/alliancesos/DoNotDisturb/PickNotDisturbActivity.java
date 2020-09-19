@@ -51,7 +51,7 @@ public class PickNotDisturbActivity extends AppCompatActivity {
             @Override
             public void onDateSet(DatePicker view, int year, int monthOfYear,
                                   int dayOfMonth) {
-                String format = year + "/" + monthOfYear + "/" + dayOfMonth;
+                String format = year + "/" + (monthOfYear + 1) + "/" + dayOfMonth;
                 mDate.setText(format);
             }
         };

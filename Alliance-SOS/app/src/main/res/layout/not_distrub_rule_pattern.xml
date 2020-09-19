@@ -72,11 +72,21 @@
             android:textSize="25sp"
             android:textStyle="bold" />
 
+        <TextView
+            android:id="@+id/day_in_Week_do_not_disturb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/day_do_not_disturb"
+            android:layout_alignLeft="@id/day_do_not_disturb"
+            android:layout_alignRight="@id/day_do_not_disturb"
+            android:gravity="center"
+            tools:text="wedensday" />
+
         <LinearLayout
             android:id="@+id/time_baze"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/day_do_not_disturb"
+            android:layout_below="@id/day_in_Week_do_not_disturb"
             android:layout_marginTop="12dp"
             android:layout_toLeftOf="@id/daily_layout"
             android:orientation="horizontal"

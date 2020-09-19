@@ -29,6 +29,7 @@ import com.example.alliancesos.DoNotDisturb.notDisturbObject;
 import com.example.alliancesos.R;
 import com.example.alliancesos.Utils.WeekDay;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,9 +62,15 @@ public class notDisturbRules extends RecyclerView.Adapter<notDisturbRules.ViewHo
     public void onBindViewHolder(@NonNull final notDisturbRules.ViewHolder holder, int position) {
         final notDisturbObject current = rulesList.get(position);
         holder.day.setText(current.day);
+        try {
+            String dayOfWeek = notDisturbObject.DisplayDayOfWeek(current.day);
+            holder.dayInWeek.setText(dayOfWeek);
+        } catch (Exception e) {
+        }
         holder.until.setText(current.until);
         holder.from.setText(current.from);
-        holder.repeat.setChecked(current.daily);
+        holder.repeat.setChecked(current.repeated);
+        holder.daily.setChecked(current.daily);
         holder.repeat.setEnabled(false);
         holder.daily.setEnabled(false);
         holder.delete.setOnClickListener(new View.OnClickListener() {
@@ -95,7 +102,7 @@ public class notDisturbRules extends RecyclerView.Adapter<notDisturbRules.ViewHo
     public class ViewHolder extends RecyclerView.ViewHolder {
 
         TextView from, until;
-        TextView day;
+        TextView day, dayInWeek;
         CheckBox repeat, daily;
         ImageView delete;
 
@@ -106,6 +113,7 @@ public class notDisturbRules extends RecyclerView.Adapter<notDisturbRules.ViewHo
             daily = itemView.findViewById(R.id.daily_switch);
             repeat = itemView.findViewById(R.id.repeat_switch);
             day = itemView.findViewById(R.id.day_do_not_disturb);
+            dayInWeek = itemView.findViewById(R.id.day_in_Week_do_not_disturb);
             delete = itemView.findViewById(R.id.delete_do_not_disturb);
         }
     }

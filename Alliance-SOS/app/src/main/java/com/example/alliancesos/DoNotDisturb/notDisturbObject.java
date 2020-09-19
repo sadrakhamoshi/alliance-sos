@@ -7,8 +7,13 @@ import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
 import java.security.PublicKey;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 
 @Entity
 public class notDisturbObject {
@@ -64,5 +69,13 @@ public class notDisturbObject {
         calendar.set(Calendar.MONTH, Integer.parseInt(dates[1]));
         calendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(dates[2]));
         return calendar.get(Calendar.DAY_OF_WEEK);
+    }
+
+    public static String DisplayDayOfWeek(String dateFormat) throws ParseException {
+        SimpleDateFormat format1 = new SimpleDateFormat("yyyy/MM/dd");
+        Date dt1 = format1.parse(dateFormat);
+        DateFormat format2 = new SimpleDateFormat("EEEE", Locale.ENGLISH);
+        String finalDay = format2.format(dt1);
+        return finalDay;
     }
 }
