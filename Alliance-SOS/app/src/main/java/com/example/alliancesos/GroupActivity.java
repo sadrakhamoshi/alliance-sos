@@ -1,11 +1,15 @@
 package com.example.alliancesos;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -13,11 +17,13 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.alliancesos.Adapters.showEvents;
 import com.example.alliancesos.GroupSetting.GroupProfileActivity;
 import com.example.alliancesos.SendNotificationPack.DataToSend;
 import com.example.alliancesos.SendNotificationPack.SendingNotification;
 import com.example.alliancesos.Setting.UserSettingActivity;
 import com.example.alliancesos.Utils.MessageType;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -32,9 +38,6 @@ import java.util.Set;
 
 public class GroupActivity extends AppCompatActivity {
 
-    private PendingIntent pendingIntent;
-    final static int RQS_1 = 1;
-
     private String mCurrentUserName, mCurrentUserId;
 
     //database
@@ -48,9 +51,12 @@ public class GroupActivity extends AppCompatActivity {
 
     private TextView mSchedule;
 
-    private ListView listView;
-    private ArrayList<String> mScheduleList;
-    private ArrayAdapter<String> arrayAdapter;
+    private RecyclerView mRecyclerView;
+    private showEvents mShowEventAdapter;
+    private ArrayList<Event> mEventList;
+
+    private ChildEventListener mEventListener;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,10 +74,12 @@ public class GroupActivity extends AppCompatActivity {
         //database
         mGroupRef = FirebaseDatabase.getInstance().getReference().child("groups");
 
-        listView = findViewById(R.id.schedule_list_view);
-        mScheduleList = new ArrayList<>();
-        arrayAdapter = new ArrayAdapter<>(GroupActivity.this, android.R.layout.simple_list_item_1, mScheduleList);
-
+        //recycle view
+        mRecyclerView = findViewById(R.id.event_list_rv);
+        mEventList = new ArrayList<>();
+        mShowEventAdapter = new showEvents(GroupActivity.this, mEventList);
+        mRecyclerView.setAdapter(mShowEventAdapter);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(GroupActivity.this));
 
         TextView nameGroup = findViewById(R.id.group_name_txt);
         nameGroup.setText(mCurrentGroupName);
@@ -122,8 +130,7 @@ public class GroupActivity extends AppCompatActivity {
     }
 
     public void goToHelpUs(View view) {
-        Toast.makeText(this, "will go to help us Activity", Toast.LENGTH_SHORT).show();
-
+        Toast.makeText(this, "It Will Works Soon ...", Toast.LENGTH_SHORT).show();
     }
 
     public void gotoGroupSetting(View view) {
@@ -134,7 +141,6 @@ public class GroupActivity extends AppCompatActivity {
 
         startActivity(goToGroupProfile);
     }
-
 
     private void goToSetScheduleEvent() {
         Intent intent = new Intent(getApplicationContext(), SetScheduleActivity.class);
@@ -153,38 +159,53 @@ public class GroupActivity extends AppCompatActivity {
         showAllEvent();
     }
 
-    private void showAllEvent() {
-        mGroupRef.child(mCurrentGroupId).child("events").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    Iterator iterator = snapshot.getChildren().iterator();
-                    Set<String> set = new HashSet<>();
-                    while (iterator.hasNext()) {
-                        try {
-                            Event message = ((DataSnapshot) (iterator.next())).getValue(Event.class);
-                            if (message != null) {
-                                String tmp = "";
-                                tmp += message.getScheduleObject().getTitle() + "\n";
-                                tmp += message.getScheduleObject().getDescription() + "\n";
-                                tmp += message.getCreatedBy();
-                                set.add(tmp);
-                            }
-                        } catch (Exception e) {
-                            Toast.makeText(GroupActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-                        mScheduleList.clear();
-                        mScheduleList.addAll(set);
-                        listView.setAdapter(arrayAdapter);
-//                        FindNextUpComingEventTask();
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mEventListener != null) {
+            mGroupRef.child(mCurrentGroupId).child("events").removeEventListener(mEventListener);
+            mEventListener = null;
+        }
+    }
+
+    private void attachListener() {
+        if (mEventListener == null) {
+            mEventListener = new ChildEventListener() {
+                @Override
+                public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                    try {
+                        Event event = snapshot.getValue(Event.class);
+                        mShowEventAdapter.add(event);
+                    } catch (Exception e) {
+                        Toast.makeText(GroupActivity.this, "Error in cast :" + e.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 }
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(GroupActivity.this, "error occured in showAllEvent " + error.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
+                @Override
+                public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+                }
+
+                @Override
+                public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+
+                }
+
+                @Override
+                public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            };
+            mGroupRef.child(mCurrentGroupId).child("events").addChildEventListener(mEventListener);
+        }
+    }
+
+    private void showAllEvent() {
+        attachListener();
     }
 }

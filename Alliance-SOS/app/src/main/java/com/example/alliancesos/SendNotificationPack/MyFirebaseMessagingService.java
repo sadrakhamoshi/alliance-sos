@@ -192,7 +192,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         }
         Notification notification = builder.build();
         notification.flags |= Notification.FLAG_AUTO_CANCEL;
-        notificationManager.notify(0, notification);
+        int id = (int) ((new Date().getTime() / 1000L) % Integer.MAX_VALUE);
+        notificationManager.notify(id, notification);
     }
 
     private PendingIntent getPendingIntent(Context context) {
