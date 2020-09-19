@@ -6,6 +6,8 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import java.security.PublicKey;
+import java.util.Calendar;
 import java.util.HashMap;
 
 @Entity
@@ -56,4 +58,11 @@ public class notDisturbObject {
         return result;
     }
 
+    public static Integer getDayOfWeek(String[] dates) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.YEAR, Integer.parseInt(dates[0]));
+        calendar.set(Calendar.MONTH, Integer.parseInt(dates[1]));
+        calendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(dates[2]));
+        return calendar.get(Calendar.DAY_OF_WEEK);
+    }
 }

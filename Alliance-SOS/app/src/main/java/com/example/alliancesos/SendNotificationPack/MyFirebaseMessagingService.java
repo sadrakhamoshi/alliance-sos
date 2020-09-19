@@ -92,7 +92,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 }
             }
         }
-
     }
 
     @Override
@@ -249,26 +248,51 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
             boolean isIn = checkTime(object, calendar);
             if (isIn) {
-
-                Log.v("do not disturb", "do not disturb");
+                checkForDeleteRule(object);
                 return false;
             }
         }
         return true;
     }
 
+    private void checkForDeleteRule(final notDisturbObject object) {
+        boolean isDaily = object.daily;
+        boolean isRepeated = object.repeated;
+        if ((!isDaily) && (!isRepeated)) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    mChoiceDB.appDatabase.disturbDao().deleteRule(object);
+                }
+            }).start();
+        }
+    }
+
     private boolean checkTime(notDisturbObject target, Calendar calendar) {
-        Date start = createInstance(notDisturbObject.splitDate(target.day), notDisturbObject.splitTime(target.from));
-        Date end = createInstance(notDisturbObject.splitDate(target.day), notDisturbObject.splitTime(target.until));
+        Date start = createInstance(target, notDisturbObject.splitDate(target.day), notDisturbObject.splitTime(target.from));
+        Date end = createInstance(target, notDisturbObject.splitDate(target.day), notDisturbObject.splitTime(target.until));
         Date curr = calendar.getTime();
         return curr.after(start) && curr.before(end);
     }
 
-    public Date createInstance(String[] dates, String[] time) {
+    public Date createInstance(notDisturbObject object, String[] dates, String[] time) {
         Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.YEAR, Integer.parseInt(dates[0]));
-        calendar.set(Calendar.MONTH, Integer.parseInt(dates[1]));
-        calendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(dates[2]));
+
+        if (object.daily) {
+
+        } else if (object.repeated) {
+            Integer dayOfWeek = notDisturbObject.getDayOfWeek(dates);
+            if (dayOfWeek == calendar.get(Calendar.DAY_OF_WEEK)) {
+                //nothing to do
+            } else {
+                //set iligal value
+                calendar.set(Calendar.YEAR, 2000);
+            }
+        } else {
+            calendar.set(Calendar.YEAR, Integer.parseInt(dates[0]));
+            calendar.set(Calendar.MONTH, Integer.parseInt(dates[1]));
+            calendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(dates[2]));
+        }
         calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(time[0]));
         calendar.set(Calendar.MINUTE, Integer.parseInt(time[1]));
         calendar.set(Calendar.SECOND, 0);

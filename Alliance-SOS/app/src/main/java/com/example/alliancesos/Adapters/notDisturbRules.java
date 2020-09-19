@@ -76,7 +76,7 @@ public class notDisturbRules extends RecyclerView.Adapter<notDisturbRules.ViewHo
                         rulesList.remove(current);
                     }
                 }).start();
-                Toast.makeText(mContext, "Refresh the Page ...", Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext, "Refresh the Page after a sec ...", Toast.LENGTH_SHORT).show();
             }
         });
 
