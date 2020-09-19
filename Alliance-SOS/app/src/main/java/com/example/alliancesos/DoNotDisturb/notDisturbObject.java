@@ -58,6 +58,12 @@ public class notDisturbObject {
         return result;
     }
 
+    public static Date DisplayDate(String date, String time) throws ParseException {
+        String res = date + 'T' + time + 'Z';
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd'T'HH:mm'Z'");
+        return dateFormat.parse(res);
+    }
+
     public static String[] splitDate(String input) {
         String[] result = input.split("/");
         return result;

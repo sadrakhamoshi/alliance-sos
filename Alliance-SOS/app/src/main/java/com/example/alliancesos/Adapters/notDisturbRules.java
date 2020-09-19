@@ -3,6 +3,7 @@ package com.example.alliancesos.Adapters;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +32,8 @@ import com.example.alliancesos.Utils.WeekDay;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 public class notDisturbRules extends RecyclerView.Adapter<notDisturbRules.ViewHolder> {
@@ -66,6 +69,20 @@ public class notDisturbRules extends RecyclerView.Adapter<notDisturbRules.ViewHo
             String dayOfWeek = notDisturbObject.DisplayDayOfWeek(current.day);
             holder.dayInWeek.setText(dayOfWeek);
         } catch (Exception e) {
+            Toast.makeText(mContext, "Error in Parse : " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+        if (current.repeated || current.daily) {
+            //do nothing
+        } else {
+            try {
+                Date now = new Date();
+                Date date = notDisturbObject.DisplayDate(current.day, current.until);
+                if (now.after(date)) {
+                    holder.isPassed.setText("Passed");
+                }
+            } catch (Exception e) {
+                Toast.makeText(mContext, "Error in Parse " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
         }
         holder.until.setText(current.until);
         holder.from.setText(current.from);
@@ -101,13 +118,14 @@ public class notDisturbRules extends RecyclerView.Adapter<notDisturbRules.ViewHo
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
-        TextView from, until;
+        TextView from, until, isPassed;
         TextView day, dayInWeek;
         CheckBox repeat, daily;
         ImageView delete;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
+            isPassed = itemView.findViewById(R.id.is_passed_do_not_disturb);
             from = itemView.findViewById(R.id.from_do_not_disturb);
             until = itemView.findViewById(R.id.until_do_not_disturb);
             daily = itemView.findViewById(R.id.daily_switch);
