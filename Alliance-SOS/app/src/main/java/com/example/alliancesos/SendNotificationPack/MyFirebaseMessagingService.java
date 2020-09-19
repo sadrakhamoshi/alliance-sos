@@ -50,6 +50,7 @@ import java.util.TimerTask;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
+    private static final long DELAY_TIME = 60 * 1000;
     public static final String NOTIFICATION_CHANNEL_ID = "10001";
 
     private DatabaseReference mRootRef;
@@ -62,7 +63,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     Integer type;
     Integer notificationIcon;
     Integer notificationColor;
-
+    private boolean isMissed;
     String toName, toId;
     String title, message;
     String groupName, groupId, makeBy;
@@ -74,8 +75,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         super.onMessageReceived(remoteMessage);
         type = Integer.valueOf(remoteMessage.getData().get("type"));
 
+        isMissed = System.currentTimeMillis() - remoteMessage.getSentTime() > DELAY_TIME;
         mContext = getApplicationContext();
-
         mChoiceDB = new ChoiceApplication(mContext);
 
         if (type == MessageType.INVITATION_TYPE) {
@@ -88,7 +89,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 Initialize(remoteMessage);
                 buildNotification(mContext);
                 if (type == MessageType.SOS_TYPE) {
-                    playRingtone();
+                    if (!isMissed)
+                        playRingtone();
                 }
             }
         }
@@ -135,14 +137,18 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         makeBy = remoteMessage.getData().get("makeBy");
         toId = remoteMessage.getData().get("toId");
 
-//        String path = appDatabase.dao().currentPath(toId).path;
         if (type == MessageType.SOS_TYPE) {
 
             notificationColor = Color.RED;
             notificationIcon = R.drawable.sos_icon;
 
             title = "Emergency Moment !!!!";
-            message = "SOS button has clicked by " + makeBy + " from " + groupName;
+            if (!isMissed)
+                message = "SOS button has clicked by " + makeBy + " from " + groupName;
+            else {
+                message = "You Have One Missed SOS Emergency Moment from " + groupName;
+                title = "MISSED SOS !!!";
+            }
 
         } else if (type == MessageType.NOTIFICATION_TYPE) {
 
@@ -177,7 +183,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                         .setContentIntent(pendingIntent)
                         .setStyle(new NotificationCompat.BigTextStyle().bigText(message));
 
-        if (type == MessageType.NOTIFICATION_TYPE) {
+        if (type == MessageType.NOTIFICATION_TYPE || type == MessageType.INVITATION_TYPE) {
             builder.setSound(alarmSound);
         }
 
