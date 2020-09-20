@@ -1,6 +1,8 @@
 package com.example.alliancesos;
 
-public class ScheduleObject {
+import java.io.Serializable;
+
+public class ScheduleObject implements Serializable {
     private String title, description;
 
     private DateTime dateTime;
@@ -35,5 +37,11 @@ public class ScheduleObject {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String GetDate() {
+        DateTime dateTime = this.getDateTime();
+        String res = dateTime.getYear() + "/" + dateTime.getMonth() + "/" + dateTime.getDay() + " " + dateTime.getHour() + ":" + dateTime.getMinute();
+        return res;
     }
 }

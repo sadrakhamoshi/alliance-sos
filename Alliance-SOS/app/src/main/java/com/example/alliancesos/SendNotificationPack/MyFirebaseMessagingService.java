@@ -22,6 +22,7 @@ import androidx.room.Room;
 
 import com.example.alliancesos.DbForRingtone.AppDatabase;
 import com.example.alliancesos.DbForRingtone.ChoiceApplication;
+import com.example.alliancesos.DbForRingtone.ringtone;
 import com.example.alliancesos.R;
 import com.example.alliancesos.Utils.MessageType;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -49,6 +50,7 @@ import java.util.TimerTask;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
+    private static final long DELAY_TIME = 60 * 1000;
     public static final String NOTIFICATION_CHANNEL_ID = "10001";
 
     private DatabaseReference mRootRef;
@@ -61,7 +63,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     Integer type;
     Integer notificationIcon;
     Integer notificationColor;
-
+    private boolean isMissed;
     String toName, toId;
     String title, message;
     String groupName, groupId, makeBy;
@@ -73,17 +75,23 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         super.onMessageReceived(remoteMessage);
         type = Integer.valueOf(remoteMessage.getData().get("type"));
 
+        isMissed = System.currentTimeMillis() - remoteMessage.getSentTime() > DELAY_TIME;
         mContext = getApplicationContext();
-
         mChoiceDB = new ChoiceApplication(mContext);
 
-        if (checkDoNotDisturb()) {
+        if (type == MessageType.INVITATION_TYPE) {
             Initialize(remoteMessage);
-
             buildNotification(mContext);
 
-            if (type == MessageType.SOS_TYPE) {
-                playRingtone();
+        } else {
+            boolean isNotInRules = checkDoNotDisturb();
+            if (isNotInRules) {
+                Initialize(remoteMessage);
+                buildNotification(mContext);
+                if (type == MessageType.SOS_TYPE) {
+                    if (!isMissed)
+                        playRingtone();
+                }
             }
         }
     }
@@ -129,14 +137,18 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         makeBy = remoteMessage.getData().get("makeBy");
         toId = remoteMessage.getData().get("toId");
 
-//        String path = appDatabase.dao().currentPath(toId).path;
         if (type == MessageType.SOS_TYPE) {
 
             notificationColor = Color.RED;
             notificationIcon = R.drawable.sos_icon;
 
             title = "Emergency Moment !!!!";
-            message = "SOS button has clicked by " + makeBy + " from " + groupName;
+            if (!isMissed)
+                message = "SOS button has clicked by " + makeBy + " from " + groupName;
+            else {
+                message = "You Have One Missed SOS Emergency Moment from " + groupName;
+                title = "MISSED SOS !!!";
+            }
 
         } else if (type == MessageType.NOTIFICATION_TYPE) {
 
@@ -158,11 +170,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private void buildNotification(Context context) {
 
         PendingIntent pendingIntent = getPendingIntent(context);
-
-        //Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.ic3);
-
         Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-
         NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(getApplicationContext(), "CHANNEL_ID")
                         .setColorized(true)
@@ -175,24 +183,23 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                         .setContentIntent(pendingIntent)
                         .setStyle(new NotificationCompat.BigTextStyle().bigText(message));
 
-        if (type == MessageType.NOTIFICATION_TYPE) {
+        if (type == MessageType.NOTIFICATION_TYPE || type == MessageType.INVITATION_TYPE) {
             builder.setSound(alarmSound);
         }
+
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             int importance = NotificationManager.IMPORTANCE_HIGH;
-            NotificationChannel notificationChannel = new
-                    NotificationChannel(NOTIFICATION_CHANNEL_ID, getString(R.string.notificationChannel_name), importance);
-            notificationChannel.enableLights(true);
-            notificationChannel.setLightColor(Color.RED);
+            NotificationChannel notificationChannel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, getString(R.string.notificationChannel_name), importance);
             builder.setChannelId(NOTIFICATION_CHANNEL_ID);
             assert notificationManager != null;
             notificationManager.createNotificationChannel(notificationChannel);
         }
         Notification notification = builder.build();
         notification.flags |= Notification.FLAG_AUTO_CANCEL;
-        notificationManager.notify(0, notification);
+        int id = (int) ((new Date().getTime() / 1000L) % Integer.MAX_VALUE);
+        notificationManager.notify(id, notification);
     }
 
     private PendingIntent getPendingIntent(Context context) {
@@ -216,10 +223,13 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     }
 
     private void playRingtone() {
-        Uri alert = Uri.parse(mChoiceDB.appDatabase.dao().currentPath(toId).path);
+        ringtone ring = mChoiceDB.appDatabase.dao().currentPath(toId);
+
+        Uri alert = Uri.parse(ring.path);
         if (alert != null) {
             mRingtone = RingtoneManager.getRingtone(getBaseContext(), alert);
-            mRingtone.play();
+            if (!mRingtone.isPlaying())
+                mRingtone.play();
             TimerTask task = new TimerTask() {
                 @Override
                 public void run() {
@@ -236,42 +246,51 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     }
 
     public boolean checkDoNotDisturb() {
-        SimpleDateFormat sdf = new SimpleDateFormat("EEEE", Locale.ENGLISH);
-        Calendar calendar = Calendar.getInstance();
-        Integer hour = calendar.get(Calendar.HOUR_OF_DAY);
-        Integer minute = calendar.get(Calendar.MINUTE);
-        Date dateTime = calendar.getTime();
-        String dayOfWeek = sdf.format(dateTime);
-
         List<notDisturbObject> allRules = mChoiceDB.appDatabase.disturbDao().getAllRules();
+
+        Date now = new Date();
+
         for (final notDisturbObject object :
                 allRules) {
-            String day = object.day;
-            Log.v("compare", day + " " + dayOfWeek);
-            if (day.equals(dayOfWeek)) {
-                HashMap<String, String> start = notDisturbObject.splitTime(object.from);
-                HashMap<String, String> end = notDisturbObject.splitTime(object.until);
 
-                if (checkTime(minute, hour, start, end)) {
-                    if (!object.repeat) {
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                mChoiceDB.appDatabase.disturbDao().deleteRule(object);
-                            }
-                        }).start();
-                    }
-                    Log.v("do not disturb", "do not disturb");
-                    return false;
-                }
+            boolean isIn = checkTime(object, now);
+            if (isIn) {
+                Log.v("isNotRules", object + " " + now.getTime());
+                return false;
             }
         }
         return true;
     }
 
-    private boolean checkTime(Integer minute, Integer hour, HashMap<String, String> start, HashMap<String, String> end) {
-        long tmp = minute * 60 + hour * 60 * 60;
-        return tmp < Integer.parseInt(end.get("minute")) * 60 + Integer.parseInt(end.get("hour")) * 60 * 60
-                && tmp > Integer.parseInt(start.get("hour")) * 60 * 60 + Integer.parseInt(start.get("minute")) * 60;
+    private boolean checkTime(notDisturbObject target, Date now) {
+        Date start = createInstance(target, notDisturbObject.splitDate(target.day), notDisturbObject.splitTime(target.from));
+        Date end = createInstance(target, notDisturbObject.splitDate(target.day), notDisturbObject.splitTime(target.until));
+        Log.v("compair", start + " " + now + " " + end);
+        return now.after(start) && now.before(end);
     }
+
+    public Date createInstance(notDisturbObject object, String[] dates, String[] time) {
+        Calendar calendar = Calendar.getInstance();
+
+        if (object.daily) {
+
+        } else if (object.repeated) {
+            Integer dayOfWeek = notDisturbObject.getDayOfWeek(dates);
+            if (dayOfWeek == calendar.get(Calendar.DAY_OF_WEEK)) {
+                //nothing to do
+            } else {
+                //set iligal value
+                calendar.set(Calendar.YEAR, 2000);
+            }
+        } else {
+            calendar.set(Calendar.YEAR, Integer.parseInt(dates[0]));
+            calendar.set(Calendar.MONTH, Integer.parseInt(dates[1]) - 1);
+            calendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(dates[2]));
+        }
+        calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(time[0]));
+        calendar.set(Calendar.MINUTE, Integer.parseInt(time[1]));
+        calendar.set(Calendar.SECOND, 0);
+        return calendar.getTime();
+    }
+
 }

@@ -1,6 +1,8 @@
 package com.example.alliancesos;
 
-public class DateTime {
+import java.io.Serializable;
+
+public class DateTime implements Serializable {
     private String year, month, day, hour, minute;
 
     public DateTime(String y, String mo, String d, String h, String mi) {
@@ -54,8 +56,8 @@ public class DateTime {
         this.year = year;
     }
 
-    public static String DisplayTime(DateTime dateTime) {
-        String result = dateTime.getYear() + "-" + dateTime.getMonth() + "-" + dateTime.getDay() + " " + dateTime.getHour() + ":" + dateTime.getMinute();
+    public String DisplayTime() {
+        String result = this.getYear() + "-" + this.getMonth() + "-" + this.getDay() + " " + this.getHour() + ":" + this.getMinute();
         return result;
     }
 }

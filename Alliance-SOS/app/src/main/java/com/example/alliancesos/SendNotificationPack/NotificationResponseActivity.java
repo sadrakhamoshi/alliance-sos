@@ -14,6 +14,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,6 +43,7 @@ import java.util.List;
 import java.util.TimeZone;
 
 public class NotificationResponseActivity extends AppCompatActivity {
+    private ProgressBar mProgressBar;
 
     private ListView listView;
     private ArrayList<String> mNames;
@@ -170,6 +172,7 @@ public class NotificationResponseActivity extends AppCompatActivity {
     }
 
     private void showAttendingMembers() {
+        mProgressBar.setVisibility(View.VISIBLE);
         mGroupRef.child(mGroupId).child("events").child(mEventId).child("members").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -182,18 +185,15 @@ public class NotificationResponseActivity extends AppCompatActivity {
                         DataSnapshot dataSnapshot = (DataSnapshot) (iterator.next());
                         String id = dataSnapshot.child("id").getValue().toString();
                         goToGroupMembersRef(id);
-//                        String name = dataSnapshot.child("name").getValue().toString();
-//                        names.add(name);
                     }
-//                    mNames.clear();
-//                    mNames.addAll(names);
-//                    adapter.notifyDataSetChanged();
+                    mProgressBar.setVisibility(View.GONE);
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Toast.makeText(NotificationResponseActivity.this, "Error in ShowAttending members " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                mProgressBar.setVisibility(View.GONE);
             }
         });
     }
@@ -310,6 +310,7 @@ public class NotificationResponseActivity extends AppCompatActivity {
     }
 
     private void InitUI() {
+        mProgressBar = findViewById(R.id.progress_notif_response);
         mNames = new ArrayList<>();
         listView = findViewById(R.id.event_member_listView);
         adapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_list_item_1, mNames);

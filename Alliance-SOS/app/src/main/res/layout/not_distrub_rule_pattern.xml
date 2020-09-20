@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="5dp"
+    android:layout_margin="7dp"
     android:layoutDirection="ltr"
     app:cardCornerRadius="10dp">
 
@@ -14,9 +14,33 @@
         android:padding="7dp">
 
         <LinearLayout
-            android:id="@+id/repeat_layout"
+            android:id="@+id/daily_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layoutDirection="ltr"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Daily :"
+                android:textColor="#000000"
+                android:textDirection="ltr"
+                android:textSize="20dp"
+                android:textStyle="italic" />
+
+            <CheckBox
+                android:id="@+id/daily_switch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:shadowRadius="10" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/daily_layout"
             android:layout_alignParentRight="true"
             android:layoutDirection="ltr"
             android:orientation="horizontal">
@@ -48,13 +72,35 @@
             android:textSize="25sp"
             android:textStyle="bold" />
 
+        <TextView
+            android:id="@+id/is_passed_do_not_disturb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@id/day_do_not_disturb"
+            android:layout_alignBottom="@id/day_do_not_disturb"
+            android:layout_marginLeft="20dp"
+            android:layout_toRightOf="@id/day_do_not_disturb"
+            android:gravity="center"
+            tools:text="passed" />
+
+
+        <TextView
+            android:id="@+id/day_in_Week_do_not_disturb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/day_do_not_disturb"
+            android:layout_alignLeft="@id/day_do_not_disturb"
+            android:layout_alignRight="@id/day_do_not_disturb"
+            android:gravity="center"
+            tools:text="wedensday" />
+
         <LinearLayout
             android:id="@+id/time_baze"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/day_do_not_disturb"
+            android:layout_below="@id/day_in_Week_do_not_disturb"
             android:layout_marginTop="12dp"
-            android:layout_toLeftOf="@id/repeat_layout"
+            android:layout_toLeftOf="@id/daily_layout"
             android:orientation="horizontal"
             android:padding="12dp">
 
@@ -65,9 +111,10 @@
                 android:layout_alignParentLeft="true"
                 android:layout_weight="1"
                 android:focusable="false"
-                tools:text="13:0"
+                android:gravity="center"
                 android:padding="5dp"
-                android:textColor="#424242" />
+                android:textColor="#424242"
+                tools:text="13:0" />
 
             <View
                 android:layout_width="20dp"
@@ -83,12 +130,22 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_weight="1"
-                android:text="13:0"
                 android:focusable="false"
+                android:gravity="center"
                 android:padding="5dp"
-                android:textColor="#424242" />
+                android:text="13:0"
+                android:textColor="#424242"
+                android:textDirection="rtl" />
 
         </LinearLayout>
+
+        <ImageView
+            android:id="@+id/delete_do_not_disturb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/time_baze"
+            android:layout_alignParentRight="true"
+            android:src="@drawable/delete_icon" />
     </RelativeLayout>
 
 </androidx.cardview.widget.CardView>

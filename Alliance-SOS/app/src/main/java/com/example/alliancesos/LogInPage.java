@@ -31,10 +31,10 @@ public class LogInPage extends AppCompatActivity {
     private EditText mEmail;
     private TextInputEditText mPass;
     private Button mLogIn;
-
+    private String ClientID = "648692468099-fgpjgivrk64lmp71murg2rbs7aik02hu.apps.googleusercontent.com";
+    
     //authentication
     private FirebaseAuth mFirebaseAuth;
-    private static final int RC_SIGN_IN = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

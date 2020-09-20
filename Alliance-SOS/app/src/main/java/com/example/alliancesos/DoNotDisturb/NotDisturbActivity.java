@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.TimePickerDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
@@ -14,6 +15,7 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
@@ -32,10 +34,8 @@ public class NotDisturbActivity extends AppCompatActivity {
     private ArrayList<notDisturbObject> mRulesList;
 
     private ChoiceApplication mChoiceDB;
-    boolean isStartTurn;
-    private TimePickerDialog.OnTimeSetListener time;
 
-    private EditText mStart, mEnd;
+    private ProgressBar mProgressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,120 +45,30 @@ public class NotDisturbActivity extends AppCompatActivity {
         new showAllRulesTask().execute();
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
 
     private void Init() {
-
+        mProgressBar = findViewById(R.id.progress_notDisturb);
         mChoiceDB = new ChoiceApplication(this);
         mRecyclerView = findViewById(R.id.not_disturbs_rv);
         mRulesList = new ArrayList<>();
-        mRulesAdapter = new notDisturbRules(NotDisturbActivity.this, mRulesList);
+        mRulesAdapter = new notDisturbRules(NotDisturbActivity.this, mRulesList, mChoiceDB);
         mRecyclerView.setAdapter(mRulesAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(NotDisturbActivity.this));
-
-        time = new TimePickerDialog.OnTimeSetListener() {
-            @Override
-            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                String time = hourOfDay + ":" + minute;
-                if (isStartTurn) {
-                    mStart.setText(time);
-                } else {
-                    mEnd.setText(time);
-                }
-            }
-        };
     }
-
 
     public void addNewNotDisturbRule(View view) {
-        final View root = getLayoutInflater().inflate(R.layout.create_new_rules, null);
-
-        setupNewRulesView(root);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(NotDisturbActivity.this, R.style.AlertDialog);
-        builder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                Long curr = System.currentTimeMillis() / 1000;
-                String id = curr.intValue() + "";
-                String day = ((EditText) root.findViewById(R.id.pick_day_rules)).getText().toString();
-                String start = mStart.getText().toString();
-                String end = mEnd.getText().toString();
-                final notDisturbObject obj = new notDisturbObject(id, day, start, end);
-                obj.repeat = ((CheckBox) root.findViewById(R.id.check_rule)).isChecked();
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mRulesAdapter.add(obj);
-                    }
-                });
-                new addToDatabaseTask(obj).execute();
-            }
-        });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-        builder.setView(root);
-        builder.create().show();
+        startActivity(new Intent(NotDisturbActivity.this, PickNotDisturbActivity.class));
     }
 
-    private void setupNewRulesView(final View root) {
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(root.getContext(), android.R.layout.select_dialog_singlechoice, WeekDay.DAYS);
-        AutoCompleteTextView dayView = root.findViewById(R.id.pick_day_rules);
-        dayView.setThreshold(1);
-        dayView.setAdapter(adapter);
-
-        mStart = root.findViewById(R.id.start_rule);
-        mEnd = root.findViewById(R.id.end_rule);
-        mStart.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                isStartTurn = true;
-                new TimePickerDialog(root.getContext(), time, 12, 30, true).show();
-            }
-        });
-        mEnd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                isStartTurn = false;
-                new TimePickerDialog(root.getContext(), time, 12, 30, true).show();
-            }
-        });
+    public void refreshNotDisturb(View view) {
+        mRulesAdapter.RemoveAll();
+        new showAllRulesTask().execute();
     }
 
-    public void goBackToUserSetting(View view) {
-        finish();
-        return;
-    }
-
-    public class addToDatabaseTask extends AsyncTask<Void, Void, Void> {
-
-        private notDisturbObject object;
-
-        public addToDatabaseTask(notDisturbObject notDisturbObject) {
-            object = notDisturbObject;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            Toast.makeText(NotDisturbActivity.this, "finish", Toast.LENGTH_SHORT).show();
-            super.onPostExecute(aVoid);
-        }
-
-        @Override
-        protected void onPreExecute() {
-            Toast.makeText(NotDisturbActivity.this, "start", Toast.LENGTH_SHORT).show();
-            super.onPreExecute();
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            mChoiceDB.appDatabase.disturbDao().insert(object);
-            return null;
-        }
-    }
 
     public class showAllRulesTask extends AsyncTask<Void, Void, Void> {
 
@@ -167,30 +77,31 @@ public class NotDisturbActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (allRules != null) {
-                        for (notDisturbObject object :
-                                allRules) {
-                            mRulesAdapter.add(object);
-                        }
-//                        mRulesAdapter.addAll(allRules);
-                    }
+            if (allRules != null) {
+                for (notDisturbObject obj :
+                        allRules) {
+                    mRulesAdapter.add(obj);
                 }
-            });
+            }
+//            mProgressBar.setVisibility(View.GONE);
         }
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+//            mProgressBar.setVisibility(View.VISIBLE);
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
             allRules = mChoiceDB.appDatabase.disturbDao().getAllRules();
-//            appDatabase.disturbDao().deleteAll();
+//            mChoiceDB.appDatabase.disturbDao().deleteAll();
             return null;
         }
+    }
+
+    public void goBackToUserSetting(View view) {
+        finish();
+        return;
     }
 }
