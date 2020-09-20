@@ -228,7 +228,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         Uri alert = Uri.parse(ring.path);
         if (alert != null) {
             mRingtone = RingtoneManager.getRingtone(getBaseContext(), alert);
-            mRingtone.play();
+            if (!mRingtone.isPlaying())
+                mRingtone.play();
             TimerTask task = new TimerTask() {
                 @Override
                 public void run() {
@@ -247,25 +248,25 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     public boolean checkDoNotDisturb() {
         List<notDisturbObject> allRules = mChoiceDB.appDatabase.disturbDao().getAllRules();
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.SECOND, 0);
+        Date now = new Date();
 
         for (final notDisturbObject object :
                 allRules) {
 
-            boolean isIn = checkTime(object, calendar);
+            boolean isIn = checkTime(object, now);
             if (isIn) {
+                Log.v("isNotRules", object + " " + now.getTime());
                 return false;
             }
         }
         return true;
     }
 
-    private boolean checkTime(notDisturbObject target, Calendar calendar) {
+    private boolean checkTime(notDisturbObject target, Date now) {
         Date start = createInstance(target, notDisturbObject.splitDate(target.day), notDisturbObject.splitTime(target.from));
         Date end = createInstance(target, notDisturbObject.splitDate(target.day), notDisturbObject.splitTime(target.until));
-        Date curr = calendar.getTime();
-        return curr.after(start) && curr.before(end);
+        Log.v("compair", start + " " + now + " " + end);
+        return now.after(start) && now.before(end);
     }
 
     public Date createInstance(notDisturbObject object, String[] dates, String[] time) {
@@ -283,7 +284,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             }
         } else {
             calendar.set(Calendar.YEAR, Integer.parseInt(dates[0]));
-            calendar.set(Calendar.MONTH, Integer.parseInt(dates[1]));
+            calendar.set(Calendar.MONTH, Integer.parseInt(dates[1]) - 1);
             calendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(dates[2]));
         }
         calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(time[0]));

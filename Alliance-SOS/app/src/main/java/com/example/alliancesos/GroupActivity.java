@@ -77,7 +77,7 @@ public class GroupActivity extends AppCompatActivity {
         //recycle view
         mRecyclerView = findViewById(R.id.event_list_rv);
         mEventList = new ArrayList<>();
-        mShowEventAdapter = new showEvents(GroupActivity.this, mEventList);
+        mShowEventAdapter = new showEvents(GroupActivity.this, mEventList,mCurrentGroupId);
         mRecyclerView.setAdapter(mShowEventAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(GroupActivity.this));
 

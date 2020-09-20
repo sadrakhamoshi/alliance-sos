@@ -2,9 +2,10 @@ package com.example.alliancesos;
 
 import android.text.TextUtils;
 
+import java.io.Serializable;
 import java.util.TimeZone;
 
-public class Event {
+public class Event implements Serializable {
     private String eventId;
     private String createdBy;
     private long timeInMillisecond;

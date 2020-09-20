@@ -51,7 +51,8 @@ public class PickNotDisturbActivity extends AppCompatActivity {
             @Override
             public void onDateSet(DatePicker view, int year, int monthOfYear,
                                   int dayOfMonth) {
-                String format = year + "/" + (monthOfYear + 1) + "/" + dayOfMonth;
+                int tmp = monthOfYear + 1;
+                String format = year + "/" + tmp + "/" + dayOfMonth;
                 mDate.setText(format);
             }
         };
@@ -72,6 +73,7 @@ public class PickNotDisturbActivity extends AppCompatActivity {
         Long id = (System.currentTimeMillis() / 1000);
         notDisturbObject newObject = new notDisturbObject(id.intValue() + "", mDate.getText().toString()
                 , mStart.getText().toString(), mEnd.getText().toString());
+        Toast.makeText(this, newObject.day, Toast.LENGTH_SHORT).show();
         newObject.repeated = mRepeat.isChecked();
         newObject.daily = mDaily.isChecked();
         addToDatabaseTask newTask = new addToDatabaseTask(newObject);

@@ -1,6 +1,7 @@
 package com.example.alliancesos.Adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.media.Image;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.alliancesos.Event;
 import com.example.alliancesos.R;
+import com.example.alliancesos.SpecificEventActivity;
 
 import java.util.ArrayList;
 
@@ -21,9 +23,10 @@ public class showEvents extends RecyclerView.Adapter<showEvents.ViewHolder> {
 
     private ArrayList<Event> mEventList;
     private Context mContext;
+    private String mGroupId;
 
-    public showEvents(Context context, ArrayList<Event> object) {
-
+    public showEvents(Context context, ArrayList<Event> object, String groupId) {
+        mGroupId = groupId;
         mEventList = object;
         mContext = context;
     }
@@ -38,16 +41,18 @@ public class showEvents extends RecyclerView.Adapter<showEvents.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull showEvents.ViewHolder holder, int position) {
-        Event curr = mEventList.get(position);
+        final Event curr = mEventList.get(position);
         holder.mTitle.setText(curr.getScheduleObject().getTitle());
         holder.mCreated.setText(curr.getCreatedBy());
         String date = curr.getScheduleObject().GetDate();
         holder.mDate.setText(date);
-
         holder.mRight.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(mContext, "go to event page", Toast.LENGTH_SHORT).show();
+                Intent goToEventActivity = new Intent(mContext, SpecificEventActivity.class);
+                goToEventActivity.putExtra("event", curr);
+                goToEventActivity.putExtra("groupId", mGroupId);
+                mContext.startActivity(goToEventActivity);
             }
         });
     }

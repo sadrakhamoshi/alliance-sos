@@ -1,6 +1,8 @@
 package com.example.alliancesos;
 
-public class ScheduleObject {
+import java.io.Serializable;
+
+public class ScheduleObject implements Serializable {
     private String title, description;
 
     private DateTime dateTime;
