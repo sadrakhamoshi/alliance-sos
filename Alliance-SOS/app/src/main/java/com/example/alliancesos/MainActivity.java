@@ -84,8 +84,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         };
-        mFirebaseAuth.addAuthStateListener(mAuthStateListener);
-
         UpdateToken();
 
         //database

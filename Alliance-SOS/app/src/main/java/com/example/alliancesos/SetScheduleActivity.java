@@ -240,7 +240,7 @@ public class SetScheduleActivity extends AppCompatActivity {
 
         SendingNotification sendingNotification = new SendingNotification(mGroupId, mGroupName
                 , mAuthorUserName, mAuthorId, getApplicationContext(), data);
-
+        sendingNotification.isInSendMode = true;
         sendingNotification.Send();
     }
 

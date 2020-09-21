@@ -77,7 +77,7 @@ public class GroupActivity extends AppCompatActivity {
         //recycle view
         mRecyclerView = findViewById(R.id.event_list_rv);
         mEventList = new ArrayList<>();
-        mShowEventAdapter = new showEvents(GroupActivity.this, mEventList,mCurrentGroupId);
+        mShowEventAdapter = new showEvents(GroupActivity.this, mEventList, mCurrentGroupId);
         mRecyclerView.setAdapter(mShowEventAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(GroupActivity.this));
 
@@ -99,6 +99,7 @@ public class GroupActivity extends AppCompatActivity {
                 DataToSend data = new DataToSend(mCurrentUserName, mCurrentGroupName, mCurrentGroupId, MessageType.SOS_TYPE);
                 SendingNotification sender = new SendingNotification(mCurrentGroupId, mCurrentGroupName,
                         mCurrentUserName, mCurrentUserId, GroupActivity.this, data);
+                sender.isInSendMode = true;
                 sender.Send();
             }
         });

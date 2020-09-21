@@ -8,6 +8,7 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -147,11 +148,9 @@ public class NotificationResponseActivity extends AppCompatActivity {
 
                     try {
                         scheduleObject = snapshot.child("scheduleObject").getValue(ScheduleObject.class);
-
                         mFrom_TimeZoneId = snapshot.child("createdTimezoneId").getValue().toString();
                         setTime();
                         Toast.makeText(NotificationResponseActivity.this, "get schedule object", Toast.LENGTH_SHORT).show();
-
                     } catch (Exception e) {
                         Toast.makeText(NotificationResponseActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
                     }
@@ -222,14 +221,19 @@ public class NotificationResponseActivity extends AppCompatActivity {
 
         if (scheduleObject != null) {
             AlarmManager alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
-            Intent intent = new Intent(this, MyAlarmService.class);
+            Intent intent = new Intent(NotificationResponseActivity.this, MyAlarmService.class);
             intent.setAction("com.example.helloandroid.alarms");
             intent.putExtra("ringEnable", mRingOrNotify);
             PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 101, intent, PendingIntent.FLAG_UPDATE_CURRENT);
             Calendar calendar = ConvertTime();
-            Toast.makeText(this, "Alarm set Successfully ....", Toast.LENGTH_SHORT).show();
             Toast.makeText(this, calendar.get(Calendar.HOUR_OF_DAY) + " " + calendar.get(Calendar.MINUTE) + " " + calendar.get(Calendar.SECOND), Toast.LENGTH_SHORT).show();
-            alarmManager.setExact(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
+            if (Build.VERSION.SDK_INT >= 23) {
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+            } else if (Build.VERSION.SDK_INT >= 19) {
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+            } else {
+                alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+            }
         } else {
             Toast.makeText(this, "schedule object is null ", Toast.LENGTH_SHORT).show();
         }

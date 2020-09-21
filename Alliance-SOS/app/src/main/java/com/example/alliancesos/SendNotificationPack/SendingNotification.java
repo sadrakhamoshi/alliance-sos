@@ -20,6 +20,7 @@ import retrofit2.Response;
 
 public class SendingNotification {
 
+    public boolean isInSendMode = false;
     private static final String BASE_URL = "https://fcm.googleapis.com/";
     private APIService mApiService;
 
@@ -41,7 +42,6 @@ public class SendingNotification {
         mFrom = from_username;
         data = dataToSendForSOS;
         mContext = context;
-
         mApiService = Client.getClient(BASE_URL).create(APIService.class);
         DatabaseReference root = FirebaseDatabase.getInstance().getReference();
         mGroupRef = root.child("groups");
@@ -102,33 +102,40 @@ public class SendingNotification {
         mGroupRef.child(this.mGroupId).child("members").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                Iterator iterator = snapshot.getChildren().iterator();
 
-                while (iterator.hasNext()) {
+                if (isInSendMode) {
 
-                    Member member = ((DataSnapshot) iterator.next()).getValue(Member.class);
-                    String id = member.getId();
+                    Iterator iterator = snapshot.getChildren().iterator();
 
-                    if (!mFrom_id.equals(id)) {
+                    while (iterator.hasNext()) {
 
-                        String userNameForThisGroup = member.getUserName();
-                        if (!member.isNotDisturb()) {
-                            goToUsersRef(id, userNameForThisGroup);
+                        Member member = ((DataSnapshot) iterator.next()).getValue(Member.class);
+                        String id = member.getId();
+
+                        if (!mFrom_id.equals(id)) {
+
+                            String userNameForThisGroup = member.getUserName();
+                            if (!member.isNotDisturb()) {
+                                goToUsersRef(id, userNameForThisGroup);
+                            } else {
+                                Toast.makeText(mContext, userNameForThisGroup + " is in Do not Disturb mode....", Toast.LENGTH_SHORT).show();
+                            }
+
                         } else {
-                            Toast.makeText(mContext, userNameForThisGroup + " is in Do not Disturb mode....", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(mContext, "not For Your self..:)", Toast.LENGTH_SHORT).show();
                         }
-
-                    } else {
-                        Toast.makeText(mContext, "not For Your self..:)", Toast.LENGTH_SHORT).show();
                     }
+                    isInSendMode = false;
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Toast.makeText(mContext, "error in sendNotification " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                isInSendMode = false;
             }
         });
+
     }
 
     private void goToUsersRef(final String userId, final String userNameForThisGroup) {
@@ -136,7 +143,6 @@ public class SendingNotification {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-//                    String name = snapshot.child("userName").getValue().toString();
                     String token = snapshot.child("token").getValue().toString();
                     sendNotif(token, userNameForThisGroup, userId);
 
