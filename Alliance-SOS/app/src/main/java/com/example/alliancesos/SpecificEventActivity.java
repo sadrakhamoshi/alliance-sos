@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -13,6 +14,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -55,7 +58,6 @@ public class SpecificEventActivity extends AppCompatActivity {
     }
 
     private void Init() {
-
         InitUI();
     }
 
@@ -84,8 +86,19 @@ public class SpecificEventActivity extends AppCompatActivity {
                 public void run() {
                     HashMap<String, String> newUid = new HashMap<>();
                     newUid.put("id", mUserId);
-                    mGroupRef.child("events").child(mCurrentEvent.getEventId()).child("members").child(mUserId).setValue(newUid);
-                    mProgress.setVisibility(View.GONE);
+                    mGroupRef.child("events").child(mCurrentEvent.getEventId()).child("members").child(mUserId).setValue(newUid)
+                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (!task.isSuccessful()) {
+                                        Toast.makeText(SpecificEventActivity.this, "Can Not join " + task.getException(), Toast.LENGTH_SHORT).show();
+                                    } else {
+                                        setAlarmOn();
+                                    }
+                                    mProgress.setVisibility(View.GONE);
+                                }
+                            });
+
                 }
             }).start();
         } else {
@@ -93,9 +106,8 @@ public class SpecificEventActivity extends AppCompatActivity {
         }
     }
 
-    public void backEventPage(View view) {
-        finish();
-        return;
+    private void setAlarmOff() {
+
     }
 
     @Override
@@ -142,19 +154,16 @@ public class SpecificEventActivity extends AppCompatActivity {
             mMemberListener = new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    mProgress.setVisibility(View.VISIBLE);
                     Iterator iterator = snapshot.getChildren().iterator();
                     mNamesList.clear();
                     while (iterator.hasNext()) {
                         String id = ((DataSnapshot) iterator.next()).getKey().toString();
                         goToGroupMembers(id);
                     }
-                    mProgress.setVisibility(View.GONE);
                 }
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
-                    mProgress.setVisibility(View.GONE);
                     Toast.makeText(SpecificEventActivity.this, "Error in show :" + error.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             };
@@ -181,5 +190,42 @@ public class SpecificEventActivity extends AppCompatActivity {
                 Toast.makeText(SpecificEventActivity.this, "error in gotoGroupMembers :" + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    public void leaveEventPage(View view) {
+        if (mNamesList.contains(mUsername)) {
+            mProgress.setVisibility(View.VISIBLE);
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    mGroupRef.child("events").child(mCurrentEvent.getEventId()).child("members").child(mUserId).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (!task.isSuccessful()) {
+                                Toast.makeText(SpecificEventActivity.this, "Task Not Done", Toast.LENGTH_SHORT).show();
+                            } else {
+                                mNamesList.remove(mUsername);
+                                adapter.notifyDataSetChanged();
+                                setAlarmOff();
+                            }
+                            mProgress.setVisibility(View.GONE);
+                        }
+                    });
+                }
+            }).start();
+
+        } else {
+            Toast.makeText(this, "You are not in the group", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void setAlarmOn() {
+
+    }
+
+
+    public void backEventPage(View view) {
+        finish();
+        return;
     }
 }
