@@ -9,7 +9,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -49,7 +51,7 @@ public class GroupProfileActivity extends AppCompatActivity {
     private TextView mGroupName_txt, mChosePhoto_txt;
     private CheckBox mNoDisturb;
     private EditText mUsername_edt, mPreset;
-    private Button mUpdate_btn;
+    private Button mUpdate_btn, mSavePreset;
     private CircleImageView mGroupImage;
 
     private String mGroupId, mGroupName, mUserId;
@@ -110,6 +112,8 @@ public class GroupProfileActivity extends AppCompatActivity {
         mChosePhoto_txt.setVisibility(View.GONE);
         mPreset.setEnabled(false);
         mPreset.setText("");
+        mPreset.setHint("Write new Preset message...");
+        mSavePreset.setEnabled(false);
         edit_mode = false;
     }
 
@@ -121,12 +125,13 @@ public class GroupProfileActivity extends AppCompatActivity {
         mEdit_image.setVisibility(View.GONE);
         mChosePhoto_txt.setVisibility(View.VISIBLE);
         mPreset.setEnabled(true);
-
+        mSavePreset.setEnabled(true);
         edit_mode = true;
     }
 
     private void InitUI() {
         mProgress = findViewById(R.id.loading_bar_group_setting);
+        mSavePreset = findViewById(R.id.save_preset_group_setting);
         mEdit_image = findViewById(R.id.edit_group_setting);
         mExit_image = findViewById(R.id.exit_edit_group_setting);
         mBackGroupImage = findViewById(R.id.back_groupImage_group_setting);
@@ -287,8 +292,10 @@ public class GroupProfileActivity extends AppCompatActivity {
                     mUpdatedNotDisturb = snapshot.child("notDisturb").getValue(Boolean.class);
                     mUpdatedUsername = snapshot.child("userName").getValue().toString();
                     mCanChangeGroupImage = snapshot.child("canChangeGroupImage").getValue(Boolean.class);
-                    if (mCanChangeGroupImage)
+                    if (mCanChangeGroupImage) {
                         mPreset.setVisibility(View.VISIBLE);
+                        mSavePreset.setVisibility(View.VISIBLE);
+                    }
                     mUsername_edt.setText(mUpdatedUsername);
                     mNoDisturb.setChecked(mUpdatedNotDisturb);
                 } else {
@@ -327,7 +334,7 @@ public class GroupProfileActivity extends AppCompatActivity {
     }
 
     public void addNewPresetMessage(View view) {
-        if (mCanChangeGroupImage) {
+        if (mCanChangeGroupImage && edit_mode) {
             mProgress.setVisibility(View.VISIBLE);
             new Thread(new Runnable() {
                 @Override
