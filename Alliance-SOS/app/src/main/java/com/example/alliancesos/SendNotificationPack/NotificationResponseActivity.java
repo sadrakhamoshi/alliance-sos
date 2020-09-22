@@ -224,7 +224,7 @@ public class NotificationResponseActivity extends AppCompatActivity {
             Intent intent = new Intent(NotificationResponseActivity.this, MyAlarmService.class);
             intent.setAction("com.example.helloandroid.alarms");
             intent.putExtra("ringEnable", mRingOrNotify);
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 101, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(this,, intent, PendingIntent.FLAG_UPDATE_CURRENT);
             Calendar calendar = ConvertTime();
             Toast.makeText(this, calendar.get(Calendar.HOUR_OF_DAY) + " " + calendar.get(Calendar.MINUTE) + " " + calendar.get(Calendar.SECOND), Toast.LENGTH_SHORT).show();
             if (Build.VERSION.SDK_INT >= 23) {
