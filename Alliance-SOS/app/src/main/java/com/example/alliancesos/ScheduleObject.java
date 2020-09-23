@@ -41,7 +41,7 @@ public class ScheduleObject implements Serializable {
 
     public String GetDate() {
         DateTime dateTime = this.getDateTime();
-        String res = dateTime.getYear() + "/" + dateTime.getMonth() + "/" + dateTime.getDay() + " " + dateTime.getHour() + ":" + dateTime.getMinute();
+        String res = dateTime.getYear() + "/" + (dateTime.getMonth() + 1) + "/" + dateTime.getDay() + " " + dateTime.getHour() + ":" + dateTime.getMinute();
         return res;
     }
 }
