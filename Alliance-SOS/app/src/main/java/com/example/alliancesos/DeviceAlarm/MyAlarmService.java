@@ -56,6 +56,7 @@ public class MyAlarmService extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         mContext = context;
+
         Toast.makeText(context, "Is In OnReceive", Toast.LENGTH_SHORT).show();
         Integer ringOrNotify = intent.getIntExtra("ringEnable", AlarmType.NOTIFICATION);
         if (ringOrNotify == AlarmType.RING) {

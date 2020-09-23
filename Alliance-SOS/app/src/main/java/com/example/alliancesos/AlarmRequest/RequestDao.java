@@ -3,6 +3,7 @@ package com.example.alliancesos.AlarmRequest;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
+import androidx.room.Query;
 
 import com.example.alliancesos.DoNotDisturb.notDisturbObject;
 
@@ -13,4 +14,7 @@ public interface RequestDao {
 
     @Delete
     void deleteRule(RequestCode requestCode);
+
+    @Query("SELECT * FROM requestCode WHERE id LIKE :id")
+    RequestCode getById(String id);
 }

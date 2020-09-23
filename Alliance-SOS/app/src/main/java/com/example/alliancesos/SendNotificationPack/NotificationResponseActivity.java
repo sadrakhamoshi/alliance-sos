@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -19,7 +20,9 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.alliancesos.AlarmRequest.RequestCode;
 import com.example.alliancesos.DateTime;
+import com.example.alliancesos.DbForRingtone.ChoiceApplication;
 import com.example.alliancesos.DeviceAlarm.MyAlarmService;
 import com.example.alliancesos.MainActivity;
 import com.example.alliancesos.R;
@@ -41,6 +44,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import java.util.TimeZone;
 
 public class NotificationResponseActivity extends AppCompatActivity {
@@ -61,11 +65,18 @@ public class NotificationResponseActivity extends AppCompatActivity {
     private String mFrom_TimeZoneId, mCurrent_TimezoneId;
 
     private DatabaseReference mGroupRef, mRootRef;
+    private ChoiceApplication mChoiceDB;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notification_response);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                mChoiceDB = new ChoiceApplication(NotificationResponseActivity.this);
+            }
+        }).start();
         Initialize();
         if (!TextUtils.isEmpty(mEventId)) {
             getCurrentTimezone();
@@ -221,10 +232,21 @@ public class NotificationResponseActivity extends AppCompatActivity {
 
         if (scheduleObject != null) {
             AlarmManager alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
+            Random r = new Random();
+            int random = r.nextInt(1000);
             Intent intent = new Intent(NotificationResponseActivity.this, MyAlarmService.class);
             intent.setAction("com.example.helloandroid.alarms");
             intent.putExtra("ringEnable", mRingOrNotify);
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(this,, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            if (mRingOrNotify == AlarmType.NOTIFICATION) {
+                if (random % 2 == 1) {
+                    random++;
+                }
+            } else {
+                if (random % 2 == 0)
+                    random++;
+            }
+            addRequestCodeToDb(random);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, random, intent, PendingIntent.FLAG_UPDATE_CURRENT);
             Calendar calendar = ConvertTime();
             Toast.makeText(this, calendar.get(Calendar.HOUR_OF_DAY) + " " + calendar.get(Calendar.MINUTE) + " " + calendar.get(Calendar.SECOND), Toast.LENGTH_SHORT).show();
             if (Build.VERSION.SDK_INT >= 23) {
@@ -237,6 +259,22 @@ public class NotificationResponseActivity extends AppCompatActivity {
         } else {
             Toast.makeText(this, "schedule object is null ", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void addRequestCodeToDb(final Integer id) {
+        mProgressBar.setVisibility(View.VISIBLE);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                mChoiceDB.appDatabase.requestDao().insert(new RequestCode(mEventId, id + ""));
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mProgressBar.setVisibility(View.GONE);
+                    }
+                });
+            }
+        }).start();
     }
 
     private Calendar ConvertTime() {
