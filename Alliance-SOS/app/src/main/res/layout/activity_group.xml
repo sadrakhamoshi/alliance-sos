@@ -7,6 +7,7 @@
     android:padding="10dp"
     tools:context=".GroupActivity">
 
+
     <Button
         android:id="@+id/member_list_btn"
         android:layout_width="wrap_content"
@@ -52,6 +53,7 @@
         android:background="@drawable/sos_back_ground"
         android:text="sos" />
 
+
     <Button
         android:id="@+id/groups_list_btn"
         android:layout_width="wrap_content"
@@ -79,8 +81,13 @@
         android:text="Schedule Event"
         android:textSize="25sp" />
 
+    <ProgressBar
+        android:id="@+id/progress_group_act"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true" />
+
     <androidx.recyclerview.widget.RecyclerView
-        android:background="#9F5252"
         android:id="@+id/event_list_rv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -88,6 +95,7 @@
         android:layout_below="@id/schedule_event"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"
+        android:background="#9F5252"
         android:layoutDirection="ltr"
         android:textDirection="ltr" />
 

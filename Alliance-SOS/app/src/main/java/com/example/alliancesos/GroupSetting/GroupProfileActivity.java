@@ -339,7 +339,7 @@ public class GroupProfileActivity extends AppCompatActivity {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    mRootRef.child("groups").child(mGroupId).child("preset_message").push().setValue(mPreset.getText().toString()).
+                    mRootRef.child("groups").child(mGroupId).child("preset_message").child("message").setValue(mPreset.getText().toString()).
                             addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {

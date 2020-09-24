@@ -1,6 +1,8 @@
 package com.example.alliancesos.SendNotificationPack;
 
 import android.content.Context;
+import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -145,7 +147,6 @@ public class SendingNotification {
                 if (snapshot.exists()) {
                     String token = snapshot.child("token").getValue().toString();
                     sendNotif(token, userNameForThisGroup, userId);
-
                 } else {
                     Toast.makeText(mContext, "not exist for sending notifi....", Toast.LENGTH_SHORT).show();
                 }

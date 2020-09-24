@@ -375,7 +375,6 @@ public class SpecificEventActivity extends AppCompatActivity {
 
     }
 
-
     public void backEventPage(View view) {
         finish();
         return;
