@@ -92,7 +92,7 @@ public class SpecificEventActivity extends AppCompatActivity {
         mTitle.setText(mCurrentEvent.getScheduleObject().getTitle());
         mCreated.setText(mCurrentEvent.getCreatedBy());
         mDescribe.setText(mCurrentEvent.getScheduleObject().getDescription());
-        mDate.setText(mCurrentEvent.getScheduleObject().GetDate());
+        mDate.setText(mCurrentEvent.getScheduleObject().GetDate(mCurrentEvent.getCreatedTimezoneId(), TimeZone.getDefault().getID()));
     }
 
     public void joinEventPage(View view) {
@@ -356,7 +356,6 @@ public class SpecificEventActivity extends AppCompatActivity {
                     int ringType = Integer.parseInt(target.reqCode) % 2;
                     AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
                     Intent myIntent = new Intent(SpecificEventActivity.this, MyAlarmService.class);
-                    myIntent.setAction("com.example.helloandroid.alarms");
                     myIntent.putExtra("ringEnable", ringType);
                     PendingIntent pendingIntent = PendingIntent.getBroadcast(
                             SpecificEventActivity.this, Integer.parseInt(target.reqCode), myIntent, PendingIntent.FLAG_UPDATE_CURRENT);

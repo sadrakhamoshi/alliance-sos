@@ -20,6 +20,7 @@ import android.widget.ProgressBar;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.example.alliancesos.DeviceAlarm.MyAlarmService;
 import com.example.alliancesos.SendNotificationPack.DataToSend;
 import com.example.alliancesos.SendNotificationPack.SendingNotification;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -221,7 +222,6 @@ public class SetScheduleActivity extends AppCompatActivity {
                             if (task.isSuccessful()) {
                                 SortUpcomingEventTask sort = new SortUpcomingEventTask();
                                 sort.execute();
-//                                Toast.makeText(SetScheduleActivity.this, "Message Successfully added to Database...", Toast.LENGTH_SHORT).show();
                             } else {
                                 Toast.makeText(SetScheduleActivity.this, "Can't add Author to event members...", Toast.LENGTH_SHORT).show();
                             }
@@ -335,5 +335,10 @@ public class SetScheduleActivity extends AppCompatActivity {
             });
             return null;
         }
+    }
+
+    private void SetAlarmForMySelf() {
+        Intent intent = new Intent(getApplicationContext(), MyAlarmService.class);
+
     }
 }

@@ -36,6 +36,20 @@ public class MyAlarmService extends BroadcastReceiver {
     Context mContext;
     Ringtone mRingtone;
 
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        mContext = context;
+
+        Toast.makeText(context, "Is In OnReceive", Toast.LENGTH_SHORT).show();
+        Integer ringOrNotify = intent.getIntExtra("ringEnable", AlarmType.NOTIFICATION);
+        if (ringOrNotify == AlarmType.RING) {
+            Toast.makeText(context, "time is up!!!!.", Toast.LENGTH_LONG).show();
+            playRingtone();
+        }
+        makeNotification();
+
+    }
+
     private void playRingtone() {
         Uri alert = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
         mRingtone = RingtoneManager.getRingtone(mContext, alert);
@@ -52,26 +66,6 @@ public class MyAlarmService extends BroadcastReceiver {
         timer.schedule(task, 4000);
     }
 
-
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        mContext = context;
-
-        Toast.makeText(context, "Is In OnReceive", Toast.LENGTH_SHORT).show();
-        Integer ringOrNotify = intent.getIntExtra("ringEnable", AlarmType.NOTIFICATION);
-        if (ringOrNotify == AlarmType.RING) {
-            if (intent.getAction().equals("com.example.helloandroid.alarms")) {
-                Toast.makeText(context, "time is up!!!!.", Toast.LENGTH_LONG).show();
-                // Vibrate the mobile phone
-                Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
-                vibrator.vibrate(2000);
-                playRingtone();
-            }
-        } else {
-            makeNotification();
-        }
-
-    }
 
     private void makeNotification() {
         NotificationCompat.Builder builder =

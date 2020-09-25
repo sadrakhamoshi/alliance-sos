@@ -51,8 +51,15 @@ public class ShowGroup extends RecyclerView.Adapter<ShowGroup.ViewHolder> {
         holder.groupName.setText(name);
 
         UpComingEvent currEvent = mUpComingEventArrayList.get(position);
-        holder.groupEvent.setText("event: " + currEvent.getUpcomingName());
-        holder.groupTime.setText("Date: " + currEvent.getUpcomingTime());
+
+        String eventName = currEvent.getUpcomingName();
+        if (eventName.length() > 10) {
+            eventName = eventName.substring(0, 8);
+            eventName += "...";
+        }
+        holder.groupEvent.setText("event: " + eventName);
+
+        holder.groupTime.setText("Date:" + currEvent.getUpcomingTime());
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
