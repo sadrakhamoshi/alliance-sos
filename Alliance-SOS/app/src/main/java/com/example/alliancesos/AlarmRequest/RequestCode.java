@@ -18,7 +18,6 @@ public class RequestCode {
 
 
     public RequestCode() {
-
     }
 
     public RequestCode(String id, String reqCode) {

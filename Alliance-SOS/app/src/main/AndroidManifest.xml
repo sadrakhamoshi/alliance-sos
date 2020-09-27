@@ -51,14 +51,12 @@
             </intent-filter>
         </service>
 
+
         <receiver
-            android:name=".DeviceAlarm.MyAlarmService"
+            android:name=".DeviceAlarm.MyAlarmReceiver"
             android:enabled="true"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="com.example.helloandroid.alarms" />
-            </intent-filter>
-        </receiver>
+            android:exported="true" />
+
     </application>
 
 </manifest>

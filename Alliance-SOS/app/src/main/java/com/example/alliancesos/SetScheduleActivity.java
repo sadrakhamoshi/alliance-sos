@@ -5,11 +5,15 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import androidx.appcompat.app.AlertDialog;
 
+import android.app.AlarmManager;
 import android.app.DatePickerDialog;
+import android.app.PendingIntent;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -20,9 +24,12 @@ import android.widget.ProgressBar;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import com.example.alliancesos.DeviceAlarm.MyAlarmService;
+import com.example.alliancesos.AlarmRequest.RequestCode;
+import com.example.alliancesos.DbForRingtone.ChoiceApplication;
+import com.example.alliancesos.DeviceAlarm.MyAlarmReceiver;
 import com.example.alliancesos.SendNotificationPack.DataToSend;
 import com.example.alliancesos.SendNotificationPack.SendingNotification;
+import com.example.alliancesos.Utils.AlarmType;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
@@ -38,6 +45,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Random;
 
 public class SetScheduleActivity extends AppCompatActivity {
 
@@ -64,6 +72,9 @@ public class SetScheduleActivity extends AppCompatActivity {
     private Calendar mCalendar;
     private DatePickerDialog.OnDateSetListener date;
 
+    //ApplicationChoicer
+    private ChoiceApplication mChoiceDB;
+
 
     //time
     private TimePickerDialog.OnTimeSetListener time;
@@ -73,6 +84,12 @@ public class SetScheduleActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_set_schedule);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                mChoiceDB = new ChoiceApplication(SetScheduleActivity.this);
+            }
+        }).start();
         Intent fromGroupAct = getIntent();
         if (fromGroupAct != null) {
             mGroupId = fromGroupAct.getStringExtra("groupId");
@@ -188,8 +205,6 @@ public class SetScheduleActivity extends AppCompatActivity {
     }
 
     private Date computeScheduleInMilliSecond(DateTime dateTime) throws ParseException {
-
-//        String dtStart = "2010-10-15T09:27:37Z";
         String dt = dateTime.getYear() + "-" + dateTime.getMonth() + "-" + dateTime.getDay() + "T" + dateTime.getHour() + ":" + dateTime.getMinute() + ":0Z";
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
@@ -204,6 +219,22 @@ public class SetScheduleActivity extends AppCompatActivity {
     }
 
     private void sendMessageToDB() {
+        Random random = new Random();
+        int id = random.nextInt(1000);
+        if (id % 2 == 0) {
+            id++;
+        }
+        final int finalId = id;
+        Date calendar = convertSchToCalendar(mEvent.getScheduleObject().getDateTime());
+        SetAlarmForMySelf(finalId, calendar);
+        Toast.makeText(this, mEvent.getEventId(), Toast.LENGTH_SHORT).show();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                mChoiceDB.appDatabase.requestDao().insert(new RequestCode(mEvent.getEventId(), finalId + ""));
+            }
+        }).start();
+
         mEvent.setCreatedBy(mAuthorUserName);
         final String key = mGroupsRef.child(mGroupId).child("events").push().getKey();
         mEvent.setEventId(key);
@@ -233,6 +264,21 @@ public class SetScheduleActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private Date convertSchToCalendar(DateTime dateTime) {
+
+        int Month = Integer.parseInt(dateTime.getMonth()) + 1;
+        String dateTime_combine = dateTime.getYear() + "/" + Month + "/" + dateTime.getDay() + "T"
+                + dateTime.getHour() + "/" + dateTime.getMinute() + "/00Z";
+        String pattern = "yyyy/MM/dd'T'HH/mm/ss'Z'";
+        SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
+        try {
+            Date result = dateFormat.parse(dateTime_combine);
+            return result;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private void sendNotificationToOtherDevice() {
@@ -337,8 +383,17 @@ public class SetScheduleActivity extends AppCompatActivity {
         }
     }
 
-    private void SetAlarmForMySelf() {
-        Intent intent = new Intent(getApplicationContext(), MyAlarmService.class);
-
+    private void SetAlarmForMySelf(Integer id, Date calendar) {
+        AlarmManager alarmManager = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(getApplicationContext(), MyAlarmReceiver.class);
+        intent.putExtra("ringEnable", AlarmType.RING);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        Toast.makeText(this, id + " " + calendar, Toast.LENGTH_SHORT).show();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (calendar.getTime() > System.currentTimeMillis()) {
+                Toast.makeText(this, "set alarm", Toast.LENGTH_SHORT).show();
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTime(), pendingIntent);
+            }
+        }
     }
 }

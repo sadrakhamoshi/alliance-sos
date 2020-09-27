@@ -6,44 +6,39 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.alliancesos.AlarmRequest.RequestCode;
-import com.example.alliancesos.DateTime;
 import com.example.alliancesos.DbForRingtone.ChoiceApplication;
-import com.example.alliancesos.DeviceAlarm.MyAlarmService;
+import com.example.alliancesos.DeviceAlarm.MyAlarmReceiver;
 import com.example.alliancesos.MainActivity;
 import com.example.alliancesos.R;
 import com.example.alliancesos.ScheduleObject;
 import com.example.alliancesos.Utils.AlarmType;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Random;
 import java.util.TimeZone;
 
@@ -230,10 +225,10 @@ public class NotificationResponseActivity extends AppCompatActivity {
 
     public void setAlarm() {
         if (scheduleObject != null) {
-            AlarmManager alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
+            AlarmManager alarmManager = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
             Random r = new Random();
             int random = r.nextInt(1000);
-            Intent intent = new Intent(getApplicationContext(), MyAlarmService.class);
+            Intent intent = new Intent(getApplicationContext(), MyAlarmReceiver.class);
             intent.putExtra("ringEnable", mRingOrNotify);
 
             if (mRingOrNotify == AlarmType.NOTIFICATION) {
@@ -251,11 +246,10 @@ public class NotificationResponseActivity extends AppCompatActivity {
 
             Toast.makeText(this, mConvertedCalendar.get(Calendar.HOUR_OF_DAY) + " " + mConvertedCalendar.get(Calendar.MINUTE) + " " + mConvertedCalendar.get(Calendar.SECOND), Toast.LENGTH_SHORT).show();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, mConvertedCalendar.getTimeInMillis(), pendingIntent);
-            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                alarmManager.setExact(AlarmManager.RTC_WAKEUP, mConvertedCalendar.getTimeInMillis(), pendingIntent);
-            } else {
-                alarmManager.set(AlarmManager.RTC_WAKEUP, mConvertedCalendar.getTimeInMillis(), pendingIntent);
+                if (mConvertedCalendar.getTimeInMillis() > new Date().getTime()) {
+                    Toast.makeText(this, "set Successfully", Toast.LENGTH_SHORT).show();
+                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, mConvertedCalendar.getTimeInMillis(), pendingIntent);
+                }
             }
         } else {
             Toast.makeText(this, "schedule object is null ", Toast.LENGTH_SHORT).show();
@@ -267,7 +261,8 @@ public class NotificationResponseActivity extends AppCompatActivity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                mChoiceDB.appDatabase.requestDao().insert(new RequestCode(mEventId, id + ""));
+                RequestCode newCode = new RequestCode(mEventId, id + "");
+                mChoiceDB.appDatabase.requestDao().insert(newCode);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {

@@ -322,7 +322,11 @@ public class GroupActivity extends AppCompatActivity {
                 public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                     try {
                         Event event = snapshot.getValue(Event.class);
-                        mShowEventAdapter.add(event);
+                        if (event.getTimeInMillisecond() * -1 >= System.currentTimeMillis()) {
+                            mShowEventAdapter.add(event);
+                        } else {
+                            //delete task fro data base
+                        }
                         mProgress.setVisibility(View.GONE);
                     } catch (Exception e) {
                         Toast.makeText(GroupActivity.this, "Error in cast :" + e.getMessage(), Toast.LENGTH_SHORT).show();

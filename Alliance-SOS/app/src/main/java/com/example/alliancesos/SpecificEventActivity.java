@@ -20,8 +20,7 @@ import android.widget.Toast;
 
 import com.example.alliancesos.AlarmRequest.RequestCode;
 import com.example.alliancesos.DbForRingtone.ChoiceApplication;
-import com.example.alliancesos.DeviceAlarm.MyAlarmService;
-import com.example.alliancesos.SendNotificationPack.NotificationResponseActivity;
+import com.example.alliancesos.DeviceAlarm.MyAlarmReceiver;
 import com.example.alliancesos.Utils.AlarmType;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -256,23 +255,20 @@ public class SpecificEventActivity extends AppCompatActivity {
     public void setAlarm(ScheduleObject scheduleObject, String createdZoneId) {
 
         if (scheduleObject != null) {
-            AlarmManager alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
-            Intent intent = new Intent(SpecificEventActivity.this, MyAlarmService.class);
-            intent.setAction("com.example.helloandroid.alarms");
+            AlarmManager alarmManager = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+            Intent intent = new Intent(getApplicationContext(), MyAlarmReceiver.class);
             intent.putExtra("ringEnable", AlarmType.RING);
             Random r = new Random();
             Integer random = r.nextInt(1000);
             addRequestCodeToDb(random);
-            Log.v("reqCode", random + "");
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, random, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), random, intent, PendingIntent.FLAG_UPDATE_CURRENT);
             Calendar calendar = ConvertTime(scheduleObject, createdZoneId, TimeZone.getDefault().getID());
             Toast.makeText(this, calendar.get(Calendar.HOUR_OF_DAY) + " " + calendar.get(Calendar.MINUTE) + " " + calendar.get(Calendar.SECOND), Toast.LENGTH_SHORT).show();
-            if (Build.VERSION.SDK_INT >= 23) {
-                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
-            } else if (Build.VERSION.SDK_INT >= 19) {
-                alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
-            } else {
-                alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (calendar.getTimeInMillis() > System.currentTimeMillis()) {
+                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+                    Toast.makeText(this, "set Successfully", Toast.LENGTH_SHORT).show();
+                }
             }
         } else {
             Toast.makeText(this, "schedule object is null ", Toast.LENGTH_SHORT).show();
@@ -354,8 +350,8 @@ public class SpecificEventActivity extends AppCompatActivity {
                     RequestCode target = mChoiceDB.appDatabase.requestDao().getById(mCurrentEvent.getEventId());
                     mChoiceDB.appDatabase.requestDao().deleteRule(target);
                     int ringType = Integer.parseInt(target.reqCode) % 2;
-                    AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-                    Intent myIntent = new Intent(SpecificEventActivity.this, MyAlarmService.class);
+                    AlarmManager alarmManager = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+                    Intent myIntent = new Intent(getApplicationContext(), MyAlarmReceiver.class);
                     myIntent.putExtra("ringEnable", ringType);
                     PendingIntent pendingIntent = PendingIntent.getBroadcast(
                             SpecificEventActivity.this, Integer.parseInt(target.reqCode), myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
