@@ -76,6 +76,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     String eventId;
     private ChoiceApplication mChoiceDB;
 
+    private String mSosId;
+
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
@@ -155,6 +157,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         if (type == MessageType.SOS_TYPE) {
             String sos_message = remoteMessage.getData().get("sosMessage");
             String photo_url = remoteMessage.getData().get("photoUrl");
+            mSosId = remoteMessage.getData().get("sosId");
 
             notificationColor = Color.RED;
             notificationIcon = R.drawable.sos_icon;
@@ -234,13 +237,19 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     }
 
     private PendingIntent getPendingIntent(Context context) {
-        if (type == MessageType.NOTIFICATION_TYPE || type == MessageType.SOS_TYPE) {
+        if (type == MessageType.NOTIFICATION_TYPE) {
             Intent intent = new Intent(context, NotificationResponseActivity.class);
             intent.putExtra("groupId", groupId);
             intent.putExtra("eventId", eventId);
             intent.putExtra("toName", toName);
             intent.putExtra("toId", toId);
 
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            return PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        } else if (type == MessageType.SOS_TYPE) {
+            Intent intent = new Intent(context, SOSResponseActivity.class);
+            intent.putExtra("sosId", mSosId);
+            intent.putExtra("groupId", groupId);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             return PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         } else {
