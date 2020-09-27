@@ -8,6 +8,24 @@ public class DataToSend {
     private String groupId;
     private String eventId;
     private int type;
+    private String photoUrl;
+    private String sosMessage;
+
+    public String getSosMessage() {
+        return sosMessage;
+    }
+
+    public String getPhotoUrl() {
+        return photoUrl;
+    }
+
+    public void setPhotoUrl(String photoUrl) {
+        this.photoUrl = photoUrl;
+    }
+
+    public void setSosMessage(String sosMessage) {
+        this.sosMessage = sosMessage;
+    }
 
     public String getToId() {
         return toId;

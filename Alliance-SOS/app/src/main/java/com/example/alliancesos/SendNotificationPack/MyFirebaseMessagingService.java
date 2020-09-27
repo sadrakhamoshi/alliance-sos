@@ -8,6 +8,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -36,7 +37,10 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.example.alliancesos.DoNotDisturb.*;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.RequestCreator;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.Calendar;
@@ -50,8 +54,10 @@ import java.util.TimerTask;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
-    private static final long DELAY_TIME = 60 * 1000;
+    private static final long DELAY_TIME = 2 * 60 * 1000;
     public static final String NOTIFICATION_CHANNEL_ID = "10001";
+
+    private Bitmap notificationPhoto;
 
     private DatabaseReference mRootRef;
     private String mUserId;
@@ -80,17 +86,26 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         mChoiceDB = new ChoiceApplication(mContext);
 
         if (type == MessageType.INVITATION_TYPE) {
-            Initialize(remoteMessage);
-            buildNotification(mContext);
+            try {
+                Initialize(remoteMessage);
+                buildNotification(mContext);
+            } catch (Exception e) {
+                Log.v("Init", e.getMessage());
+            }
+
 
         } else {
             boolean isNotInRules = checkDoNotDisturb();
             if (isNotInRules) {
-                Initialize(remoteMessage);
-                buildNotification(mContext);
-                if (type == MessageType.SOS_TYPE) {
-                    if (!isMissed)
-                        playRingtone();
+                try {
+                    Initialize(remoteMessage);
+                    buildNotification(mContext);
+                    if (type == MessageType.SOS_TYPE) {
+                        if (!isMissed)
+                            playRingtone();
+                    }
+                } catch (Exception e) {
+                    Log.v("Init", e.getMessage());
                 }
             }
         }
@@ -130,7 +145,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         });
     }
 
-    private void Initialize(RemoteMessage remoteMessage) {
+    private void Initialize(RemoteMessage remoteMessage) throws IOException {
         eventId = toName = toId = "";
         groupName = remoteMessage.getData().get("groupName");
         groupId = remoteMessage.getData().get("groupId");
@@ -138,14 +153,23 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         toId = remoteMessage.getData().get("toId");
 
         if (type == MessageType.SOS_TYPE) {
+            String sos_message = remoteMessage.getData().get("sosMessage");
+            String photo_url = remoteMessage.getData().get("photoUrl");
 
             notificationColor = Color.RED;
             notificationIcon = R.drawable.sos_icon;
 
             title = "Emergency Moment !!!!";
-            if (!isMissed)
-                message = "SOS button has clicked by " + makeBy + " from " + groupName;
-            else {
+            if (!isMissed) {
+                if (sos_message == null) {
+                    message = "SOS button has clicked by " + makeBy + " from " + groupName;
+                    RequestCreator creator = Picasso.get().load(photo_url);
+                    notificationPhoto = creator.get();
+                } else {
+                    message = sos_message;
+                }
+
+            } else {
                 message = "You Have One Missed SOS Emergency Moment from " + groupName;
                 title = "MISSED SOS !!!";
             }
@@ -186,6 +210,12 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         if (type == MessageType.NOTIFICATION_TYPE || type == MessageType.INVITATION_TYPE) {
             builder.setSound(alarmSound);
         }
+        if (type == MessageType.SOS_TYPE && notificationPhoto != null) {
+            builder.setLargeIcon(notificationPhoto);
+            builder.setStyle(new NotificationCompat.BigPictureStyle()
+                    .bigPicture(notificationPhoto)
+                    .bigLargeIcon(null));
+        }
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
@@ -200,6 +230,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         notification.flags |= Notification.FLAG_AUTO_CANCEL;
         int id = (int) ((new Date().getTime() / 1000L) % Integer.MAX_VALUE);
         notificationManager.notify(id, notification);
+        notificationPhoto = null;
     }
 
     private PendingIntent getPendingIntent(Context context) {
@@ -255,7 +286,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
             boolean isIn = checkTime(object, now);
             if (isIn) {
-                Log.v("isNotRules", object + " " + now.getTime());
                 return false;
             }
         }

@@ -6,40 +6,40 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.alliancesos.DateTime;
-import com.example.alliancesos.DeviceAlarm.MyAlarmService;
+import com.example.alliancesos.AlarmRequest.RequestCode;
+import com.example.alliancesos.DbForRingtone.ChoiceApplication;
+import com.example.alliancesos.DeviceAlarm.MyAlarmReceiver;
 import com.example.alliancesos.MainActivity;
 import com.example.alliancesos.R;
 import com.example.alliancesos.ScheduleObject;
 import com.example.alliancesos.Utils.AlarmType;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
+import java.util.Random;
 import java.util.TimeZone;
 
 public class NotificationResponseActivity extends AppCompatActivity {
@@ -51,7 +51,7 @@ public class NotificationResponseActivity extends AppCompatActivity {
 
     private String mGroupId, mEventId;
 
-    private String mCurrUsername, mCurrUserId;
+    private String mCurrUserId;
 
     private Integer mRingOrNotify;
 
@@ -60,11 +60,20 @@ public class NotificationResponseActivity extends AppCompatActivity {
     private String mFrom_TimeZoneId, mCurrent_TimezoneId;
 
     private DatabaseReference mGroupRef, mRootRef;
+    private ChoiceApplication mChoiceDB;
+
+    private Calendar mConvertedCalendar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notification_response);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                mChoiceDB = new ChoiceApplication(NotificationResponseActivity.this);
+            }
+        }).start();
         Initialize();
         if (!TextUtils.isEmpty(mEventId)) {
             getCurrentTimezone();
@@ -79,6 +88,19 @@ public class NotificationResponseActivity extends AppCompatActivity {
         mCurrent_TimezoneId = "";
         getExtra();
         InitUI();
+    }
+
+    private void getExtra() {
+        Bundle bundle = getIntent().getExtras();
+        mEventId = bundle.getString("eventId");
+        if (TextUtils.isEmpty(mEventId)) {
+            finish();
+            return;
+        }
+        mGroupId = bundle.getString("groupId");
+        setGroupId();
+        mCurrUserId = bundle.getString("toId");
+        getRingOrNotify();
     }
 
     private void getRingOrNotify() {
@@ -101,20 +123,6 @@ public class NotificationResponseActivity extends AppCompatActivity {
                 Toast.makeText(NotificationResponseActivity.this, "canceled getting ringable.. " + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
-    }
-
-    private void getExtra() {
-        Bundle bundle = getIntent().getExtras();
-        mEventId = bundle.getString("eventId");
-        if (TextUtils.isEmpty(mEventId)) {
-            finish();
-            return;
-        }
-        mGroupId = bundle.getString("groupId");
-        setGroupId();
-        mCurrUserId = bundle.getString("toId");
-        mCurrUsername = bundle.getString("toName");
-        getRingOrNotify();
     }
 
     private void setGroupId() {
@@ -144,14 +152,11 @@ public class NotificationResponseActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-
                     try {
                         scheduleObject = snapshot.child("scheduleObject").getValue(ScheduleObject.class);
-
                         mFrom_TimeZoneId = snapshot.child("createdTimezoneId").getValue().toString();
                         setTime();
                         Toast.makeText(NotificationResponseActivity.this, "get schedule object", Toast.LENGTH_SHORT).show();
-
                     } catch (Exception e) {
                         Toast.makeText(NotificationResponseActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
                     }
@@ -166,8 +171,8 @@ public class NotificationResponseActivity extends AppCompatActivity {
     }
 
     private void setTime() {
-        Calendar calendar = ConvertTime();
-        String time = calendar.getTime().toString();
+        mConvertedCalendar = ConvertTime();
+        String time = mConvertedCalendar.getTime().toString();
         ((TextView) findViewById(R.id.noti_response_group_time)).setText("Date : " + time);
     }
 
@@ -219,20 +224,53 @@ public class NotificationResponseActivity extends AppCompatActivity {
     }
 
     public void setAlarm() {
-
         if (scheduleObject != null) {
-            AlarmManager alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
-            Intent intent = new Intent(this, MyAlarmService.class);
-            intent.setAction("com.example.helloandroid.alarms");
+            AlarmManager alarmManager = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+            Random r = new Random();
+            int random = r.nextInt(1000);
+            Intent intent = new Intent(getApplicationContext(), MyAlarmReceiver.class);
             intent.putExtra("ringEnable", mRingOrNotify);
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 101, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-            Calendar calendar = ConvertTime();
-            Toast.makeText(this, "Alarm set Successfully ....", Toast.LENGTH_SHORT).show();
-            Toast.makeText(this, calendar.get(Calendar.HOUR_OF_DAY) + " " + calendar.get(Calendar.MINUTE) + " " + calendar.get(Calendar.SECOND), Toast.LENGTH_SHORT).show();
-            alarmManager.setExact(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
+
+            if (mRingOrNotify == AlarmType.NOTIFICATION) {
+                if (random % 2 == 1) {
+                    random++;
+                }
+            } else {
+                if (random % 2 == 0)
+                    random++;
+            }
+
+            addRequestCodeToDb(random);
+
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), random, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+            Toast.makeText(this, mConvertedCalendar.get(Calendar.HOUR_OF_DAY) + " " + mConvertedCalendar.get(Calendar.MINUTE) + " " + mConvertedCalendar.get(Calendar.SECOND), Toast.LENGTH_SHORT).show();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (mConvertedCalendar.getTimeInMillis() > new Date().getTime()) {
+                    Toast.makeText(this, "set Successfully", Toast.LENGTH_SHORT).show();
+                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, mConvertedCalendar.getTimeInMillis(), pendingIntent);
+                }
+            }
         } else {
             Toast.makeText(this, "schedule object is null ", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void addRequestCodeToDb(final Integer id) {
+        mProgressBar.setVisibility(View.VISIBLE);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                RequestCode newCode = new RequestCode(mEventId, id + "");
+                mChoiceDB.appDatabase.requestDao().insert(newCode);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mProgressBar.setVisibility(View.GONE);
+                    }
+                });
+            }
+        }).start();
     }
 
     private Calendar ConvertTime() {
@@ -259,7 +297,6 @@ public class NotificationResponseActivity extends AppCompatActivity {
         }
         if (from.contains("-")) {
             m_from *= -1;
-//            h_from *= -1;
         }
         Date targetTime_in_GMT = new Date(calendar.getTimeInMillis() - (h_from * 60 * 60 * 1000 + m_from * 60 * 1000));
 
@@ -280,7 +317,6 @@ public class NotificationResponseActivity extends AppCompatActivity {
         }
         if (target.contains("-")) {
             m_target *= -1;
-//            h_target *= -1;
         }
         Date newDate = new Date(targetTime_in_GMT.getTime() + (h_target * 60 * 60 * 1000 + m_target * 60 * 1000));
         calendar.setTime(newDate);

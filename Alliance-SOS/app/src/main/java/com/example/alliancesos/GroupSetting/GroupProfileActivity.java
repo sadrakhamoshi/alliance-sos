@@ -5,20 +5,14 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.app.ProgressDialog;
-import android.content.ActivityNotFoundException;
-import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.ResolveInfo;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.MediaStore;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -30,7 +24,6 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.example.alliancesos.Member;
 import com.example.alliancesos.R;
-import com.google.android.gms.auth.api.signin.internal.Storage;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
@@ -47,6 +40,8 @@ import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
 
+import java.util.HashMap;
+
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class GroupProfileActivity extends AppCompatActivity {
@@ -55,8 +50,8 @@ public class GroupProfileActivity extends AppCompatActivity {
     private ImageView mEdit_image, mExit_image, mBackGroupImage;
     private TextView mGroupName_txt, mChosePhoto_txt;
     private CheckBox mNoDisturb;
-    private EditText mUsername_edt;
-    private Button mUpdate_btn;
+    private EditText mUsername_edt, mPreset;
+    private Button mUpdate_btn, mSavePreset;
     private CircleImageView mGroupImage;
 
     private String mGroupId, mGroupName, mUserId;
@@ -69,7 +64,7 @@ public class GroupProfileActivity extends AppCompatActivity {
 
     private boolean edit_mode;
 
-    private ProgressBar loadingBar;
+    private ProgressBar mProgress;
 
 
     @Override
@@ -115,6 +110,10 @@ public class GroupProfileActivity extends AppCompatActivity {
         mExit_image.setVisibility(View.GONE);
         mEdit_image.setVisibility(View.VISIBLE);
         mChosePhoto_txt.setVisibility(View.GONE);
+        mPreset.setEnabled(false);
+        mPreset.setText("");
+        mPreset.setHint("Write new Preset message...");
+        mSavePreset.setEnabled(false);
         edit_mode = false;
     }
 
@@ -125,11 +124,14 @@ public class GroupProfileActivity extends AppCompatActivity {
         mExit_image.setVisibility(View.VISIBLE);
         mEdit_image.setVisibility(View.GONE);
         mChosePhoto_txt.setVisibility(View.VISIBLE);
+        mPreset.setEnabled(true);
+        mSavePreset.setEnabled(true);
         edit_mode = true;
     }
 
     private void InitUI() {
-        loadingBar = findViewById(R.id.loading_bar_group_setting);
+        mProgress = findViewById(R.id.loading_bar_group_setting);
+        mSavePreset = findViewById(R.id.save_preset_group_setting);
         mEdit_image = findViewById(R.id.edit_group_setting);
         mExit_image = findViewById(R.id.exit_edit_group_setting);
         mBackGroupImage = findViewById(R.id.back_groupImage_group_setting);
@@ -143,6 +145,7 @@ public class GroupProfileActivity extends AppCompatActivity {
         mUsername_edt = findViewById(R.id.username_group_setting);
         mGroupImage = findViewById(R.id.groupImage_group_setting);
         mUpdate_btn = findViewById(R.id.update_group_setting);
+        mPreset = findViewById(R.id.preset_message_group_setting);
     }
 
 
@@ -182,7 +185,7 @@ public class GroupProfileActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if(edit_mode){
+        if (edit_mode) {
             exitEditMode();
         }
         super.onBackPressed();
@@ -203,7 +206,7 @@ public class GroupProfileActivity extends AppCompatActivity {
         if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
             CropImage.ActivityResult result = CropImage.getActivityResult(data);
             final Uri photo = result.getUri();
-            loadingBar.setVisibility(View.VISIBLE);
+            mProgress.setVisibility(View.VISIBLE);
 
             final StorageReference filepath = mGroupProfileRef.child(mGroupId + ".jpg");
             filepath.putFile(photo).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
@@ -230,24 +233,24 @@ public class GroupProfileActivity extends AppCompatActivity {
                                                 Glide.with(getApplicationContext())
                                                         .load(photo)
                                                         .into(mGroupImage);
-                                                loadingBar.setVisibility(View.GONE);
+                                                mProgress.setVisibility(View.GONE);
 
                                             } else {
-                                                loadingBar.setVisibility(View.GONE);
+                                                mProgress.setVisibility(View.GONE);
                                                 Toast.makeText(GroupProfileActivity.this, "Error :" + task.getException(), Toast.LENGTH_SHORT).show();
                                             }
                                         }
                                     });
 
                                 } else {
-                                    loadingBar.setVisibility(View.GONE);
+                                    mProgress.setVisibility(View.GONE);
                                     Toast.makeText(GroupProfileActivity.this, "Error " + task.getException(), Toast.LENGTH_SHORT).show();
                                 }
                             }
                         });
 
                     } else {
-                        loadingBar.setVisibility(View.GONE);
+                        mProgress.setVisibility(View.GONE);
                         Toast.makeText(GroupProfileActivity.this, "Error: " + task.getException().toString(), Toast.LENGTH_SHORT).show();
                     }
                 }
@@ -259,7 +262,7 @@ public class GroupProfileActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         if (!edit_mode) {
-            loadingBar.setVisibility(View.VISIBLE);
+            mProgress.setVisibility(View.VISIBLE);
             forTestAlertDialog();
             getBasicInfo();
             getImage();
@@ -289,6 +292,10 @@ public class GroupProfileActivity extends AppCompatActivity {
                     mUpdatedNotDisturb = snapshot.child("notDisturb").getValue(Boolean.class);
                     mUpdatedUsername = snapshot.child("userName").getValue().toString();
                     mCanChangeGroupImage = snapshot.child("canChangeGroupImage").getValue(Boolean.class);
+                    if (mCanChangeGroupImage) {
+                        mPreset.setVisibility(View.VISIBLE);
+                        mSavePreset.setVisibility(View.VISIBLE);
+                    }
                     mUsername_edt.setText(mUpdatedUsername);
                     mNoDisturb.setChecked(mUpdatedNotDisturb);
                 } else {
@@ -304,25 +311,46 @@ public class GroupProfileActivity extends AppCompatActivity {
     }
 
     private void getImage() {
-        loadingBar.setVisibility(View.VISIBLE);
+        mProgress.setVisibility(View.VISIBLE);
         mRootRef.child("groups").child(mGroupId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 String url = snapshot.child("image").getValue().toString();
                 if (!TextUtils.isEmpty(url)) {
-                    loadingBar.setVisibility(View.VISIBLE);
+                    mProgress.setVisibility(View.VISIBLE);
                     RequestCreator requestCreator = Picasso.get().load(url);
                     requestCreator.into(mBackGroupImage);
                     requestCreator.into(mGroupImage);
                 }
-                loadingBar.setVisibility(View.GONE);
+                mProgress.setVisibility(View.GONE);
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Toast.makeText(GroupProfileActivity.this, "error :" + error.getMessage() + error.getDetails(), Toast.LENGTH_SHORT).show();
-                loadingBar.setVisibility(View.GONE);
+                mProgress.setVisibility(View.GONE);
             }
         });
+    }
+
+    public void addNewPresetMessage(View view) {
+        if (mCanChangeGroupImage && edit_mode) {
+            mProgress.setVisibility(View.VISIBLE);
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    mRootRef.child("groups").child(mGroupId).child("preset_message").child("message").setValue(mPreset.getText().toString()).
+                            addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (!task.isSuccessful()) {
+                                        Toast.makeText(GroupProfileActivity.this, "error " + task.getException(), Toast.LENGTH_SHORT).show();
+                                    }
+                                    mProgress.setVisibility(View.GONE);
+                                }
+                            });
+                }
+            }).start();
+        }
     }
 }

@@ -15,7 +15,8 @@ public class ChoiceApplication {
     public ChoiceApplication(Context context) {
         appDatabase = Room.databaseBuilder(context, AppDatabase.class, "choice_db")
                 .addMigrations(createMigration())
-                .addMigrations(createMigration3_4()).build();
+                .addMigrations(createMigration3_4())
+                .addMigrations(createMigration4_5()).build();
     }
 
     private static Migration createMigration() {
@@ -34,6 +35,16 @@ public class ChoiceApplication {
             public void migrate(@NonNull SupportSQLiteDatabase database) {
                 database.execSQL("CREATE TABLE IF NOT EXISTS `ringtone` (`id` STRING, "
                         + "`path` STRING , PRIMARY KEY(`id`))");
+            }
+        };
+    }
+
+    private static Migration createMigration4_5() {
+        return new Migration(4, 5) {
+            @Override
+            public void migrate(@NonNull SupportSQLiteDatabase database) {
+                database.execSQL("CREATE TABLE IF NOT EXISTS `requestCode` (`id` STRING, "
+                        + "`reqCode` STRING , PRIMARY KEY(`id`))");
             }
         };
     }

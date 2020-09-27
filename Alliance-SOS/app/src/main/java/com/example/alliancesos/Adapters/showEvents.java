@@ -18,6 +18,7 @@ import com.example.alliancesos.R;
 import com.example.alliancesos.SpecificEventActivity;
 
 import java.util.ArrayList;
+import java.util.TimeZone;
 
 public class showEvents extends RecyclerView.Adapter<showEvents.ViewHolder> {
 
@@ -44,7 +45,7 @@ public class showEvents extends RecyclerView.Adapter<showEvents.ViewHolder> {
         final Event curr = mEventList.get(position);
         holder.mTitle.setText(curr.getScheduleObject().getTitle());
         holder.mCreated.setText(curr.getCreatedBy());
-        String date = curr.getScheduleObject().GetDate();
+        String date = curr.getScheduleObject().GetDate(curr.getCreatedTimezoneId(), TimeZone.getDefault().getID());
         holder.mDate.setText(date);
         holder.mRight.setOnClickListener(new View.OnClickListener() {
             @Override
