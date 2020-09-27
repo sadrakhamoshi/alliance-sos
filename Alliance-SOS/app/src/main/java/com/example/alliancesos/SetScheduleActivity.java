@@ -205,7 +205,8 @@ public class SetScheduleActivity extends AppCompatActivity {
     }
 
     private Date computeScheduleInMilliSecond(DateTime dateTime) throws ParseException {
-        String dt = dateTime.getYear() + "-" + dateTime.getMonth() + "-" + dateTime.getDay() + "T" + dateTime.getHour() + ":" + dateTime.getMinute() + ":0Z";
+        int Month = Integer.parseInt(dateTime.getMonth()) + 1;
+        String dt = dateTime.getYear() + "-" + Month + "-" + dateTime.getDay() + "T" + dateTime.getHour() + ":" + dateTime.getMinute() + ":0Z";
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
         Date date = format.parse(dt);

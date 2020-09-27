@@ -43,6 +43,7 @@ import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 
 public class GroupActivity extends AppCompatActivity {
@@ -317,15 +318,18 @@ public class GroupActivity extends AppCompatActivity {
 
     private void attachListener() {
         if (mEventListener == null) {
+            final Date date = new Date();
+            final long time = date.getTime() - 1000 * 60;
             mEventListener = new ChildEventListener() {
                 @Override
                 public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                     try {
                         Event event = snapshot.getValue(Event.class);
-                        if (event.getTimeInMillisecond() * -1 >= System.currentTimeMillis()) {
+                        Long value = event.getTimeInMillisecond() * -1;
+                        if (time < value) {
                             mShowEventAdapter.add(event);
                         } else {
-                            //delete task fro data base
+                            //delete task from data base
                         }
                         mProgress.setVisibility(View.GONE);
                     } catch (Exception e) {

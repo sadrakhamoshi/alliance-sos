@@ -253,6 +253,7 @@ public class SpecificEventActivity extends AppCompatActivity {
     }
 
     public void setAlarm(ScheduleObject scheduleObject, String createdZoneId) {
+
         if (scheduleObject != null) {
             AlarmManager alarmManager = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
             Intent intent = new Intent(getApplicationContext(), MyAlarmReceiver.class);
@@ -263,7 +264,6 @@ public class SpecificEventActivity extends AppCompatActivity {
             PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), random, intent, PendingIntent.FLAG_UPDATE_CURRENT);
             Calendar calendar = ConvertTime(scheduleObject, createdZoneId, TimeZone.getDefault().getID());
             Toast.makeText(this, calendar.get(Calendar.HOUR_OF_DAY) + " " + calendar.get(Calendar.MINUTE) + " " + calendar.get(Calendar.SECOND), Toast.LENGTH_SHORT).show();
-
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 if (calendar.getTimeInMillis() > System.currentTimeMillis()) {
                     alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
