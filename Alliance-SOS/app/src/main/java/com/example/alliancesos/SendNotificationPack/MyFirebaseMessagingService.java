@@ -92,10 +92,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 Initialize(remoteMessage);
                 buildNotification(mContext);
             } catch (Exception e) {
-                Log.v("Init", e.getMessage());
             }
-
-
         } else {
             boolean isNotInRules = checkDoNotDisturb();
             if (isNotInRules) {
@@ -264,7 +261,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private void playRingtone() {
         ringtone ring = mChoiceDB.appDatabase.dao().currentPath(toId);
-
         Uri alert = Uri.parse(ring.path);
         if (alert != null) {
             mRingtone = RingtoneManager.getRingtone(getBaseContext(), alert);
