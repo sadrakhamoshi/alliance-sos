@@ -227,17 +227,12 @@ public class SetScheduleActivity extends AppCompatActivity {
         final int finalId = id;
         Date calendar = convertSchToCalendar(mEvent.getScheduleObject().getDateTime());
         SetAlarmForMySelf(finalId, calendar);
-        Toast.makeText(this, mEvent.getEventId(), Toast.LENGTH_SHORT).show();
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                mChoiceDB.appDatabase.requestDao().insert(new RequestCode(mEvent.getEventId(), finalId + ""));
-            }
-        }).start();
 
         mEvent.setCreatedBy(mAuthorUserName);
         final String key = mGroupsRef.child(mGroupId).child("events").push().getKey();
         mEvent.setEventId(key);
+
+        AddToLocalDatabase(finalId);
         mGroupsRef.child(mGroupId).child("events").child(key).setValue(mEvent).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
@@ -264,6 +259,17 @@ public class SetScheduleActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private void AddToLocalDatabase(final int finalId) {
+        Toast.makeText(this, mEvent.getEventId(), Toast.LENGTH_SHORT).show();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                RequestCode code = new RequestCode(mEvent.getEventId(), finalId + "");
+                mChoiceDB.appDatabase.requestDao().insert(code);
+            }
+        }).start();
     }
 
     private Date convertSchToCalendar(DateTime dateTime) {
