@@ -25,6 +25,7 @@ import android.widget.Toast;
 import com.example.alliancesos.Adapters.showEvents;
 import com.example.alliancesos.GroupSetting.GroupProfileActivity;
 import com.example.alliancesos.SendNotificationPack.DataToSend;
+import com.example.alliancesos.SendNotificationPack.SOSLogActivity;
 import com.example.alliancesos.SendNotificationPack.SendingNotification;
 import com.example.alliancesos.Utils.MessageType;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -374,6 +375,12 @@ public class GroupActivity extends AppCompatActivity {
 
     private void showAllEvent() {
         attachListener();
+    }
+
+    public void goToSOSLog(View view) {
+        Intent intent = new Intent(GroupActivity.this, SOSLogActivity.class);
+        intent.putExtra("groupId", mCurrentGroupId);
+        startActivity(intent);
     }
 
     private class AddSOSToDB extends AsyncTask<Void, Void, Void> {

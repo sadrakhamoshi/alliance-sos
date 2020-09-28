@@ -13,27 +13,21 @@ import android.graphics.Color;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.os.Vibrator;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
-import androidx.room.Room;
 
-import com.example.alliancesos.DbForRingtone.AppDatabase;
 import com.example.alliancesos.DbForRingtone.ChoiceApplication;
 import com.example.alliancesos.DbForRingtone.ringtone;
 import com.example.alliancesos.R;
+import com.example.alliancesos.SpecificSOSActivity;
 import com.example.alliancesos.Utils.MessageType;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.example.alliancesos.DoNotDisturb.*;
@@ -41,14 +35,9 @@ import com.squareup.picasso.Picasso;
 import com.squareup.picasso.RequestCreator;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -75,15 +64,15 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     String groupName, groupId, makeBy;
     String eventId;
     private ChoiceApplication mChoiceDB;
-
+    private long sentTime;
     private String mSosId;
 
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
         type = Integer.valueOf(remoteMessage.getData().get("type"));
-
-        isMissed = System.currentTimeMillis() - remoteMessage.getSentTime() > DELAY_TIME;
+        sentTime = remoteMessage.getSentTime();
+        isMissed = System.currentTimeMillis() - sentTime > DELAY_TIME;
         mContext = getApplicationContext();
         mChoiceDB = new ChoiceApplication(mContext);
 
@@ -244,9 +233,10 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             return PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         } else if (type == MessageType.SOS_TYPE) {
-            Intent intent = new Intent(context, SOSResponseActivity.class);
+            Intent intent = new Intent(context, SpecificSOSActivity.class);
             intent.putExtra("sosId", mSosId);
             intent.putExtra("groupId", groupId);
+            intent.putExtra("time", sentTime);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             return PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         } else {

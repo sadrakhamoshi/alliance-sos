@@ -16,7 +16,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
 import com.example.alliancesos.R;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -25,13 +24,11 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Request;
-import com.squareup.picasso.RequestCreator;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 
-public class SOSResponseActivity extends AppCompatActivity {
+public class SOSLogActivity extends AppCompatActivity {
 
     private ListView mListView;
     private ArrayList<String> mSosList;
@@ -72,13 +69,13 @@ public class SOSResponseActivity extends AppCompatActivity {
                         showSosTask showSosTask = new showSosTask(snapshot);
                         showSosTask.execute();
                     } else {
-                        Toast.makeText(SOSResponseActivity.this, "Not Exist", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(SOSLogActivity.this, "Not Exist", Toast.LENGTH_SHORT).show();
                     }
                 }
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
-                    Toast.makeText(SOSResponseActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(SOSLogActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             };
             mSosRef.addValueEventListener(mSosListener);
@@ -137,7 +134,7 @@ public class SOSResponseActivity extends AppCompatActivity {
 
                 @Override
                 public void onError(Exception e) {
-                    Toast.makeText(SOSResponseActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(SOSLogActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             });
             mAdapter.notifyDataSetChanged();
