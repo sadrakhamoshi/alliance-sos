@@ -68,7 +68,7 @@ public class ScheduleObject implements Serializable {
         from = from.replace("GMT", "").replace("+", "").replace("-", "");
         to = to.replace("GMT", "").replace("+", "").replace("-", "");
 
-        SimpleDateFormat format = new SimpleDateFormat("hh:mm");
+        SimpleDateFormat format = new SimpleDateFormat("HH:mm");
         Date date1 = format.parse(from);
         Date date2 = format.parse(to);
 
