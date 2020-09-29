@@ -58,34 +58,21 @@ public class ScheduleObject implements Serializable {
         calendar.set(Calendar.MINUTE, Integer.parseInt(this.getDateTime().getMinute()));
         calendar.set(Calendar.SECOND, 0);
 
-        int multi_from = 1;
-        int multi_to = 1;
-        String from = TimeZone.getTimeZone(mFrom_TimeZoneId).getDisplayName(false, TimeZone.SHORT);
-        if (from.contains("-"))
-            multi_from = -1;
-        String to = TimeZone.getTimeZone(mTo_TimezoneId).getDisplayName(false, TimeZone.SHORT);
-        if (to.contains("-1"))
-            multi_to = -1;
-        from = from.replace("GMT", "").replace("+", "").replace("-", "");
-        to = to.replace("GMT", "").replace("+", "").replace("-", "");
-        SimpleDateFormat format = new SimpleDateFormat("HH:mm");
-        long time = 0;
-        try {
-            Date date1 = format.parse(from);
-            Date date2 = format.parse(to);
-            long diff = date2.getTime() * multi_to - date1.getTime() * multi_from;
+        TimeZone from = TimeZone.getTimeZone(mFrom_TimeZoneId);
+        TimeZone to = TimeZone.getTimeZone(mTo_TimezoneId);
+        int from_offset = from.getOffset(Calendar.ZONE_OFFSET);
+        int to_offset = to.getOffset(Calendar.ZONE_OFFSET);
 
-            int hours = (int) (diff / (1000 * 60 * 60));
-            int minutes = (int) ((diff / (1000 * 60)) % 60);
-            time = calendar.getTimeInMillis() + 60 * 60 * 1000 * hours + 60 * 1000 * minutes;
-            Date newDate = new Date(time);
+        long diff = to_offset - from_offset;
 
-            String pattern = "MM/dd/yyyy HH:mm";
-            SimpleDateFormat df = new SimpleDateFormat(pattern, Locale.ENGLISH);
-            String res = df.format(newDate);
-            return res;
-        } catch (Exception e) {
-            return from + "   " + to + "  " + time + "  \n" + e + "  \n" + mFrom_TimeZoneId + " " + mTo_TimezoneId;
-        }
+        int minutes = (int) ((diff / (1000 * 60)) % 60);
+        long time = calendar.getTimeInMillis() + diff;
+        Date newDate = new Date(time);
+
+        String pattern = "MM/dd/yyyy HH:mm";
+        SimpleDateFormat df = new SimpleDateFormat(pattern, Locale.ENGLISH);
+        String res = df.format(newDate);
+        return res;
+
     }
 }
