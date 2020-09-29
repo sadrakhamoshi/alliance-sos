@@ -1,5 +1,6 @@
 package com.example.alliancesos;
 
+import android.content.Context;
 import android.text.TextUtils;
 import android.widget.Toast;
 
@@ -48,7 +49,7 @@ public class ScheduleObject implements Serializable {
         this.title = title;
     }
 
-    public String GetDate(String mFrom_TimeZoneId, String mTo_TimezoneId) throws ParseException {
+    public String GetDate(String mFrom_TimeZoneId, String mTo_TimezoneId) {
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.YEAR, Integer.parseInt(this.getDateTime().getYear()));
         calendar.set(Calendar.MONTH, Integer.parseInt(this.getDateTime().getMonth()));
@@ -59,28 +60,32 @@ public class ScheduleObject implements Serializable {
 
         int multi_from = 1;
         int multi_to = 1;
-        String from = TimeZone.getTimeZone(mFrom_TimeZoneId).getDisplayName(true, TimeZone.SHORT);
+        String from = TimeZone.getTimeZone(mFrom_TimeZoneId).getDisplayName(false, TimeZone.SHORT);
         if (from.contains("-"))
             multi_from = -1;
-        String to = TimeZone.getTimeZone(mTo_TimezoneId).getDisplayName(true, TimeZone.SHORT);
+        String to = TimeZone.getTimeZone(mTo_TimezoneId).getDisplayName(false, TimeZone.SHORT);
         if (to.contains("-1"))
             multi_to = -1;
         from = from.replace("GMT", "").replace("+", "").replace("-", "");
         to = to.replace("GMT", "").replace("+", "").replace("-", "");
-
         SimpleDateFormat format = new SimpleDateFormat("HH:mm");
-        Date date1 = format.parse(from);
-        Date date2 = format.parse(to);
+        long time = 0;
+        try {
+            Date date1 = format.parse(from);
+            Date date2 = format.parse(to);
+            long diff = date2.getTime() * multi_to - date1.getTime() * multi_from;
 
-        long diff = date2.getTime() * multi_to - date1.getTime() * multi_from;
+            int hours = (int) (diff / (1000 * 60 * 60));
+            int minutes = (int) ((diff / (1000 * 60)) % 60);
+            time = calendar.getTimeInMillis() + 60 * 60 * 1000 * hours + 60 * 1000 * minutes;
+            Date newDate = new Date(time);
 
-        int hours = (int) (diff / (1000 * 60 * 60));
-        int minutes = (int) ((diff / (1000 * 60)) % 60);
-        Date newDate = new Date(calendar.getTimeInMillis() + 60 * 60 * 1000 * hours + 60 * 1000 * minutes);
-
-        String pattern = "MM/dd/yyyy HH:mm";
-        SimpleDateFormat df = new SimpleDateFormat(pattern, Locale.ENGLISH);
-        String res = df.format(newDate);
-        return res;
+            String pattern = "MM/dd/yyyy HH:mm";
+            SimpleDateFormat df = new SimpleDateFormat(pattern, Locale.ENGLISH);
+            String res = df.format(newDate);
+            return res;
+        } catch (Exception e) {
+            return from + "   " + to + "  " + time + "  \n" + e + "  \n" + mFrom_TimeZoneId + " " + mTo_TimezoneId;
+        }
     }
 }

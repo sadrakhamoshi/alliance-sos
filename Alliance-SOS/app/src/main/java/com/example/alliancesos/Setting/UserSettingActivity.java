@@ -311,7 +311,8 @@ public class UserSettingActivity extends AppCompatActivity {
         mEmail.setText(mCurrUserInfo.getEmail());
         mPass.setText(mCurrUserInfo.getPassword());
         mUsername.setText(mCurrUserInfo.getUserName());
-        mTime.setText(mCurrUserInfo.getTimeZone());
+//        mTime.setText(mCurrUserInfo.getTimeZone());
+        mTime.setText(TimeZone.getDefault().getID());
         mLanguage.setText(mCurrUserInfo.getLanguage());
         mRingEnable.setChecked(true);
     }
@@ -585,7 +586,7 @@ public class UserSettingActivity extends AppCompatActivity {
         mPass.setEnabled(true);
         mUsername.setEnabled(true);
         mRingEnable.setEnabled(true);
-        mTime.setEnabled(true);
+//        mTime.setEnabled(true);
         mLanguage.setEnabled(true);
         mChosePhoto.setVisibility(View.VISIBLE);
     }
@@ -599,7 +600,7 @@ public class UserSettingActivity extends AppCompatActivity {
         mPass.setEnabled(false);
         mUsername.setEnabled(false);
         mRingEnable.setEnabled(false);
-        mTime.setEnabled(false);
+//        mTime.setEnabled(false);
         mLanguage.setEnabled(false);
         mChosePhoto.setVisibility(View.GONE);
     }

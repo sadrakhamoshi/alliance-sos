@@ -45,12 +45,8 @@ public class showEvents extends RecyclerView.Adapter<showEvents.ViewHolder> {
         final Event curr = mEventList.get(position);
         holder.mTitle.setText(curr.getScheduleObject().getTitle());
         holder.mCreated.setText(curr.getCreatedBy());
-        try {
-            String date = curr.getScheduleObject().GetDate(curr.getCreatedTimezoneId(), TimeZone.getDefault().getID());
-            holder.mDate.setText(date);
-        } catch (Exception e) {
-            Toast.makeText(mContext, e.getMessage(), Toast.LENGTH_SHORT).show();
-        }
+        String date = curr.getScheduleObject().GetDate(curr.getCreatedTimezoneId(), TimeZone.getDefault().getID());
+        holder.mDate.setText(date);
         holder.mRight.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
