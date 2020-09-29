@@ -263,7 +263,6 @@ public class GroupProfileActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         if (!edit_mode) {
-            mProgress.setVisibility(View.VISIBLE);
             forTestAlertDialog();
             getBasicInfo();
             getImage();
@@ -333,6 +332,8 @@ public class GroupProfileActivity extends AppCompatActivity {
                     RequestCreator requestCreator = Picasso.get().load(url);
                     requestCreator.into(mBackGroupImage);
                     requestCreator.into(mGroupImage, callback);
+                } else {
+                    mProgress.setVisibility(View.GONE);
                 }
             }
 

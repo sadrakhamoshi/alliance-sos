@@ -91,7 +91,11 @@ public class SpecificEventActivity extends AppCompatActivity {
         mTitle.setText(mCurrentEvent.getScheduleObject().getTitle());
         mCreated.setText(mCurrentEvent.getCreatedBy());
         mDescribe.setText(mCurrentEvent.getScheduleObject().getDescription());
-        mDate.setText(mCurrentEvent.getScheduleObject().GetDate(mCurrentEvent.getCreatedTimezoneId(), TimeZone.getDefault().getID()));
+        try {
+            mDate.setText(mCurrentEvent.getScheduleObject().GetDate(mCurrentEvent.getCreatedTimezoneId(), TimeZone.getDefault().getID()));
+        } catch (Exception e) {
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     public void joinEventPage(View view) {
