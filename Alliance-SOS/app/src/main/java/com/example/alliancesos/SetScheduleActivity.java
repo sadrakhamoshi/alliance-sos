@@ -46,6 +46,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Random;
+import java.util.TimeZone;
 
 public class SetScheduleActivity extends AppCompatActivity {
 
@@ -102,21 +103,22 @@ public class SetScheduleActivity extends AppCompatActivity {
     }
 
     private void getCurrentTimezone() {
-        mRootRef.child("users").child(mAuthorId).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    mAuthorTimezone = snapshot.child("timeZone").getValue().toString();
-                } else {
-                    Toast.makeText(SetScheduleActivity.this, "not exist user...", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(SetScheduleActivity.this, "onCancelled " + error.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
+        mAuthorTimezone = TimeZone.getDefault().getID();
+//        mRootRef.child("users").child(mAuthorId).addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot snapshot) {
+//                if (snapshot.exists()) {
+//                    mAuthorTimezone = snapshot.child("timeZone").getValue().toString();
+//                } else {
+//                    Toast.makeText(SetScheduleActivity.this, "not exist user...", Toast.LENGTH_SHORT).show();
+//                }
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError error) {
+//                Toast.makeText(SetScheduleActivity.this, "onCancelled " + error.getMessage(), Toast.LENGTH_SHORT).show();
+//            }
+//        });
     }
 
     private void Initialize() {
@@ -274,7 +276,6 @@ public class SetScheduleActivity extends AppCompatActivity {
     }
 
     private Date convertSchToCalendar(DateTime dateTime) {
-
         int Month = Integer.parseInt(dateTime.getMonth()) + 1;
         String dateTime_combine = dateTime.getYear() + "/" + Month + "/" + dateTime.getDay() + "T"
                 + dateTime.getHour() + "/" + dateTime.getMinute() + "/00Z";
