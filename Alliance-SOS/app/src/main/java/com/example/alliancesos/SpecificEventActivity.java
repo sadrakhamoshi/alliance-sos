@@ -266,11 +266,11 @@ public class SpecificEventActivity extends AppCompatActivity {
             Integer random = r.nextInt(1000);
             addRequestCodeToDb(random);
             PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), random, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-            Calendar calendar = ConvertTime(scheduleObject, createdZoneId, TimeZone.getDefault().getID());
-            Toast.makeText(this, calendar.get(Calendar.HOUR_OF_DAY) + " " + calendar.get(Calendar.MINUTE) + " " + calendar.get(Calendar.SECOND), Toast.LENGTH_SHORT).show();
+            Date calendar = ConvertTime(scheduleObject, createdZoneId, TimeZone.getDefault().getID());
+            Toast.makeText(this, calendar + "", Toast.LENGTH_SHORT).show();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if (calendar.getTimeInMillis() > System.currentTimeMillis()) {
-                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+                if (calendar.getTime() > System.currentTimeMillis()) {
+                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTime(), pendingIntent);
                     Toast.makeText(this, "set Successfully", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -294,7 +294,7 @@ public class SpecificEventActivity extends AppCompatActivity {
         }).start();
     }
 
-    private Calendar ConvertTime(ScheduleObject scheduleObject, String mFrom_TimeZoneId, String mCurrent_TimezoneId) {
+    private Date ConvertTime(ScheduleObject scheduleObject, String mFrom_TimeZoneId, String mTo_TimezoneId) {
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.YEAR, Integer.parseInt(scheduleObject.getDateTime().getYear()));
         calendar.set(Calendar.MONTH, Integer.parseInt(scheduleObject.getDateTime().getMonth()));
@@ -303,47 +303,16 @@ public class SpecificEventActivity extends AppCompatActivity {
         calendar.set(Calendar.MINUTE, Integer.parseInt(scheduleObject.getDateTime().getMinute()));
         calendar.set(Calendar.SECOND, 0);
 
-        String from = TimeZone.getTimeZone(mFrom_TimeZoneId).getDisplayName(true, TimeZone.SHORT);
-        from = from.replace("GMT", "");
-        String[] h_m_seperated = from.split(":");
+        TimeZone from = TimeZone.getTimeZone(mFrom_TimeZoneId);
+        TimeZone to = TimeZone.getTimeZone(mTo_TimezoneId);
+        int from_offset = from.getOffset(Calendar.ZONE_OFFSET);
+        int to_offset = to.getOffset(Calendar.ZONE_OFFSET);
 
-        Integer h_from = 0, m_from = 0;
-        try {
-            h_from = Integer.parseInt(h_m_seperated[0]);
-        } catch (Exception e) {
-        }
-        try {
-            m_from = Integer.parseInt(h_m_seperated[1]);
-        } catch (Exception e) {
-        }
-        if (from.contains("-")) {
-            m_from *= -1;
-//            h_from *= -1;
-        }
-        Date targetTime_in_GMT = new Date(calendar.getTimeInMillis() - (h_from * 60 * 60 * 1000 + m_from * 60 * 1000));
+        int diff = to_offset - from_offset;
 
-        if (TextUtils.isEmpty(mCurrent_TimezoneId)) {
-            mCurrent_TimezoneId = TimeZone.getDefault().getID();
-        }
-        String target = TimeZone.getTimeZone(mCurrent_TimezoneId).getDisplayName(true, TimeZone.SHORT);
-        target = target.replace("GMT", "");
-        String[] h_m_spereated2 = target.split(":");
-        Integer h_target = 0, m_target = 0;
-        try {
-            h_target = Integer.parseInt(h_m_spereated2[0]);
-        } catch (Exception e) {
-        }
-        try {
-            m_target = Integer.parseInt(h_m_spereated2[1]);
-        } catch (Exception e) {
-        }
-        if (target.contains("-")) {
-            m_target *= -1;
-//            h_target *= -1;
-        }
-        Date newDate = new Date(targetTime_in_GMT.getTime() + (h_target * 60 * 60 * 1000 + m_target * 60 * 1000));
-        calendar.setTime(newDate);
-        return calendar;
+        long time = calendar.getTimeInMillis() + diff;
+        Date newDate = new Date(time);
+        return newDate;
     }
 
     private void setAlarmOff() {
