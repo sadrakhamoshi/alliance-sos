@@ -63,9 +63,8 @@ public class ScheduleObject implements Serializable {
         int from_offset = from.getOffset(Calendar.ZONE_OFFSET);
         int to_offset = to.getOffset(Calendar.ZONE_OFFSET);
 
-        long diff = to_offset - from_offset;
+        int diff = to_offset - from_offset;
 
-        int minutes = (int) ((diff / (1000 * 60)) % 60);
         long time = calendar.getTimeInMillis() + diff;
         Date newDate = new Date(time);
 
