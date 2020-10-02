@@ -28,50 +28,23 @@
         android:textSize="20sp"
         tools:text="groupName" />
 
-    <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/profile_image"
-        android:layout_width="96dp"
-        android:layout_height="96dp"
-        android:layout_below="@id/member_list_btn"
-        android:layout_marginTop="30dp"
-        android:layout_toLeftOf="@id/member_list_btn"
-        android:layout_toRightOf="@id/group_name_txt"
-        android:src="@drawable/un_known"
-        app:civ_border_color="@color/colorPrimaryDark"
-        app:civ_border_width="2dp" />
 
     <Button
         android:id="@+id/sos_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@id/schedule_event"
-        android:layout_below="@id/profile_image"
+        android:layout_above="@id/group_sos_log"
+        android:layout_below="@id/group_name_txt"
+        android:layout_alignLeft="@id/schedule_event"
+        android:layout_alignRight="@id/schedule_event"
         android:layout_centerInParent="true"
-        android:layout_margin="15dp"
-        android:layout_toLeftOf="@id/member_list_btn"
-        android:layout_toRightOf="@id/group_name_txt"
+        android:layout_marginTop="40dp"
+        android:layout_marginBottom="15dp"
         android:background="@drawable/sos_back_ground"
-        android:text="sos" />
-
-
-    <Button
-        android:id="@+id/groups_list_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignRight="@id/group_name_txt"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentBottom="true"
-        android:text="Groups" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@id/member_list_btn"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
-        android:onClick="gotoGroupSetting"
-        android:text="group setting"
-        android:textAllCaps="false" />
+        android:text="SOS"
+        android:textColor="#FFFFFF"
+        android:textSize="25sp"
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/schedule_event"
@@ -80,6 +53,58 @@
         android:layout_centerInParent="true"
         android:text="Schedule Event"
         android:textSize="25sp" />
+
+    <TextView
+        android:id="@+id/group_sos_log"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/schedule_event"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="15dp"
+        android:onClick="goToSOSLog"
+        android:text="SOS Log"
+        android:textColor="@color/red"
+        android:textSize="25sp"
+        android:textStyle="italic" />
+
+    <LinearLayout
+        android:id="@+id/end_page_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/groups_list_btn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentBottom="true"
+            android:layout_weight="1"
+            android:text="Groups" />
+
+        <Button
+            android:id="@+id/group_setting"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginLeft="5dp"
+            android:onClick="gotoGroupSetting"
+            android:text="group setting"
+            android:textAllCaps="false" />
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginLeft="5dp"
+            android:layout_weight="1"
+            android:onClick="goToHelpUs"
+            android:text="help us" />
+    </LinearLayout>
+
 
     <ProgressBar
         android:id="@+id/progress_group_act"
@@ -92,21 +117,14 @@
         android:id="@+id/event_list_rv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@id/groups_list_btn"
+        android:layout_above="@id/end_page_layout"
         android:layout_below="@id/schedule_event"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"
-        android:background="#9F5252"
+        android:background="#E88686"
         android:layoutDirection="ltr"
+        android:padding="7dp"
         android:textDirection="ltr" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:onClick="goToHelpUs"
-        android:text="help us" />
 
 
 </RelativeLayout>

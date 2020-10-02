@@ -34,6 +34,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.RequestCreator;
 import com.theartofdev.edmodo.cropper.CropImage;
@@ -262,7 +263,6 @@ public class GroupProfileActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         if (!edit_mode) {
-            mProgress.setVisibility(View.VISIBLE);
             forTestAlertDialog();
             getBasicInfo();
             getImage();
@@ -318,11 +318,23 @@ public class GroupProfileActivity extends AppCompatActivity {
                 String url = snapshot.child("image").getValue().toString();
                 if (!TextUtils.isEmpty(url)) {
                     mProgress.setVisibility(View.VISIBLE);
+                    Callback callback = new Callback() {
+                        @Override
+                        public void onSuccess() {
+                            mProgress.setVisibility(View.GONE);
+                        }
+
+                        @Override
+                        public void onError(Exception e) {
+                            Toast.makeText(GroupProfileActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    };
                     RequestCreator requestCreator = Picasso.get().load(url);
                     requestCreator.into(mBackGroupImage);
-                    requestCreator.into(mGroupImage);
+                    requestCreator.into(mGroupImage, callback);
+                } else {
+                    mProgress.setVisibility(View.GONE);
                 }
-                mProgress.setVisibility(View.GONE);
             }
 
             @Override

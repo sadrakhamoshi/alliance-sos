@@ -57,12 +57,12 @@ public class NotificationResponseActivity extends AppCompatActivity {
 
     private ScheduleObject scheduleObject;
 
-    private String mFrom_TimeZoneId, mCurrent_TimezoneId;
+    private String mFrom_TimeZoneId;
 
     private DatabaseReference mGroupRef, mRootRef;
     private ChoiceApplication mChoiceDB;
 
-    private Calendar mConvertedCalendar;
+    private Date mConvertedDate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,9 +75,6 @@ public class NotificationResponseActivity extends AppCompatActivity {
             }
         }).start();
         Initialize();
-        if (!TextUtils.isEmpty(mEventId)) {
-            getCurrentTimezone();
-        }
     }
 
     private void Initialize() {
@@ -85,7 +82,6 @@ public class NotificationResponseActivity extends AppCompatActivity {
         //database
         mRootRef = FirebaseDatabase.getInstance().getReference();
         mGroupRef = mRootRef.child("groups");
-        mCurrent_TimezoneId = "";
         getExtra();
         InitUI();
     }
@@ -171,9 +167,8 @@ public class NotificationResponseActivity extends AppCompatActivity {
     }
 
     private void setTime() {
-        mConvertedCalendar = ConvertTime();
-        String time = mConvertedCalendar.getTime().toString();
-        ((TextView) findViewById(R.id.noti_response_group_time)).setText("Date : " + time);
+        mConvertedDate = ConvertTime();
+        ((TextView) findViewById(R.id.noti_response_group_time)).setText("Date : " + mConvertedDate);
     }
 
     private void showAttendingMembers() {
@@ -244,11 +239,11 @@ public class NotificationResponseActivity extends AppCompatActivity {
 
             PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), random, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-            Toast.makeText(this, mConvertedCalendar.get(Calendar.HOUR_OF_DAY) + " " + mConvertedCalendar.get(Calendar.MINUTE) + " " + mConvertedCalendar.get(Calendar.SECOND), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, mConvertedDate + "", Toast.LENGTH_SHORT).show();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if (mConvertedCalendar.getTimeInMillis() > new Date().getTime()) {
+                if (mConvertedDate.getTime() > new Date().getTime()) {
                     Toast.makeText(this, "set Successfully", Toast.LENGTH_SHORT).show();
-                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, mConvertedCalendar.getTimeInMillis(), pendingIntent);
+                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, mConvertedDate.getTime(), pendingIntent);
                 }
             }
         } else {
@@ -273,7 +268,7 @@ public class NotificationResponseActivity extends AppCompatActivity {
         }).start();
     }
 
-    private Calendar ConvertTime() {
+    private Date ConvertTime() {
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.YEAR, Integer.parseInt(scheduleObject.getDateTime().getYear()));
         calendar.set(Calendar.MONTH, Integer.parseInt(scheduleObject.getDateTime().getMonth()));
@@ -281,68 +276,18 @@ public class NotificationResponseActivity extends AppCompatActivity {
         calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(scheduleObject.getDateTime().getHour()));
         calendar.set(Calendar.MINUTE, Integer.parseInt(scheduleObject.getDateTime().getMinute()));
         calendar.set(Calendar.SECOND, 0);
+        String mCurrent_TimezoneId = TimeZone.getDefault().getID();
 
-        String from = TimeZone.getTimeZone(mFrom_TimeZoneId).getDisplayName(true, TimeZone.SHORT);
-        from = from.replace("GMT", "");
-        String[] h_m_seperated = from.split(":");
+        TimeZone from = TimeZone.getTimeZone(mFrom_TimeZoneId);
+        TimeZone to = TimeZone.getTimeZone(mCurrent_TimezoneId);
+        int from_offset = from.getOffset(Calendar.ZONE_OFFSET);
+        int to_offset = to.getOffset(Calendar.ZONE_OFFSET);
 
-        Integer h_from = 0, m_from = 0;
-        try {
-            h_from = Integer.parseInt(h_m_seperated[0]);
-        } catch (Exception e) {
-        }
-        try {
-            m_from = Integer.parseInt(h_m_seperated[1]);
-        } catch (Exception e) {
-        }
-        if (from.contains("-")) {
-            m_from *= -1;
-        }
-        Date targetTime_in_GMT = new Date(calendar.getTimeInMillis() - (h_from * 60 * 60 * 1000 + m_from * 60 * 1000));
+        int diff = to_offset - from_offset;
 
-        if (TextUtils.isEmpty(mCurrent_TimezoneId)) {
-            mCurrent_TimezoneId = TimeZone.getDefault().getID();
-        }
-        String target = TimeZone.getTimeZone(mCurrent_TimezoneId).getDisplayName(true, TimeZone.SHORT);
-        target = target.replace("GMT", "");
-        String[] h_m_spereated2 = target.split(":");
-        Integer h_target = 0, m_target = 0;
-        try {
-            h_target = Integer.parseInt(h_m_spereated2[0]);
-        } catch (Exception e) {
-        }
-        try {
-            m_target = Integer.parseInt(h_m_spereated2[1]);
-        } catch (Exception e) {
-        }
-        if (target.contains("-")) {
-            m_target *= -1;
-        }
-        Date newDate = new Date(targetTime_in_GMT.getTime() + (h_target * 60 * 60 * 1000 + m_target * 60 * 1000));
-        calendar.setTime(newDate);
-        return calendar;
-    }
-
-    private void getCurrentTimezone() {
-//        mCurrent_TimezoneId = TimeZone.getDefault().getID();
-
-        //for test
-        mRootRef.child("users").child(mCurrUserId).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-
-                    mCurrent_TimezoneId = snapshot.child("timeZone").getValue().toString();
-                } else {
-                    Toast.makeText(NotificationResponseActivity.this, "not exists user (timezone)...", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(NotificationResponseActivity.this, "error onCreate getting timezone " + error.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
+        long time = calendar.getTimeInMillis() + diff;
+        Date newDate = new Date(time);
+        return newDate;
     }
 
     private void InitUI() {

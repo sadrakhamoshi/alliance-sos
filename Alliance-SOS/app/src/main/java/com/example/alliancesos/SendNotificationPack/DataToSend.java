@@ -9,7 +9,15 @@ public class DataToSend {
     private String eventId;
     private int type;
     private String photoUrl;
-    private String sosMessage;
+    private String sosMessage, sosId;
+
+    public String getSosId() {
+        return sosId;
+    }
+
+    public void setSosId(String sosId) {
+        this.sosId = sosId;
+    }
 
     public String getSosMessage() {
         return sosMessage;

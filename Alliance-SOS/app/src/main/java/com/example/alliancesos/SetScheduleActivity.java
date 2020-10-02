@@ -46,6 +46,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Random;
+import java.util.TimeZone;
 
 public class SetScheduleActivity extends AppCompatActivity {
 
@@ -102,21 +103,22 @@ public class SetScheduleActivity extends AppCompatActivity {
     }
 
     private void getCurrentTimezone() {
-        mRootRef.child("users").child(mAuthorId).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    mAuthorTimezone = snapshot.child("timeZone").getValue().toString();
-                } else {
-                    Toast.makeText(SetScheduleActivity.this, "not exist user...", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(SetScheduleActivity.this, "onCancelled " + error.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
+        mAuthorTimezone = TimeZone.getDefault().getID();
+//        mRootRef.child("users").child(mAuthorId).addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot snapshot) {
+//                if (snapshot.exists()) {
+//                    mAuthorTimezone = snapshot.child("timeZone").getValue().toString();
+//                } else {
+//                    Toast.makeText(SetScheduleActivity.this, "not exist user...", Toast.LENGTH_SHORT).show();
+//                }
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError error) {
+//                Toast.makeText(SetScheduleActivity.this, "onCancelled " + error.getMessage(), Toast.LENGTH_SHORT).show();
+//            }
+//        });
     }
 
     private void Initialize() {
@@ -205,7 +207,8 @@ public class SetScheduleActivity extends AppCompatActivity {
     }
 
     private Date computeScheduleInMilliSecond(DateTime dateTime) throws ParseException {
-        String dt = dateTime.getYear() + "-" + dateTime.getMonth() + "-" + dateTime.getDay() + "T" + dateTime.getHour() + ":" + dateTime.getMinute() + ":0Z";
+        int Month = Integer.parseInt(dateTime.getMonth()) + 1;
+        String dt = dateTime.getYear() + "-" + Month + "-" + dateTime.getDay() + "T" + dateTime.getHour() + ":" + dateTime.getMinute() + ":0Z";
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
         Date date = format.parse(dt);
@@ -227,17 +230,12 @@ public class SetScheduleActivity extends AppCompatActivity {
         final int finalId = id;
         Date calendar = convertSchToCalendar(mEvent.getScheduleObject().getDateTime());
         SetAlarmForMySelf(finalId, calendar);
-        Toast.makeText(this, mEvent.getEventId(), Toast.LENGTH_SHORT).show();
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                mChoiceDB.appDatabase.requestDao().insert(new RequestCode(mEvent.getEventId(), finalId + ""));
-            }
-        }).start();
 
         mEvent.setCreatedBy(mAuthorUserName);
         final String key = mGroupsRef.child(mGroupId).child("events").push().getKey();
         mEvent.setEventId(key);
+
+        AddToLocalDatabase(finalId);
         mGroupsRef.child(mGroupId).child("events").child(key).setValue(mEvent).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
@@ -266,8 +264,18 @@ public class SetScheduleActivity extends AppCompatActivity {
         });
     }
 
-    private Date convertSchToCalendar(DateTime dateTime) {
+    private void AddToLocalDatabase(final int finalId) {
+        Toast.makeText(this, mEvent.getEventId(), Toast.LENGTH_SHORT).show();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                RequestCode code = new RequestCode(mEvent.getEventId(), finalId + "");
+                mChoiceDB.appDatabase.requestDao().insert(code);
+            }
+        }).start();
+    }
 
+    private Date convertSchToCalendar(DateTime dateTime) {
         int Month = Integer.parseInt(dateTime.getMonth()) + 1;
         String dateTime_combine = dateTime.getYear() + "/" + Month + "/" + dateTime.getDay() + "T"
                 + dateTime.getHour() + "/" + dateTime.getMinute() + "/00Z";

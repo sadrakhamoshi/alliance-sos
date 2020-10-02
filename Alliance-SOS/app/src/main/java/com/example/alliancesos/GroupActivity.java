@@ -10,6 +10,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -17,7 +18,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,6 +25,7 @@ import android.widget.Toast;
 import com.example.alliancesos.Adapters.showEvents;
 import com.example.alliancesos.GroupSetting.GroupProfileActivity;
 import com.example.alliancesos.SendNotificationPack.DataToSend;
+import com.example.alliancesos.SendNotificationPack.SOSLogActivity;
 import com.example.alliancesos.SendNotificationPack.SendingNotification;
 import com.example.alliancesos.Utils.MessageType;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -34,7 +35,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -43,7 +43,8 @@ import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Date;
+import java.util.HashMap;
 
 public class GroupActivity extends AppCompatActivity {
 
@@ -70,6 +71,8 @@ public class GroupActivity extends AppCompatActivity {
 
     private StorageReference mSOSImagesRef;
 
+    private DatabaseReference mRootRef;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,7 +88,8 @@ public class GroupActivity extends AppCompatActivity {
 
     private void InitializeUI() {
         //database
-        mGroupRef = FirebaseDatabase.getInstance().getReference().child("groups");
+        mRootRef = FirebaseDatabase.getInstance().getReference();
+        mGroupRef = mRootRef.child("groups");
         mSOSImagesRef = FirebaseStorage.getInstance().getReference().child("sos_images");
 
         //recycle view
@@ -142,12 +146,12 @@ public class GroupActivity extends AppCompatActivity {
     }
 
     private void MakeAlertDialog() {
-        final int[] whichOption = {0};
+        final int[] whichOption = {2};
         String[] options = {"Write Own Message", "Send Picture", "Send Preset Message"};
         final EditText message = new EditText(GroupActivity.this);
         message.setHint("Write Your message...");
         final AlertDialog.Builder builder = new AlertDialog.Builder(GroupActivity.this, R.style.AlertDialog);
-        builder.setSingleChoiceItems(options, 0, new DialogInterface.OnClickListener() {
+        builder.setSingleChoiceItems(options, 2, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 whichOption[0] = which;
@@ -181,19 +185,23 @@ public class GroupActivity extends AppCompatActivity {
     }
 
     private void ChoseFromPreset() {
-        mGroupRef.child(mCurrentGroupId).child("preset_message").addListenerForSingleValueEvent(new ValueEventListener() {
+        mGroupRef.child(mCurrentGroupId).child("preset_message").child("message").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    String message = snapshot.child("message").getValue().toString();
+                    String message = snapshot.getValue().toString();
                     Toast.makeText(GroupActivity.this, message, Toast.LENGTH_SHORT).show();
                     if (message != null) {
+                        String key = mRootRef.child("sos").child(mCurrentGroupId).push().getKey();
                         DataToSend data = new DataToSend(mCurrentUserName, mCurrentGroupName, mCurrentGroupId, MessageType.SOS_TYPE);
                         data.setSosMessage(message);
+                        data.setSosId(key);
                         SendingNotification sender = new SendingNotification(mCurrentGroupId, mCurrentGroupName,
                                 mCurrentUserName, mCurrentUserId, GroupActivity.this, data);
                         sender.isInSendMode = true;
                         sender.Send();
+                        AddSOSToDB addSOSToDB = new AddSOSToDB(data);
+                        addSOSToDB.execute();
                     } else {
                         Toast.makeText(GroupActivity.this, "No message is exist", Toast.LENGTH_SHORT).show();
                     }
@@ -236,12 +244,17 @@ public class GroupActivity extends AppCompatActivity {
                                 public void onComplete(@NonNull Task<Uri> task) {
                                     if (task.isSuccessful()) {
                                         Log.v("taskk", "Successful");
+                                        String key = mRootRef.child("sos").child(mCurrentGroupId).push().getKey();
                                         DataToSend dataToSend = new DataToSend(mCurrentUserName, mCurrentGroupName, mCurrentGroupId, MessageType.SOS_TYPE);
                                         dataToSend.setPhotoUrl(task.getResult().toString());
+                                        dataToSend.setSosId(key);
                                         SendingNotification sender = new SendingNotification(mCurrentGroupId, mCurrentGroupName,
                                                 mCurrentUserName, mCurrentUserId, GroupActivity.this, dataToSend);
                                         sender.isInSendMode = true;
                                         sender.Send();
+                                        AddSOSToDB addSOSToDB = new AddSOSToDB(dataToSend);
+                                        addSOSToDB.execute();
+
                                     } else {
                                         Toast.makeText(GroupActivity.this, "Could'nt get download url", Toast.LENGTH_SHORT).show();
                                     }
@@ -260,17 +273,17 @@ public class GroupActivity extends AppCompatActivity {
 
     private void sendOwnMessage(final EditText message) {
         if (!TextUtils.isEmpty(message.getText())) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    DataToSend data = new DataToSend(mCurrentUserName, mCurrentGroupName, mCurrentGroupId, MessageType.SOS_TYPE);
-                    data.setSosMessage(message.getText().toString());
-                    SendingNotification sender = new SendingNotification(mCurrentGroupId, mCurrentGroupName,
-                            mCurrentUserName, mCurrentUserId, GroupActivity.this, data);
-                    sender.isInSendMode = true;
-                    sender.Send();
-                }
-            }).start();
+            String key = mRootRef.child("sos").child(mCurrentGroupId).push().getKey();
+            DataToSend data = new DataToSend(mCurrentUserName, mCurrentGroupName, mCurrentGroupId, MessageType.SOS_TYPE);
+            data.setSosMessage(message.getText().toString());
+            data.setSosId(key);
+            SendingNotification sender = new SendingNotification(mCurrentGroupId, mCurrentGroupName,
+                    mCurrentUserName, mCurrentUserId, GroupActivity.this, data);
+            sender.isInSendMode = true;
+            sender.Send();
+            AddSOSToDB addSOSToDB = new AddSOSToDB(data);
+            addSOSToDB.execute();
+
         } else {
             Toast.makeText(GroupActivity.this, "Message Is Empty...", Toast.LENGTH_SHORT).show();
         }
@@ -317,15 +330,18 @@ public class GroupActivity extends AppCompatActivity {
 
     private void attachListener() {
         if (mEventListener == null) {
+            final Date date = new Date();
+            final long time = date.getTime() - 1000 * 60;
             mEventListener = new ChildEventListener() {
                 @Override
                 public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                     try {
                         Event event = snapshot.getValue(Event.class);
-                        if (event.getTimeInMillisecond() * -1 >= System.currentTimeMillis()) {
+                        Long value = event.getTimeInMillisecond() * -1;
+                        if (time < value) {
                             mShowEventAdapter.add(event);
                         } else {
-                            //delete task fro data base
+                            //delete task from data base
                         }
                         mProgress.setVisibility(View.GONE);
                     } catch (Exception e) {
@@ -359,5 +375,48 @@ public class GroupActivity extends AppCompatActivity {
 
     private void showAllEvent() {
         attachListener();
+    }
+
+    public void goToSOSLog(View view) {
+        Intent intent = new Intent(GroupActivity.this, SOSLogActivity.class);
+        intent.putExtra("groupId", mCurrentGroupId);
+        startActivity(intent);
+    }
+
+    private class AddSOSToDB extends AsyncTask<Void, Void, Void> {
+
+        private DataToSend dataToSend;
+        private String message;
+
+        public AddSOSToDB(DataToSend obj) {
+            dataToSend = obj;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            mProgress.setVisibility(View.GONE);
+            if (!TextUtils.isEmpty(message))
+                Toast.makeText(GroupActivity.this, message, Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            mProgress.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            mRootRef.child("sos").child(mCurrentGroupId).child(dataToSend.getSosId()).setValue(dataToSend).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if (!task.isSuccessful()) {
+                        message = task.getException().getMessage();
+                    }
+                }
+            });
+            return null;
+        }
     }
 }

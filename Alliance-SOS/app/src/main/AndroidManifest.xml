@@ -11,6 +11,7 @@
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
         android:allowBackup="true"
@@ -19,7 +20,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".SpecificEventActivity"></activity>
+        <activity android:name=".SpecificSOSActivity"></activity>
+        <activity android:name=".SendNotificationPack.SOSLogActivity" />
+        <activity android:name=".SpecificEventActivity" />
         <activity android:name=".DoNotDisturb.PickNotDisturbActivity" />
         <activity android:name=".DoNotDisturb.NotDisturbActivity" />
         <activity android:name=".GroupSetting.GroupProfileActivity" />
@@ -51,12 +54,10 @@
             </intent-filter>
         </service>
 
-
         <receiver
             android:name=".DeviceAlarm.MyAlarmReceiver"
             android:enabled="true"
             android:exported="true" />
-
     </application>
 
 </manifest>
