@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000"
+    android:background="@drawable/group_act_back_ground"
     android:orientation="vertical"
     android:padding="15dp"
     tools:context=".DoNotDisturb.PickNotDisturbActivity">
@@ -43,13 +43,13 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:layout_marginBottom="15dp"
-        android:background="#fff">
+        android:layout_marginBottom="15dp">
 
         <EditText
             android:id="@+id/pick_disturb_date"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="@drawable/input_back"
             android:focusable="false"
             android:hint="pick date "
             android:inputType="textEmailAddress"
@@ -63,13 +63,13 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:layout_marginBottom="15dp"
-        android:background="#FFFFFF">
+        android:layout_marginBottom="15dp">
 
         <EditText
             android:id="@+id/pick_disturb_start"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="@drawable/input_back"
             android:focusable="false"
             android:hint="start time "
             android:inputType="textEmailAddress"
@@ -83,13 +83,13 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:layout_marginBottom="15dp"
-        android:background="#FFFFFF">
+        android:layout_marginBottom="15dp">
 
         <EditText
             android:id="@+id/pick_disturb_end"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="@drawable/input_back"
             android:focusable="false"
             android:hint="end time "
             android:inputType="textEmailAddress"
@@ -104,7 +104,7 @@
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:layout_marginBottom="15dp"
-        android:background="#FFFFFF"
+        android:background="@drawable/input_back"
         android:padding="5dp">
 
         <TextView
@@ -130,7 +130,7 @@
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:layout_marginBottom="15dp"
-        android:background="#FFFFFF"
+        android:background="@drawable/input_back"
         android:padding="5dp">
 
         <TextView
