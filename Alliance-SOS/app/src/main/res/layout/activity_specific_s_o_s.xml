@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FF4537"
+    android:background="@drawable/flower"
     android:layoutDirection="ltr"
     android:orientation="vertical"
     android:padding="10dp"
@@ -16,7 +16,8 @@
         android:layout_marginBottom="35dp"
         android:layoutDirection="ltr"
         android:onClick="BackToMainPage"
-        android:src="@drawable/back_vector" />
+        android:src="@drawable/back_vector"
+        app:tint="#FFFFFF" />
 
 
     <TextView
@@ -80,6 +81,8 @@
         android:id="@+id/specific_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:visibility="gone"
+        android:background="@drawable/layout_border"
         android:scaleType="fitCenter" />
 
 

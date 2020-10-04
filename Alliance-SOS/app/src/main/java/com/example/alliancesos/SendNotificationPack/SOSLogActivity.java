@@ -26,6 +26,7 @@ import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 
 public class SOSLogActivity extends AppCompatActivity {
@@ -182,6 +183,7 @@ public class SOSLogActivity extends AppCompatActivity {
                 mDataToSendList.add(dataSnapshot);
                 mSosList.add("Make By  :   " + dataSnapshot.getMakeBy());
             }
+            Collections.reverse(mDataToSendList);
             return null;
         }
     }
