@@ -13,8 +13,8 @@
         android:layout_width="match_parent"
         android:layout_height="75dp"
         android:focusable="false"
-        android:onClick="SearchingMembers"
         android:hint="Username that want to add to this Group..."
+        android:onClick="SearchingMembers"
         android:padding="10dp" />
 
     <Button
@@ -25,11 +25,17 @@
         android:layout_marginTop="10dp"
         android:text="add To group" />
 
-    <ListView
-        android:id="@+id/members_list_view"
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="30dp" />
+        android:fillViewport="true">
+
+        <ListView
+            android:id="@+id/members_list_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="30dp" />
+    </androidx.core.widget.NestedScrollView>
 
 
 </LinearLayout>
