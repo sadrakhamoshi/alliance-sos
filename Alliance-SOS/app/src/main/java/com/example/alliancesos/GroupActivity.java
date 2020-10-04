@@ -2,18 +2,27 @@ package com.example.alliancesos;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.TextUtils;
+import android.text.style.ImageSpan;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -30,6 +39,7 @@ import com.example.alliancesos.SendNotificationPack.SendingNotification;
 import com.example.alliancesos.Utils.MessageType;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.appbar.AppBarLayout;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -57,10 +67,7 @@ public class GroupActivity extends AppCompatActivity {
 
     private String mCurrentGroupId, mCurrentGroupName;
 
-    private Button mMembersList;
-    private Button mGroupList;
     private Button mSOS_btn;
-
     private TextView mSchedule;
 
     private RecyclerView mRecyclerView;
@@ -73,6 +80,10 @@ public class GroupActivity extends AppCompatActivity {
 
     private DatabaseReference mRootRef;
 
+
+    //appbar
+    private AppBarLayout mAppBarLayout;
+    private Toolbar mToolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,8 +111,6 @@ public class GroupActivity extends AppCompatActivity {
         mRecyclerView.setLayoutManager(new LinearLayoutManager(GroupActivity.this));
 
         mProgress = findViewById(R.id.progress_group_act);
-        TextView nameGroup = findViewById(R.id.group_name_txt);
-        nameGroup.setText(mCurrentGroupName);
 
         mSchedule = findViewById(R.id.schedule_event);
         mSchedule.setOnClickListener(new View.OnClickListener() {
@@ -119,30 +128,63 @@ public class GroupActivity extends AppCompatActivity {
             }
         });
 
-        mMembersList = findViewById(R.id.member_list_btn);
-        mMembersList.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        //appbar
+        mToolbar = findViewById(R.id.group_toolbar);
+        mAppBarLayout = findViewById(R.id.group_appbar);
+        setSupportActionBar(mToolbar);
+        final ActionBar ab = getSupportActionBar();
+        ab.setDisplayHomeAsUpEnabled(true);
+        ab.setTitle(mCurrentGroupName);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        menu.add(0, 1, 1, menuIconWithText(getResources().getDrawable(R.drawable.members_vector, getTheme()), "Add Member"));
+        menu.add(0, 2, 2, menuIconWithText(getResources().getDrawable(R.drawable.setting_vector, getTheme()), "Group Setting"));
+        menu.add(0, 3, 3, menuIconWithText(getResources().getDrawable(R.drawable.help_vector, getTheme()), "Help Us"));
+        return true;
+    }
+
+    private CharSequence menuIconWithText(Drawable r, String title) {
+        r.setBounds(0, 0, r.getIntrinsicWidth(), r.getIntrinsicHeight());
+        SpannableString sb = new SpannableString("    " + title);
+        ImageSpan imageSpan = new ImageSpan(r, ImageSpan.ALIGN_BOTTOM);
+        sb.setSpan(imageSpan, 0, 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        return sb;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+
+        switch (item.getItemId()) {
+
+            case 3:
+                Toast.makeText(this, "It Will Works Soon ...", Toast.LENGTH_SHORT).show();
+                break;
+            case android.R.id.home:
+                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish();
+                break;
+            case 1:
                 Intent toMember = new Intent(getApplicationContext(), MemberActivity.class);
                 toMember.putExtra("groupId", mCurrentGroupId);
                 toMember.putExtra("groupName", mCurrentGroupName);
                 toMember.putExtra("currUsername", mCurrentUserName);
                 toMember.putExtra("currUserId", mCurrentUserId);
                 startActivity(toMember);
-            }
-        });
-        mGroupList = findViewById(R.id.groups_list_btn);
-        mGroupList.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-                finish();
-                return;
-            }
-        });
-
+                break;
+            case 2:
+                Intent goToGroupProfile = new Intent(getApplicationContext(), GroupProfileActivity.class);
+                goToGroupProfile.putExtra("groupId", mCurrentGroupId);
+                goToGroupProfile.putExtra("groupName", mCurrentGroupName);
+                goToGroupProfile.putExtra("userId", mCurrentUserId);
+                startActivity(goToGroupProfile);
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void MakeAlertDialog() {
@@ -287,19 +329,6 @@ public class GroupActivity extends AppCompatActivity {
         } else {
             Toast.makeText(GroupActivity.this, "Message Is Empty...", Toast.LENGTH_SHORT).show();
         }
-    }
-
-    public void goToHelpUs(View view) {
-        Toast.makeText(this, "It Will Works Soon ...", Toast.LENGTH_SHORT).show();
-    }
-
-    public void gotoGroupSetting(View view) {
-        Intent goToGroupProfile = new Intent(getApplicationContext(), GroupProfileActivity.class);
-        goToGroupProfile.putExtra("groupId", mCurrentGroupId);
-        goToGroupProfile.putExtra("groupName", mCurrentGroupName);
-        goToGroupProfile.putExtra("userId", mCurrentUserId);
-
-        startActivity(goToGroupProfile);
     }
 
     private void goToSetScheduleEvent() {

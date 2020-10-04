@@ -12,6 +12,8 @@
         android:id="@+id/target_user_edt"
         android:layout_width="match_parent"
         android:layout_height="75dp"
+        android:focusable="false"
+        android:onClick="SearchingMembers"
         android:hint="Username that want to add to this Group..."
         android:padding="10dp" />
 

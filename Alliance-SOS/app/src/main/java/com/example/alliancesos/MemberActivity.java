@@ -177,7 +177,6 @@ public class MemberActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         showAllMembers();
-//        attachDatabaseMembersOFGroup();
     }
 
     @Override
@@ -196,8 +195,6 @@ public class MemberActivity extends AppCompatActivity {
                     String name = snapshot.child("userName").getValue().toString();
                     mMembersList.add(name);
                     adapter.notifyDataSetChanged();
-//                    adapter.add(name);
-//                    adapter.notifyDataSetChanged();
                 }
             }
 
@@ -208,36 +205,7 @@ public class MemberActivity extends AppCompatActivity {
         });
     }
 
-    private void attachDatabaseMembersOFGroup() {
-        if (mMembersEventListener == null) {
-            mMembersEventListener = new ChildEventListener() {
-                @Override
-                public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                    String memberId = snapshot.child("id").getValue().toString();
-                    getUserByIdFromUsers(memberId);
-                }
+    public void SearchingMembers(View view) {
 
-                @Override
-                public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-                }
-
-                @Override
-                public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-
-                }
-
-                @Override
-                public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-
-                }
-            };
-        }
-        mGroupRef.child(mGroupId).child("members").addChildEventListener(mMembersEventListener);
     }
 }
