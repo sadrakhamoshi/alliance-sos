@@ -5,13 +5,17 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.SearchView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.alliancesos.SendNotificationPack.DataToSend;
@@ -39,7 +43,7 @@ public class MemberActivity extends AppCompatActivity {
 
     private Button mAddToGroup;
     private ListView mMembersListView;
-    private EditText mUsername;
+    private SearchView mUsername;
 
     private ArrayList<String> mMembersList;
     private ArrayAdapter<String> adapter;
@@ -72,16 +76,25 @@ public class MemberActivity extends AppCompatActivity {
 
         mMembersListView = findViewById(R.id.members_list_view);
         mMembersList = new ArrayList<>();
-        adapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_list_item_1, mMembersList);
+        adapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, mMembersList) {
+            @NonNull
+            @Override
+            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+                TextView text = view.findViewById(android.R.id.text1);
+                text.setTextColor(Color.WHITE);
+                return view;
+            }
+        };
         mMembersListView.setAdapter(adapter);
 
-        mUsername = findViewById(R.id.target_user_edt);
+        mUsername = findViewById(R.id.target_user_search_view);
 
         mAddToGroup = findViewById(R.id.add_to_group_btn);
         mAddToGroup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String addition_member = mUsername.getText().toString();
+                String addition_member = mUsername.getQuery().toString();
                 if (TextUtils.isEmpty(addition_member)) {
                     Toast.makeText(MemberActivity.this, "You Have to write Members Username", Toast.LENGTH_LONG).show();
                 } else {
@@ -177,7 +190,6 @@ public class MemberActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         showAllMembers();
-//        attachDatabaseMembersOFGroup();
     }
 
     @Override
@@ -196,8 +208,6 @@ public class MemberActivity extends AppCompatActivity {
                     String name = snapshot.child("userName").getValue().toString();
                     mMembersList.add(name);
                     adapter.notifyDataSetChanged();
-//                    adapter.add(name);
-//                    adapter.notifyDataSetChanged();
                 }
             }
 
@@ -208,36 +218,7 @@ public class MemberActivity extends AppCompatActivity {
         });
     }
 
-    private void attachDatabaseMembersOFGroup() {
-        if (mMembersEventListener == null) {
-            mMembersEventListener = new ChildEventListener() {
-                @Override
-                public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                    String memberId = snapshot.child("id").getValue().toString();
-                    getUserByIdFromUsers(memberId);
-                }
+    public void SearchingMembers(View view) {
 
-                @Override
-                public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-                }
-
-                @Override
-                public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-
-                }
-
-                @Override
-                public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-
-                }
-            };
-        }
-        mGroupRef.child(mGroupId).child("members").addChildEventListener(mMembersEventListener);
     }
 }

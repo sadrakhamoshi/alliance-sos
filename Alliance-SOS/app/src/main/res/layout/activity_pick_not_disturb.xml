@@ -4,14 +4,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#7C4444"
+    android:background="@drawable/group_act_back_ground"
     android:orientation="vertical"
     android:padding="15dp"
     tools:context=".DoNotDisturb.PickNotDisturbActivity">
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp">
 
         <ImageView
             android:layout_width="27dp"
@@ -20,6 +21,15 @@
             android:onClick="goBack"
             android:src="@drawable/back_vector"
             app:tint="#FFFFFF" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="Do Not Disturb"
+            android:textColor="#fff"
+            android:textSize="18sp"
+            android:textStyle="bold" />
     </RelativeLayout>
 
     <ProgressBar
@@ -33,18 +43,19 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="56dp"
-
         android:layout_marginBottom="15dp">
 
         <EditText
             android:id="@+id/pick_disturb_date"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="@drawable/input_back"
             android:focusable="false"
             android:hint="pick date "
             android:inputType="textEmailAddress"
             android:onClick="pickDate"
-            android:textColor="#FFFFFF"
+            android:padding="5dp"
+            android:textColor="@color/red"
             android:textDirection="ltr" />
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -52,19 +63,19 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="56dp"
-
         android:layout_marginBottom="15dp">
 
         <EditText
             android:id="@+id/pick_disturb_start"
-
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="@drawable/input_back"
             android:focusable="false"
             android:hint="start time "
             android:inputType="textEmailAddress"
             android:onClick="pickStart"
-            android:textColor="#FFFFFF"
+            android:padding="5dp"
+            android:textColor="@color/red"
             android:textDirection="ltr" />
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -72,27 +83,29 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="56dp"
-
         android:layout_marginBottom="15dp">
 
         <EditText
             android:id="@+id/pick_disturb_end"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="@drawable/input_back"
             android:focusable="false"
             android:hint="end time "
             android:inputType="textEmailAddress"
             android:onClick="pickEnd"
-            android:textColor="#FFFFFF"
+            android:padding="5dp"
+            android:textColor="@color/red"
             android:textDirection="ltr" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
-
         android:layout_height="56dp"
-        android:layout_marginBottom="15dp">
+        android:layout_marginBottom="15dp"
+        android:background="@drawable/input_back"
+        android:padding="5dp">
 
         <TextView
             android:layout_width="wrap_content"
@@ -100,23 +113,25 @@
             android:layout_alignParentLeft="true"
             android:gravity="center_vertical"
             android:text="daily "
+            android:textColor="@color/red"
             android:textSize="17sp" />
 
         <CheckBox
             android:id="@+id/pick_disturb_daily"
-
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:layout_centerVertical="true" />
+            android:layout_centerVertical="true"
+            android:shadowColor="@color/red" />
 
     </RelativeLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
-
         android:layout_height="56dp"
-        android:layout_marginBottom="15dp">
+        android:layout_marginBottom="15dp"
+        android:background="@drawable/input_back"
+        android:padding="5dp">
 
         <TextView
             android:layout_width="wrap_content"
@@ -124,6 +139,7 @@
             android:layout_alignParentLeft="true"
             android:gravity="center_vertical"
             android:text="repeat on Day of Date "
+            android:textColor="@color/red"
             android:textSize="17sp" />
 
         <CheckBox
@@ -131,7 +147,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:layout_centerVertical="true" />
+            android:layout_centerVertical="true"
+            android:shadowColor="@color/red" />
 
     </RelativeLayout>
 
@@ -142,9 +159,15 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginBottom="19dp"
         android:background="@drawable/login_btn"
-        android:textColor="#FFFFFF"
         android:onClick="saveNOtDisturbRule"
-        android:text="Save" />
+        android:text="Save"
+        android:textColor="#FFFFFF" />
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitStart"
+        android:src="@drawable/do_not_disturb_background" />
 
 
 </LinearLayout>

@@ -341,6 +341,11 @@ public class SetScheduleActivity extends AppCompatActivity {
         mDate_edt.setText(sdf.format(mCalendar.getTime()));
     }
 
+    public void backOnSetSchedule(View view) {
+        finish();
+        return;
+    }
+
     public class SortUpcomingEventTask extends AsyncTask<Void, Void, Void> {
 
         public String errorMessage;

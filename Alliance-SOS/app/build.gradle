@@ -54,6 +54,9 @@ dependencies {
     implementation 'com.squareup.retrofit2:retrofit:2.4.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
 
+    //bottom library
+    implementation 'com.aurelhubert:ahbottomnavigation:2.3.4'
+
     //crop
     implementation 'com.theartofdev.edmodo:android-image-cropper:2.8.+'
 
@@ -65,4 +68,13 @@ dependencies {
     implementation 'com.google.firebase:firebase-ml-natural-language:22.0.0'
     implementation 'com.google.firebase:firebase-ml-natural-language-translate-model:20.0.8'
 
+
+    //list_view
+    implementation 'com.nhaarman.listviewanimations:lib-core:3.1.0@aar'
+    implementation 'com.nhaarman.listviewanimations:lib-manipulation:3.1.0@aar'
+    implementation 'com.nhaarman.listviewanimations:lib-core-slh:3.1.0@aar'
+
+
+    //animation
+    implementation 'com.skyfishjy.ripplebackground:library:1.0.1'
 }

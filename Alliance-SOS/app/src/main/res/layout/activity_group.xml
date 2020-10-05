@@ -4,47 +4,51 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="10dp"
+    android:background="@drawable/gray"
     tools:context=".GroupActivity">
 
-
-    <Button
-        android:id="@+id/member_list_btn"
-        android:layout_width="wrap_content"
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/group_appbar"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:text="members list" />
+        android:background="#004E4343"
+        android:layoutDirection="ltr">
 
-    <TextView
-        android:id="@+id/group_name_txt"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@id/member_list_btn"
-        android:layout_alignBottom="@id/member_list_btn"
-        android:layout_alignParentLeft="true"
-        android:background="@color/yellow"
-        android:gravity="center"
-        android:minWidth="100dp"
-        android:textSize="20sp"
-        tools:text="groupName" />
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/group_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/ToolbarTheme"
+            app:titleTextAppearance="@style/Toolbar.TitleText"
+            app:titleTextColor="#FFFFFF" />
 
+    </com.google.android.material.appbar.AppBarLayout>
 
-    <Button
-        android:id="@+id/sos_btn"
+    <com.skyfishjy.library.RippleBackground
+        android:id="@+id/ripple_content"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@id/group_sos_log"
-        android:layout_below="@id/group_name_txt"
-        android:layout_alignLeft="@id/schedule_event"
-        android:layout_alignRight="@id/schedule_event"
         android:layout_centerInParent="true"
-        android:layout_marginTop="40dp"
         android:layout_marginBottom="15dp"
-        android:background="@drawable/sos_back_ground"
-        android:text="SOS"
-        android:textColor="#FFFFFF"
-        android:textSize="25sp"
-        android:textStyle="bold" />
+        app:rb_color="#FA7878"
+        app:rb_duration="2000"
+        app:rb_radius="32dp"
+        app:rb_rippleAmount="4"
+        app:rb_scale="6">
+
+        <Button
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:onClick="SosClick"
+            android:background="@drawable/sos_back_ground"
+            android:text="SOS"
+            android:layout_centerInParent="true"
+            android:textColor="#FFFFFF"
+            android:textSize="25sp"
+            android:textStyle="bold" />
+    </com.skyfishjy.library.RippleBackground>
+
 
     <TextView
         android:id="@+id/schedule_event"
@@ -52,7 +56,9 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:text="Schedule Event"
-        android:textSize="25sp" />
+        android:textColor="#FFFFFF"
+        android:textSize="25sp"
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/group_sos_log"
@@ -67,44 +73,6 @@
         android:textSize="25sp"
         android:textStyle="italic" />
 
-    <LinearLayout
-        android:id="@+id/end_page_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/groups_list_btn"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentBottom="true"
-            android:layout_weight="1"
-            android:text="Groups" />
-
-        <Button
-            android:id="@+id/group_setting"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentBottom="true"
-            android:layout_marginLeft="5dp"
-            android:onClick="gotoGroupSetting"
-            android:text="group setting"
-            android:textAllCaps="false" />
-
-        <Button
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginLeft="5dp"
-            android:layout_weight="1"
-            android:onClick="goToHelpUs"
-            android:text="help us" />
-    </LinearLayout>
-
 
     <ProgressBar
         android:id="@+id/progress_group_act"
@@ -116,15 +84,22 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/event_list_rv"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/end_page_layout"
+        android:layout_height="match_parent"
         android:layout_below="@id/schedule_event"
         android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
-        android:background="#E88686"
+        android:background="@drawable/event_list_back"
         android:layoutDirection="ltr"
         android:padding="7dp"
         android:textDirection="ltr" />
 
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/navigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/navigation"
+        app:itemIconTint="#FFFFFF"
+        app:itemTextColor="#610000"
+        app:menu="@menu/group_menu" />
 
 </RelativeLayout>

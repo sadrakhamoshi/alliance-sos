@@ -31,6 +31,15 @@
             android:layout_marginTop="5dp"
             android:layout_marginRight="5dp"
             android:src="@drawable/edit_icon" />
+        <ImageView
+            android:onClick="exiteUserSetting"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_alignParentLeft="true"
+            android:layout_marginTop="5dp"
+            android:layout_marginRight="5dp"
+            android:src="@drawable/back_vector" />
+
 
         <ImageView
             android:id="@+id/exit_edit_user_setting"

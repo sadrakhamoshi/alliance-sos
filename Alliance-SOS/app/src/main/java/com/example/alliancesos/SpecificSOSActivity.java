@@ -105,6 +105,7 @@ public class SpecificSOSActivity extends AppCompatActivity {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            image.setVisibility(View.VISIBLE);
             viewDialog.showDialog();
         }
 
@@ -141,5 +142,12 @@ public class SpecificSOSActivity extends AppCompatActivity {
             dataToSend = snapshot.getValue(DataToSend.class);
             return null;
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
+        return;
     }
 }

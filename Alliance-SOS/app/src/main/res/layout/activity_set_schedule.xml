@@ -4,7 +4,33 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/set_schedule_back"
     tools:context=".SetScheduleActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:onClick="backOnSetSchedule"
+            android:src="@drawable/back_vector"
+            app:tint="#FFFFFF" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="Set Schedule"
+            android:textColor="#FFFFFF"
+            android:textSize="25sp"
+            android:textStyle="bold" />
+    </RelativeLayout>
+
 
     <ProgressBar
         android:id="@+id/progress_set_schedule"
@@ -30,41 +56,59 @@
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
-            android:layout_height="56dp">
+            android:layout_height="60dp"
+            android:textColorHint="#FFFFFF"
+            app:hintTextColor="#FFFFFF">
 
             <EditText
                 android:id="@+id/schedule_title"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:background="@drawable/input_sign_up_back"
                 android:ems="6"
-                android:hint="@string/schedule_title" />
+                android:hint="@string/schedule_title"
+                android:padding="7dp"
+                android:textColor="#FFFFFF" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
-            android:layout_height="56dp">
+            android:layout_height="60dp"
+            android:textColorHint="#FFFFFF"
+            app:hintTextColor="#FFFFFF">
 
             <EditText
                 android:id="@+id/schedule_date"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:background="@drawable/input_sign_up_back"
                 android:focusable="false"
+
                 android:hint="@string/schedule_date"
+                android:padding="7dp"
+                android:textColor="#FFFFFF"
                 android:textDirection="ltr" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
-            android:layout_height="56dp">
+            android:layout_height="60dp"
+            android:textColorHint="#FFFFFF"
+            app:hintTextColor="#FFFFFF">
 
             <EditText
                 android:id="@+id/schedule_time"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:background="@drawable/input_sign_up_back"
                 android:focusable="false"
+
                 android:hint="@string/schedule_time"
+                android:padding="7dp"
+
+                android:textColor="#FFFFFF"
                 android:textDirection="ltr" />
 
         </com.google.android.material.textfield.TextInputLayout>
@@ -72,14 +116,19 @@
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
-            android:layout_height="56dp">
+            android:layout_height="60dp"
+            android:textColorHint="#FFFFFF"
+            app:hintTextColor="#FFFFFF">
 
             <EditText
                 android:id="@+id/schedule_description"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:background="@drawable/input_sign_up_back"
                 android:hint="@string/schedule_describe"
-                android:inputType="textAutoComplete" />
+                android:inputType="textAutoComplete"
+                android:padding="7dp"
+                android:textColor="#FFFFFF" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -88,8 +137,11 @@
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:layout_marginTop="32dp"
+            android:background="@drawable/specific_event_list_back"
             android:text="@string/schedule_button"
-            android:textAllCaps="false" />
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textStyle="italic" />
     </LinearLayout>
 
 
