@@ -365,4 +365,8 @@ public class GroupProfileActivity extends AppCompatActivity {
             }).start();
         }
     }
+
+    public void exitGroupSetting(View view) {
+        onBackPressed();
+    }
 }

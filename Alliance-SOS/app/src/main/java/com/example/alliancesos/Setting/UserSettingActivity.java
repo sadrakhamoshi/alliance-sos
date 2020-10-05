@@ -605,6 +605,10 @@ public class UserSettingActivity extends AppCompatActivity {
         mChosePhoto.setVisibility(View.GONE);
     }
 
+    public void exiteUserSetting(View view) {
+        onBackPressed();
+    }
+
     public class updateRingtoneTask extends AsyncTask<Void, Void, Void> {
 
         public Uri newRing;
