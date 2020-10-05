@@ -11,7 +11,7 @@
         android:id="@+id/group_appbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/appbar_back"
+        android:background="#004E4343"
         android:layoutDirection="ltr">
 
         <androidx.appcompat.widget.Toolbar
@@ -20,15 +20,14 @@
             app:titleTextAppearance="@style/Toolbar.TitleText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/appbar_back"
             app:titleTextColor="#FFFFFF" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
     <Button
         android:id="@+id/sos_btn"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:layout_above="@id/group_sos_log"
         android:layout_centerInParent="true"
         android:layout_marginBottom="15dp"

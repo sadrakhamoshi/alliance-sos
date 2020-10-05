@@ -4,16 +4,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/member_back_ground"
     android:orientation="vertical"
     android:padding="20dp"
     tools:context=".MemberActivity">
 
-    <EditText
-        android:id="@+id/target_user_edt"
+    <SearchView
+        android:id="@+id/target_user_search_view"
         android:layout_width="match_parent"
         android:layout_height="75dp"
-        android:focusable="false"
-        android:hint="Username that want to add to this Group..."
+        android:background="@drawable/input_sign_up_back"
+        android:textStyle="bold"
         android:onClick="SearchingMembers"
         android:padding="10dp" />
 
@@ -23,19 +24,16 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="10dp"
-        android:text="add To group" />
+        android:background="@drawable/round_button"
+        android:padding="15dp"
+        android:text="add To group"
+        android:textColor="#FFFFFF" />
 
-    <androidx.core.widget.NestedScrollView
+    <ListView
+        android:id="@+id/members_list_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fillViewport="true">
-
-        <ListView
-            android:id="@+id/members_list_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="30dp" />
-    </androidx.core.widget.NestedScrollView>
+        android:layout_marginTop="30dp" />
 
 
 </LinearLayout>
