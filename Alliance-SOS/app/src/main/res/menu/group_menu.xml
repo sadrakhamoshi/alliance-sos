@@ -4,16 +4,16 @@
     <item
         android:id="@+id/home_nav"
         android:icon="@drawable/members_vector"
-        android:iconTint="#8F8C74"
+        android:iconTint="#FFFFFF"
         android:title="Add Member" />
     <item
         android:id="@+id/group_sett_menu"
         android:icon="@drawable/setting_vector"
-        android:iconTint="#8F8C74"
+        android:iconTint="#FFFFFF"
         android:title="Group Setting" />
     <item
         android:id="@+id/help_menu"
         android:icon="@drawable/help_vector"
-        android:iconTint="#8F8C74"
+        android:iconTint="#FFFFFF"
         android:title="Help Us" />
 </menu>
