@@ -16,26 +16,39 @@
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/group_toolbar"
-            android:theme="@style/ToolbarTheme"
-            app:titleTextAppearance="@style/Toolbar.TitleText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:theme="@style/ToolbarTheme"
+            app:titleTextAppearance="@style/Toolbar.TitleText"
             app:titleTextColor="#FFFFFF" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <Button
-        android:id="@+id/sos_btn"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+    <com.skyfishjy.library.RippleBackground
+        android:id="@+id/ripple_content"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_above="@id/group_sos_log"
         android:layout_centerInParent="true"
         android:layout_marginBottom="15dp"
-        android:background="@drawable/sos_back_ground"
-        android:text="SOS"
-        android:textColor="#FFFFFF"
-        android:textSize="25sp"
-        android:textStyle="bold" />
+        app:rb_color="#FA7878"
+        app:rb_duration="2000"
+        app:rb_radius="32dp"
+        app:rb_rippleAmount="4"
+        app:rb_scale="6">
+
+        <Button
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:onClick="SosClick"
+            android:background="@drawable/sos_back_ground"
+            android:text="SOS"
+            android:layout_centerInParent="true"
+            android:textColor="#FFFFFF"
+            android:textSize="25sp"
+            android:textStyle="bold" />
+    </com.skyfishjy.library.RippleBackground>
+
 
     <TextView
         android:id="@+id/schedule_event"

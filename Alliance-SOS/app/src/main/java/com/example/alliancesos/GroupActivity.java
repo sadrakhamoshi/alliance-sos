@@ -49,12 +49,15 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.skyfishjy.library.RippleBackground;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class GroupActivity extends AppCompatActivity {
 
@@ -67,7 +70,7 @@ public class GroupActivity extends AppCompatActivity {
 
     private String mCurrentGroupId, mCurrentGroupName;
 
-    private Button mSOS_btn;
+    private RippleBackground mRippleBackground;
     private TextView mSchedule;
 
     private RecyclerView mRecyclerView;
@@ -93,7 +96,6 @@ public class GroupActivity extends AppCompatActivity {
         mCurrentUserId = getIntent().getStringExtra("currUserId");
         mCurrentUserName = getIntent().getStringExtra("currUserName");
         mCurrentGroupName = getIntent().getStringExtra("groupName");
-
         InitializeUI();
     }
 
@@ -120,14 +122,6 @@ public class GroupActivity extends AppCompatActivity {
             }
         });
 
-        mSOS_btn = findViewById(R.id.sos_btn);
-        mSOS_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                MakeAlertDialog();
-            }
-        });
-
         //appbar
         mToolbar = findViewById(R.id.group_toolbar);
         mAppBarLayout = findViewById(R.id.group_appbar);
@@ -135,7 +129,11 @@ public class GroupActivity extends AppCompatActivity {
         final ActionBar ab = getSupportActionBar();
         ab.setDisplayHomeAsUpEnabled(true);
         ab.setTitle(mCurrentGroupName);
+
+        //ripple
+        mRippleBackground = findViewById(R.id.ripple_content);
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -410,6 +408,24 @@ public class GroupActivity extends AppCompatActivity {
         Intent intent = new Intent(GroupActivity.this, SOSLogActivity.class);
         intent.putExtra("groupId", mCurrentGroupId);
         startActivity(intent);
+    }
+
+    public void SosClick(View view) {
+        mRippleBackground.startRippleAnimation();
+
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mRippleBackground.stopRippleAnimation();
+                    }
+                });
+            }
+        }, 2500);
+        MakeAlertDialog();
     }
 
     private class AddSOSToDB extends AsyncTask<Void, Void, Void> {
