@@ -1,13 +1,16 @@
 package com.example.alliancesos.SendNotificationPack;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
@@ -87,7 +90,16 @@ public class SOSLogActivity extends AppCompatActivity {
         mListView = findViewById(R.id.sos_list_view);
         mSosList = new ArrayList<>();
         mDataToSendList = new ArrayList<>();
-        mAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, mSosList);
+        mAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mSosList) {
+            @NonNull
+            @Override
+            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+                TextView text = (TextView) view.findViewById(android.R.id.text1);
+                text.setTextColor(Color.WHITE);
+                return view;
+            }
+        };
         mListView.setAdapter(mAdapter);
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -187,4 +199,5 @@ public class SOSLogActivity extends AppCompatActivity {
             return null;
         }
     }
+
 }

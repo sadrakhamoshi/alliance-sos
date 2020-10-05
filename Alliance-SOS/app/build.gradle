@@ -69,4 +69,9 @@ dependencies {
     implementation 'com.google.firebase:firebase-ml-natural-language-translate-model:20.0.8'
 
 
+    //list_view
+    implementation 'com.nhaarman.listviewanimations:lib-core:3.1.0@aar'
+    implementation 'com.nhaarman.listviewanimations:lib-manipulation:3.1.0@aar'
+    implementation 'com.nhaarman.listviewanimations:lib-core-slh:3.1.0@aar'
+
 }
