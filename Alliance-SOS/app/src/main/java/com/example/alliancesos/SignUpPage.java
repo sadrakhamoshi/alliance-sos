@@ -164,14 +164,10 @@ public class SignUpPage extends AppCompatActivity {
             @Override
             public void onSuccess(InstanceIdResult instanceIdResult) {
                 String newToken = instanceIdResult.getToken();
-
                 mToken = new Token(newToken);
-
                 String key = mFirebaseAuth.getCurrentUser().getUid();
                 userId = key;
-
                 UserObject userObject = new UserObject(key, mUsername.getText().toString(), mEmail.getText().toString(), mPassword.getText().toString(), mToken.getToken());
-
                 mUserDatabaseRef.child(key).setValue(userObject);
             }
         });
