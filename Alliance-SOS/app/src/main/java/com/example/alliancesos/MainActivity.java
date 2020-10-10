@@ -141,7 +141,8 @@ public class MainActivity extends AppCompatActivity {
     private void RequestNewGroup() {
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this, R.style.AlertDialog);
         builder.setTitle("Enter the Group name and Id :");
-
+        builder.setCancelable(false);
+        builder.setIcon(R.drawable.add_vector);
         final EditText groupNameField = new EditText(MainActivity.this);
         groupNameField.setHint("example ");
 
@@ -164,19 +165,11 @@ public class MainActivity extends AppCompatActivity {
                 if (TextUtils.isEmpty(groupName) || TextUtils.isEmpty(groupId)) {
                     Toast.makeText(MainActivity.this, "None of them should not be Empty...", Toast.LENGTH_SHORT).show();
                 } else {
-
                     CreateNewGroup(groupName, groupId);
-                    addGroupToUserSubset(groupName, groupId);
-
                 }
             }
         });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
+        builder.setNegativeButton("Cancel", null);
         builder.show();
     }
 
@@ -238,29 +231,29 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void CreateNewGroup(final String groupName, final String groupId) {
-
-        Groups groups = new Groups(groupName, groupId, mCurrentUserId);
-
+        progressBar.setVisibility(View.VISIBLE);
+        final Groups groups = new Groups(groupName, groupId, mCurrentUserId);
         mGroupsRef.child(groupId).setValue(groups).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
-                    Toast.makeText(MainActivity.this, groupId + "  created Successfully ...", Toast.LENGTH_SHORT).show();
-
                     Member admin = new Member(mCurrentUserId, mCurrentUserName);
                     admin.setCanChangeGroupImage(true);
                     mGroupsRef.child(groupId).child("members").child(mCurrentUserId).setValue(admin).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
-                                Toast.makeText(MainActivity.this, "admin added to group ... ", Toast.LENGTH_SHORT).show();
+                                addGroupToUserSubset(groupName, groupId);
+
                             } else {
+                                progressBar.setVisibility(View.GONE);
                                 Toast.makeText(MainActivity.this, "admin didn't add to group " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                             }
                         }
                     });
 
                 } else {
+                    progressBar.setVisibility(View.GONE);
                     String message = task.getException().toString();
                     Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
                 }
@@ -272,16 +265,14 @@ public class MainActivity extends AppCompatActivity {
         HashMap<String, String> groupInfo = new HashMap<>();
         groupInfo.put("groupName", groupName);
         groupInfo.put("groupId", groupId);
-
-        Toast.makeText(this, mCurrentUserName, Toast.LENGTH_SHORT).show();
-
         mUsersRef.child(mCurrentUserId).child("Groups").push().setValue(groupInfo).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
-                    Toast.makeText(MainActivity.this, "add to users Groups", Toast.LENGTH_SHORT).show();
+                    progressBar.setVisibility(View.GONE);
                 } else {
-                    Toast.makeText(MainActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                    progressBar.setVisibility(View.GONE);
+                    Toast.makeText(MainActivity.this, "error in add admin " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                 }
             }
         });
