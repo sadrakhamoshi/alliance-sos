@@ -19,6 +19,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+import android.widget.VideoView;
 
 import com.example.alliancesos.DbForRingtone.AppDatabase;
 import com.example.alliancesos.DbForRingtone.ChoiceApplication;
@@ -45,8 +46,6 @@ public class SignUpPage extends AppCompatActivity {
     private EditText mUsername;
     private Button mSignUp;
 
-//    private String mToken;
-
     private Token mToken;
     private String userId;
 
@@ -59,6 +58,8 @@ public class SignUpPage extends AppCompatActivity {
 
     private ChoiceApplication mChoiceDB;
     private Uri ring;
+
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,6 +98,7 @@ public class SignUpPage extends AppCompatActivity {
         mEmail = findViewById(R.id.email_sign_up_page_edt_text);
         mPassword = findViewById(R.id.pass_sign_up_page_edt_text);
         mConfirmPassword = findViewById(R.id.confirm_pass_sign_up_page_edt_text);
+        progressBar = ((ProgressBar) findViewById(R.id.progress_signUp_page));
 
         mUsername = findViewById(R.id.username_sign_up_page_edt_text);
         mSignUp = findViewById(R.id.sign_up_btn);
@@ -110,6 +112,7 @@ public class SignUpPage extends AppCompatActivity {
 
     void CreateAccount() {
         if (checkSignUpCondition()) {
+            progressBar.setVisibility(View.VISIBLE);
             mFirebaseAuth.createUserWithEmailAndPassword(mEmail.getText().toString(), mPassword.getText().toString())
                     .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                         @Override
@@ -120,6 +123,7 @@ public class SignUpPage extends AppCompatActivity {
                                 pushDataInDatabase.execute();
 
                             } else {
+                                progressBar.setVisibility(View.GONE);
                                 Toast.makeText(getApplicationContext(), task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                             }
                         }
@@ -178,12 +182,12 @@ public class SignUpPage extends AppCompatActivity {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            ((ProgressBar) findViewById(R.id.progress_signUp_page)).setVisibility(View.VISIBLE);
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
+            progressBar.setVisibility(View.GONE);
             startActivity(new Intent(SignUpPage.this, MainActivity.class));
             finish();
             return;
