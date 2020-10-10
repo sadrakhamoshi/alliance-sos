@@ -85,6 +85,18 @@ public class SignUpPage extends AppCompatActivity {
         InitializeComp();
     }
 
+    @Override
+    protected void onPause() {
+        progressBar.setVisibility(View.GONE);
+        super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        progressBar.setVisibility(View.GONE);
+    }
+
     private void InitializeComp() {
 
         //database

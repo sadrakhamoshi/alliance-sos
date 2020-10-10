@@ -46,6 +46,8 @@ import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
 
+    private ProgressBar progressBar;
+
     private String mCurrentUserId, mCurrentUserName;
 
     private FirebaseAuth.AuthStateListener mAuthStateListener;
@@ -71,6 +73,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void Initialize() {
+        //progress
+        progressBar = findViewById(R.id.progress_main);
 
         //auth
         mCurrentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -117,24 +121,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getCurrentUserName() {
-//        ((ProgressBar) findViewById(R.id.progress_main)).setVisibility(View.VISIBLE);
         mUsersRef.child(mCurrentUserId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
                     getCurrentUsernameTask getCurrentUsernameTask = new getCurrentUsernameTask(snapshot);
                     getCurrentUsernameTask.execute();
-//                    mCurrentUserName = snapshot.child("userName").getValue().toString();
-//                    ((TextView) findViewById(R.id.main_username)).setText(mCurrentUserName);
-//                    Toast.makeText(MainActivity.this, "Current User Name Is " + mCurrentUserName, Toast.LENGTH_SHORT).show();
-//                    ((ProgressBar) findViewById(R.id.progress_main)).setVisibility(View.GONE);
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
-                ((ProgressBar) findViewById(R.id.progress_main)).setVisibility(View.GONE);
+                progressBar.setVisibility(View.GONE);
             }
         });
     }
@@ -186,13 +185,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void attachedGroupListener() {
-        ((ProgressBar) findViewById(R.id.progress_main)).setVisibility(View.VISIBLE);
+        progressBar.setVisibility(View.VISIBLE);
         if (mGroupChangeListener == null) {
             mGroupChangeListener = new ChildEventListener() {
                 @Override
                 public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                    if (((ProgressBar) findViewById(R.id.progress_main)).getVisibility() != View.VISIBLE)
-                        ((ProgressBar) findViewById(R.id.progress_main)).setVisibility(View.VISIBLE);
+                    if (progressBar.getVisibility() != View.VISIBLE)
+                        progressBar.setVisibility(View.VISIBLE);
 
                     final String name = snapshot.child("groupName").getValue().toString();
                     final String id = snapshot.child("groupId").getValue().toString();
@@ -201,16 +200,16 @@ public class MainActivity extends AppCompatActivity {
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                             UpComingEvent event = snapshot.child("upComingEvent").getValue(UpComingEvent.class);
                             mGroupAdapter.add(name, event, id);
-                            ((ProgressBar) findViewById(R.id.progress_main)).setVisibility(View.GONE);
+                            progressBar.setVisibility(View.GONE);
                         }
 
                         @Override
                         public void onCancelled(@NonNull DatabaseError error) {
                             Toast.makeText(MainActivity.this, "error in reading upComing: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-                            ((ProgressBar) findViewById(R.id.progress_main)).setVisibility(View.GONE);
+                            progressBar.setVisibility(View.GONE);
                         }
                     });
-                    ((ProgressBar) findViewById(R.id.progress_main)).setVisibility(View.GONE);
+                    progressBar.setVisibility(View.GONE);
                 }
 
                 @Override
@@ -306,6 +305,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onPause() {
+        progressBar.setVisibility(View.GONE);
+        super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        progressBar.setVisibility(View.GONE);
+        super.onDestroy();
+    }
+
+    @Override
     protected void onStart() {
         super.onStart();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -330,6 +341,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         if (mAuthStateListener != null) {
+            progressBar.setVisibility(View.GONE);
             mFirebaseAuth.removeAuthStateListener(mAuthStateListener);
         }
     }
@@ -378,15 +390,15 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            if (((ProgressBar) findViewById(R.id.progress_main)).getVisibility() != View.VISIBLE)
-                ((ProgressBar) findViewById(R.id.progress_main)).setVisibility(View.VISIBLE);
+            if (progressBar.getVisibility() != View.VISIBLE)
+                progressBar.setVisibility(View.VISIBLE);
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
             ((TextView) findViewById(R.id.main_username)).setText(mCurrentUserName);
-            ((ProgressBar) findViewById(R.id.progress_main)).setVisibility(View.GONE);
+            progressBar.setVisibility(View.GONE);
         }
 
         @Override
@@ -402,13 +414,13 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            ((ProgressBar) findViewById(R.id.progress_main)).setVisibility(View.VISIBLE);
+            progressBar.setVisibility(View.VISIBLE);
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            ((ProgressBar) findViewById(R.id.progress_main)).setVisibility(View.GONE);
+            progressBar.setVisibility(View.GONE);
         }
 
         @Override
