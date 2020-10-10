@@ -17,6 +17,13 @@
         android:textSize="20dp"
         android:textStyle="bold|italic" />
 
+    <ProgressBar
+        android:id="@+id/progress_invitation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:visibility="gone" />
+
     <EditText
         android:id="@+id/username_for_group_edt"
         android:layout_width="match_parent"

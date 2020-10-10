@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.example.alliancesos.Member;
@@ -28,6 +29,7 @@ import java.util.TimerTask;
 
 public class InvitationResponseActivity extends AppCompatActivity {
 
+    private ProgressBar progressBar;
     private EditText mName_edt;
     private String mCurrUserId;
     private String mGroupId, mGroupName;
@@ -50,13 +52,15 @@ public class InvitationResponseActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
         }
 
+        progressBar = findViewById(R.id.progress_invitation);
+
         mName_edt = findViewById(R.id.username_for_group_edt);
-        //mCurrUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         mGroupRef = FirebaseDatabase.getInstance().getReference().child("groups");
         mUserRef = FirebaseDatabase.getInstance().getReference().child("users");
     }
 
     public void addUserToGroup(View view) {
+        progressBar.setVisibility(View.VISIBLE);
         String username = mName_edt.getText().toString();
         if (TextUtils.isEmpty(username)) {
             MakeAlertDialog("Attention", "You Have to Set Name...");
@@ -73,14 +77,15 @@ public class InvitationResponseActivity extends AppCompatActivity {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 if (task.isSuccessful()) {
-                                    Toast.makeText(InvitationResponseActivity.this, "You Added to Group", Toast.LENGTH_SHORT).show();
                                     MakeAlertDialog("Attention", "You Added to " + mGroupName);
                                 } else {
                                     Toast.makeText(InvitationResponseActivity.this, "error in second complete " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                                 }
+                                progressBar.setVisibility(View.GONE);
                             }
                         });
                     } else {
+                        progressBar.setVisibility(View.GONE);
                         Toast.makeText(InvitationResponseActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 }
