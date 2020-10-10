@@ -14,9 +14,9 @@
         android:layout_width="match_parent"
         android:layout_height="75dp"
         android:background="@drawable/input_sign_up_back"
-        android:textStyle="bold"
         android:onClick="SearchingMembers"
-        android:padding="10dp" />
+        android:padding="10dp"
+        android:textStyle="bold" />
 
     <Button
         android:id="@+id/add_to_group_btn"
@@ -28,6 +28,13 @@
         android:padding="15dp"
         android:text="add To group"
         android:textColor="#FFFFFF" />
+
+    <ProgressBar
+        android:id="@+id/progress_add_member"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:layout_gravity="center_horizontal" />
 
     <ListView
         android:id="@+id/members_list_view"

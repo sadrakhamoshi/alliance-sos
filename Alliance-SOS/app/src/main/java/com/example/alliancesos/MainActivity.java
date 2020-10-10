@@ -244,7 +244,6 @@ public class MainActivity extends AppCompatActivity {
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
                                 addGroupToUserSubset(groupName, groupId);
-
                             } else {
                                 progressBar.setVisibility(View.GONE);
                                 Toast.makeText(MainActivity.this, "admin didn't add to group " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();

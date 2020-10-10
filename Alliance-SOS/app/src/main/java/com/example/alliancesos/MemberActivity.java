@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -14,6 +15,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -40,7 +42,7 @@ public class MemberActivity extends AppCompatActivity {
 
     private String mGroupId, mGroupName, mHostUsername, mHostUserId;
 
-
+    private ProgressBar progressBar;
     private Button mAddToGroup;
     private ListView mMembersListView;
     private SearchView mUsername;
@@ -69,6 +71,7 @@ public class MemberActivity extends AppCompatActivity {
     }
 
     private void initialize() {
+        progressBar = findViewById(R.id.progress_add_member);
 
         //database
         mGroupRef = FirebaseDatabase.getInstance().getReference().child("groups");
@@ -96,7 +99,7 @@ public class MemberActivity extends AppCompatActivity {
             public void onClick(View v) {
                 String addition_member = mUsername.getQuery().toString();
                 if (TextUtils.isEmpty(addition_member)) {
-                    Toast.makeText(MemberActivity.this, "You Have to write Members Username", Toast.LENGTH_LONG).show();
+                    Toast.makeText(MemberActivity.this, "You Have to write Members Username....", Toast.LENGTH_LONG).show();
                 } else {
                     addToGroup(addition_member);
                 }
@@ -105,6 +108,7 @@ public class MemberActivity extends AppCompatActivity {
     }
 
     private void addToGroup(final String addition_member) {
+        progressBar.setVisibility(View.VISIBLE);
         mUserRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -128,16 +132,18 @@ public class MemberActivity extends AppCompatActivity {
                             }
                         }
                         if (isFoundUsername) {
-
-                            addingMemberFunc(foundedUserId, addition_member);
+                            addMemberToGroups(addition_member, foundedUserId);
 
                         } else {
+                            progressBar.setVisibility(View.GONE);
                             Toast.makeText(MemberActivity.this, addition_member + " not Valid Username", Toast.LENGTH_LONG).show();
                         }
                     } catch (Exception e) {
+                        progressBar.setVisibility(View.GONE);
                         Toast.makeText(MemberActivity.this, "on Catch get " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 } else {
+                    progressBar.setVisibility(View.GONE);
                     Toast.makeText(MemberActivity.this, " Don't have any User ", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -149,42 +155,35 @@ public class MemberActivity extends AppCompatActivity {
         });
     }
 
-    private void addingMemberFunc(String foundedUserId, String foundedUsername) {
-        addMemberToGroups(foundedUsername, foundedUserId);
-    }
-
     private void addMemberToGroups(final String foundedUsername, String foundedUserId) {
         DataToSend data = new DataToSend(mHostUsername, mGroupName, mGroupId, MessageType.INVITATION_TYPE);
         data.setToId(foundedUserId);
         data.setToName(foundedUsername);
-        SendingNotification sender = new SendingNotification(MemberActivity.this, foundedUserId, data);
-        sender.sendInvitation();
+        AddingMemberTask task = new AddingMemberTask(data, foundedUserId);
+        task.execute();
+//        SendingNotification sender = new SendingNotification(MemberActivity.this, foundedUserId, data);
+//        sender.sendInvitation();
     }
 
     private void showAllMembers() {
+        progressBar.setVisibility(View.VISIBLE);
         mGroupRef.child(mGroupId).child("members").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    Iterator iterator = snapshot.getChildren().iterator();
-
-                    Set<String> membersName = new HashSet<>();
-                    while (iterator.hasNext()) {
-                        String name = ((DataSnapshot) iterator.next()).child("userName").getValue().toString();
-                        membersName.add(name);
-                    }
-                    mMembersList.clear();
-                    mMembersList.addAll(membersName);
-                    adapter.notifyDataSetChanged();
+                    ShowMemberTask task = new ShowMemberTask(snapshot);
+                    task.execute();
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
+                progressBar.setVisibility(View.GONE);
                 Toast.makeText(MemberActivity.this, "Error On showAllMembers Func " + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
+
 
     @Override
     protected void onStart() {
@@ -219,6 +218,60 @@ public class MemberActivity extends AppCompatActivity {
     }
 
     public void SearchingMembers(View view) {
+    }
 
+    public class AddingMemberTask extends AsyncTask<Void, Void, Void> {
+
+        DataToSend dataToSend;
+        String targetId;
+
+        public AddingMemberTask(DataToSend dataSnapshot, String id) {
+            this.dataToSend = dataSnapshot;
+            targetId = id;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            SendingNotification sender = new SendingNotification(MemberActivity.this, targetId, dataToSend);
+            sender.sendInvitation();
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            adapter.notifyDataSetChanged();
+            progressBar.setVisibility(View.GONE);
+            super.onPostExecute(aVoid);
+        }
+    }
+
+    public class ShowMemberTask extends AsyncTask<Void, Void, Void> {
+
+        DataSnapshot dataSnapshot;
+
+        public ShowMemberTask(DataSnapshot dataSnapshot) {
+            this.dataSnapshot = dataSnapshot;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+
+            Iterator iterator = dataSnapshot.getChildren().iterator();
+            Set<String> membersName = new HashSet<>();
+            while (iterator.hasNext()) {
+                String name = ((DataSnapshot) iterator.next()).child("userName").getValue().toString();
+                membersName.add(name);
+            }
+            mMembersList.clear();
+            mMembersList.addAll(membersName);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            adapter.notifyDataSetChanged();
+            progressBar.setVisibility(View.GONE);
+            super.onPostExecute(aVoid);
+        }
     }
 }

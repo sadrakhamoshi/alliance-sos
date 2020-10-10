@@ -88,7 +88,7 @@ public class SendingNotification {
                     if (response.body().success != 1) {
                         Toast.makeText(mContext, "Failed ", Toast.LENGTH_LONG).show();
                     } else {
-                        Toast.makeText(mContext, "Send Successfully ... ", Toast.LENGTH_LONG).show();
+                        //Toast.makeText(mContext, "Send Successfully ... ", Toast.LENGTH_LONG).show();
                     }
                 }
             }
@@ -124,7 +124,7 @@ public class SendingNotification {
                             }
 
                         } else {
-                            Toast.makeText(mContext, "not For Your self..:)", Toast.LENGTH_SHORT).show();
+                          //  Toast.makeText(mContext, "not For Your self..:)", Toast.LENGTH_SHORT).show();
                         }
                     }
                     isInSendMode = false;
@@ -170,7 +170,7 @@ public class SendingNotification {
                     if (response.body().success != 1) {
                         Toast.makeText(mContext, "Failed ", Toast.LENGTH_LONG).show();
                     } else {
-                        Toast.makeText(mContext, "Send Successfully ... ", Toast.LENGTH_LONG).show();
+                        //Toast.makeText(mContext, "Send Successfully ... ", Toast.LENGTH_LONG).show();
                     }
                 }
             }
