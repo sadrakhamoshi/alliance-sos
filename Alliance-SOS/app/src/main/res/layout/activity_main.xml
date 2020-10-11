@@ -47,12 +47,6 @@
 
         </RelativeLayout>
 
-        <ProgressBar
-            android:id="@+id/progress_main"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:visibility="gone" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/group_pattern_recycle"
@@ -87,6 +81,20 @@
         android:text="User Setting"
         android:textAllCaps="false"
         android:textColor="#FFFFFF" />
+
+    <ProgressBar
+        android:id="@+id/progress_main_group_show"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="gone" />
+
+    <ProgressBar
+        android:id="@+id/progress_main"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="gone" />
 
 
 </RelativeLayout>

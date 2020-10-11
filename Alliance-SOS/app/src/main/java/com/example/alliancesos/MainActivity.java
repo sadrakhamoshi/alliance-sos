@@ -15,6 +15,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -46,14 +47,14 @@ import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
 
-    private ProgressBar progressBar;
+    private ProgressBar progressBar, progressBar_group_show;
+
+    private long mGroupCount;
 
     private String mCurrentUserId, mCurrentUserName;
 
     private FirebaseAuth.AuthStateListener mAuthStateListener;
     private FirebaseAuth mFirebaseAuth;
-
-    private UserObject mCurrentUserObject;
 
     //database
     private DatabaseReference mRoot, mGroupsRef, mUsersRef;
@@ -68,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.v("log", "onCreate");
         setContentView(R.layout.activity_main);
         Initialize();
     }
@@ -75,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
     private void Initialize() {
         //progress
         progressBar = findViewById(R.id.progress_main);
+        progressBar_group_show = findViewById(R.id.progress_main_group_show);
 
         //auth
         mCurrentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -94,10 +97,9 @@ public class MainActivity extends AppCompatActivity {
         mRoot = FirebaseDatabase.getInstance().getReference();
         mGroupsRef = mRoot.child("groups");
         mUsersRef = mRoot.child("users");
-        showCurrentUserGroups();
-
-        InitializeUI();
         getCurrentUserName();
+        attachedGroupListener();
+        InitializeUI();
     }
 
     private void InitializeUI() {
@@ -121,6 +123,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getCurrentUserName() {
+        progressBar.setVisibility(View.VISIBLE);
         mUsersRef.child(mCurrentUserId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -173,36 +176,34 @@ public class MainActivity extends AppCompatActivity {
         builder.show();
     }
 
-    private void showCurrentUserGroups() {
-        attachedGroupListener();
-    }
-
     private void attachedGroupListener() {
-        progressBar.setVisibility(View.VISIBLE);
+        final int[] count = {0};
         if (mGroupChangeListener == null) {
+            Log.v("progresss", "on");
+            progressBar_group_show.setVisibility(View.VISIBLE);
             mGroupChangeListener = new ChildEventListener() {
                 @Override
                 public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                    if (progressBar.getVisibility() != View.VISIBLE)
-                        progressBar.setVisibility(View.VISIBLE);
-
                     final String name = snapshot.child("groupName").getValue().toString();
                     final String id = snapshot.child("groupId").getValue().toString();
+                    count[0]++;
+                    if (count[0] >= mGroupCount) {
+                        progressBar_group_show.setVisibility(View.GONE);
+                    }
                     mGroupsRef.child(id).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                             UpComingEvent event = snapshot.child("upComingEvent").getValue(UpComingEvent.class);
                             mGroupAdapter.add(name, event, id);
-                            progressBar.setVisibility(View.GONE);
                         }
 
                         @Override
                         public void onCancelled(@NonNull DatabaseError error) {
+                            progressBar_group_show.setVisibility(View.GONE);
+                            Log.v("progresss", "off");
                             Toast.makeText(MainActivity.this, "error in reading upComing: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-                            progressBar.setVisibility(View.GONE);
                         }
                     });
-                    progressBar.setVisibility(View.GONE);
                 }
 
                 @Override
@@ -212,8 +213,7 @@ public class MainActivity extends AppCompatActivity {
 
                 @Override
                 public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-                    String name = snapshot.child("groupName").getValue().toString();
-                    String id = snapshot.child("groupId").getValue().toString();
+
                 }
 
                 @Override
@@ -223,11 +223,13 @@ public class MainActivity extends AppCompatActivity {
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
+                    progressBar_group_show.setVisibility(View.GONE);
+                    Log.v("progresss", "off");
                     Toast.makeText(MainActivity.this, "Error in attach child to database :" + error.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             };
-            mUsersRef.child(mCurrentUserId).child("Groups").addChildEventListener(mGroupChangeListener);
         }
+        mUsersRef.child(mCurrentUserId).child("Groups").addChildEventListener(mGroupChangeListener);
     }
 
     private void CreateNewGroup(final String groupName, final String groupId) {
@@ -268,6 +270,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
+                    mGroupCount++;
                     progressBar.setVisibility(View.GONE);
                 } else {
                     progressBar.setVisibility(View.GONE);
@@ -295,18 +298,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onPause() {
-        progressBar.setVisibility(View.GONE);
-        super.onPause();
-    }
-
-    @Override
-    protected void onDestroy() {
-        progressBar.setVisibility(View.GONE);
-        super.onDestroy();
-    }
-
-    @Override
     protected void onStart() {
         super.onStart();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -320,15 +311,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        if (mAuthStateListener != null) {
-            mFirebaseAuth.addAuthStateListener(mAuthStateListener);
-        }
-    }
-
-    @Override
     protected void onStop() {
+        detachmentGroupListener();
         super.onStop();
         if (mAuthStateListener != null) {
             progressBar.setVisibility(View.GONE);
@@ -360,13 +344,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void RefreshPage(View view) {
+        mGroupAdapter.clearAll();
+        detachmentGroupListener();
+        attachedGroupListener();
+    }
+
+    private void detachmentGroupListener() {
         if (mGroupChangeListener != null) {
-            mGroupAdapter.clearAll();
             mUsersRef.child(mCurrentUserId).child("Groups").removeEventListener(mGroupChangeListener);
+            mGroupChangeListener = null;
         }
-//        mUsersRef.child(mCurrentUserId).child("Groups").addChildEventListener(mGroupChangeListener);
-        RefreshTask task = new RefreshTask();
-        task.execute();
     }
 
     public class getCurrentUsernameTask extends AsyncTask<Void, Void, Void> {
@@ -375,13 +362,6 @@ public class MainActivity extends AppCompatActivity {
 
         public getCurrentUsernameTask(DataSnapshot snapshot) {
             mSnapShot = snapshot;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            if (progressBar.getVisibility() != View.VISIBLE)
-                progressBar.setVisibility(View.VISIBLE);
         }
 
         @Override
@@ -394,56 +374,29 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... voids) {
             mCurrentUserName = mSnapShot.child("userName").getValue().toString();
+            mGroupCount = mSnapShot.child("Groups").getChildrenCount();
             mGroupAdapter.setUserName(mCurrentUserName);
             return null;
         }
     }
 
-    public class RefreshTask extends AsyncTask<Void, Void, Void> {
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            progressBar.setVisibility(View.VISIBLE);
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            progressBar.setVisibility(View.GONE);
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            if (mGroupChangeListener != null) {
-                mUsersRef.child(mCurrentUserId).child("Groups").addChildEventListener(mGroupChangeListener);
-            }
-            return null;
-        }
+    @Override
+    protected void onPause() {
+        super.onPause();
+        progressBar.setVisibility(View.GONE);
     }
 
+    @Override
+    protected void onDestroy() {
+        progressBar.setVisibility(View.GONE);
+        super.onDestroy();
+    }
 
-    private void getCurrentUserInfo() {
-        mUsersRef.child(mCurrentUserId).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    String id = snapshot.child("id").getValue().toString();
-                    String userName = snapshot.child("userName").getValue().toString();
-                    String email = snapshot.child("email").getValue().toString();
-                    String token = snapshot.child("token").getValue().toString();
-                    String pass = snapshot.child("password").getValue().toString();
-                    mCurrentUserObject = new UserObject(id, userName, email, pass, token);
-                    Toast.makeText(MainActivity.this, "admin info gotten...", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(MainActivity.this, "Main activity not exist...", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(MainActivity.this, "Main activity " + error.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mAuthStateListener != null) {
+            mFirebaseAuth.addAuthStateListener(mAuthStateListener);
+        }
     }
 }
