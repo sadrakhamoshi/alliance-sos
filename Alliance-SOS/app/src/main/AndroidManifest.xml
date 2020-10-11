@@ -20,7 +20,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".SpecificSOSActivity"></activity>
+        <activity android:name=".Payment.PaymentActivity"></activity>
+        <activity android:name=".SpecificSOSActivity" />
         <activity android:name=".SendNotificationPack.SOSLogActivity" />
         <activity android:name=".SpecificEventActivity" />
         <activity android:name=".DoNotDisturb.PickNotDisturbActivity" />

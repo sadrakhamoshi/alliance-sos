@@ -26,6 +26,7 @@ import android.widget.Toast;
 
 
 import com.example.alliancesos.Adapters.ShowGroup;
+import com.example.alliancesos.Payment.PaymentActivity;
 import com.example.alliancesos.SendNotificationPack.Token;
 import com.example.alliancesos.Setting.UserSettingActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -398,5 +399,11 @@ public class MainActivity extends AppCompatActivity {
         if (mAuthStateListener != null) {
             mFirebaseAuth.addAuthStateListener(mAuthStateListener);
         }
+    }
+
+    public void gotoPaymentPage(View view) {
+        Intent intent = new Intent(this, PaymentActivity.class);
+        intent.putExtra("userId", mCurrentUserId);
+        startActivity(intent);
     }
 }
