@@ -180,17 +180,14 @@ public class MainActivity extends AppCompatActivity {
     private void attachedGroupListener() {
         final int[] count = {0};
         if (mGroupChangeListener == null) {
-            Log.v("progresss", "on");
-            progressBar_group_show.setVisibility(View.VISIBLE);
+//            progressBar_group_show.setVisibility(View.VISIBLE);
             mGroupChangeListener = new ChildEventListener() {
                 @Override
                 public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                     final String name = snapshot.child("groupName").getValue().toString();
                     final String id = snapshot.child("groupId").getValue().toString();
                     count[0]++;
-                    if (count[0] >= mGroupCount) {
-                        progressBar_group_show.setVisibility(View.GONE);
-                    }
+                    progressBar_group_show.setVisibility(View.GONE);
                     mGroupsRef.child(id).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {

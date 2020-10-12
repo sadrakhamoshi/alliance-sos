@@ -25,6 +25,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -81,7 +82,7 @@ public class PaymentActivity extends AppCompatActivity {
             mRoot = FirebaseDatabase.getInstance().getReference();
         }
         mWhom = MINE;
-        mMonthIdx = 6;
+        mMonthIdx = 1;
         InitUI();
 
         mWhomOption.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
@@ -110,9 +111,6 @@ public class PaymentActivity extends AppCompatActivity {
                         break;
                     case R.id.radio_12month:
                         mMonthIdx = 2;
-                        break;
-                    case R.id.radio_other:
-                        DialogForMonth();
                         break;
                 }
             }
@@ -153,25 +151,22 @@ public class PaymentActivity extends AppCompatActivity {
     public void PayOffButton(View view) {
 
         if (mWhom == MINE) {
-            DialogForSubmit(null);
+            DialogForSubmit();
         } else {
-            DialogForSubmit(mEmail.getText().toString());
+            VerifyEmail();
         }
     }
 
-    private void DialogForSubmit(String email) {
-        if (email != null) {
-            VerifyEmail();
-        }
-
+    private void DialogForSubmit() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialog);
         builder.setIcon(R.drawable.sos_icon);
         builder.setTitle("Attention");
-
-        String message = "Option : " + mMonth_Option[mMonthIdx] + "\n";
+        builder.setCancelable(false);
+        String message = "Option : " + MonthOption.months[mMonthIdx] + " Month" + "\n";
+        message += ("Price : " + mMonth_Option[mMonthIdx] + "\n");
         message += ("For : " + mWhom + "\n");
-        if (email != null) {
-
+        if (!TextUtils.isEmpty(mEmail.getText())) {
+            String email = mEmail.getText().toString();
             if (mOtherUsername == null) {
                 Toast.makeText(this, "There isn't user with this email ", Toast.LENGTH_SHORT).show();
                 return;
@@ -192,6 +187,7 @@ public class PaymentActivity extends AppCompatActivity {
                 dialog.cancel();
             }
         });
+        builder.create().show();
     }
 
     private void VerifyEmail() {
@@ -199,8 +195,23 @@ public class PaymentActivity extends AppCompatActivity {
         mRoot.child("users").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                VerifyEmailTask task = new VerifyEmailTask(snapshot);
-                task.execute();
+                Iterator iterator = snapshot.getChildren().iterator();
+                mOtherUsername = null;
+                while (iterator.hasNext()) {
+                    DataSnapshot curr = (DataSnapshot) iterator.next();
+                    String email = curr.child("email").getValue().toString();
+                    if (email.equals(mEmail.getText().toString())) {
+                        mOtherUsername = curr.child("userName").getValue().toString();
+                        mOtherUID = curr.getKey();
+                        break;
+                    }
+                }
+                progressBar.setVisibility(View.GONE);
+                if (mOtherUsername != null) {
+                    DialogForSubmit();
+                } else {
+                    Toast.makeText(PaymentActivity.this, "There is No One With this Email", Toast.LENGTH_SHORT).show();
+                }
             }
 
             @Override
@@ -253,6 +264,10 @@ public class PaymentActivity extends AppCompatActivity {
                 progressBar.setVisibility(View.GONE);
             }
         });
+    }
+
+    public void clickOnOtherOption(View view) {
+        DialogForMonth();
     }
 
     private class VerifyEmailTask extends AsyncTask<Void, Void, Void> {

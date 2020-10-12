@@ -695,19 +695,24 @@ public class UserSettingActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            requestCreator.into(mBackUserImage);
-            requestCreator.into(mUserImage, new Callback() {
-                @Override
-                public void onSuccess() {
-                    progressBar.setVisibility(View.GONE);
-                }
-                @Override
-                public void onError(Exception e) {
-                    Toast.makeText(UserSettingActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
-                    progressBar.setVisibility(View.GONE);
-                }
-            });
             setInfoToUi();
+            if (requestCreator != null) {
+                requestCreator.into(mBackUserImage);
+                requestCreator.into(mUserImage, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                        progressBar.setVisibility(View.GONE);
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        Toast.makeText(UserSettingActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                        progressBar.setVisibility(View.GONE);
+                    }
+                });
+            } else {
+                progressBar.setVisibility(View.GONE);
+            }
         }
     }
 }
