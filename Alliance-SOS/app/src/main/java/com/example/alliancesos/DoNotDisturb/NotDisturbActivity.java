@@ -1,28 +1,18 @@
 package com.example.alliancesos.DoNotDisturb;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.app.TimePickerDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
-import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.ProgressBar;
-import android.widget.TimePicker;
-import android.widget.Toast;
 
 import com.example.alliancesos.DbForRingtone.ChoiceApplication;
 import com.example.alliancesos.R;
 import com.example.alliancesos.Adapters.*;
-import com.example.alliancesos.Utils.WeekDay;
 
 import java.util.ArrayList;
 import java.util.List;

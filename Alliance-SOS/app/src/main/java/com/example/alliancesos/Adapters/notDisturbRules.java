@@ -1,40 +1,23 @@
 package com.example.alliancesos.Adapters;
 
-import android.app.TimePickerDialog;
 import android.content.Context;
-import android.os.AsyncTask;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.TimePicker;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.widget.SwitchCompat;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.room.Room;
 
-import com.example.alliancesos.DbForRingtone.AppDatabase;
 import com.example.alliancesos.DbForRingtone.ChoiceApplication;
 import com.example.alliancesos.DoNotDisturb.notDisturbObject;
 import com.example.alliancesos.R;
-import com.example.alliancesos.Utils.WeekDay;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 
 public class notDisturbRules extends RecyclerView.Adapter<notDisturbRules.ViewHolder> {
 

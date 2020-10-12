@@ -424,7 +424,7 @@ public class GroupActivity extends AppCompatActivity {
                     }
                 });
             }
-        }, 2500);
+        }, 5000);
         MakeAlertDialog();
     }
 
