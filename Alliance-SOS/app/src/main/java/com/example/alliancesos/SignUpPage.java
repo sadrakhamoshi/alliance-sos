@@ -24,6 +24,7 @@ import android.widget.VideoView;
 import com.example.alliancesos.DbForRingtone.AppDatabase;
 import com.example.alliancesos.DbForRingtone.ChoiceApplication;
 import com.example.alliancesos.DbForRingtone.ringtone;
+import com.example.alliancesos.Payment.PaymentObject;
 import com.example.alliancesos.SendNotificationPack.Token;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -181,6 +182,7 @@ public class SignUpPage extends AppCompatActivity {
                 userId = key;
                 UserObject userObject = new UserObject(key, mUsername.getText().toString(), mEmail.getText().toString(), mPassword.getText().toString(), mToken.getToken());
                 mUserDatabaseRef.child(key).setValue(userObject);
+                mRootDatabase.child("payment").child(key).setValue(new PaymentObject(false, ""));
             }
         });
     }

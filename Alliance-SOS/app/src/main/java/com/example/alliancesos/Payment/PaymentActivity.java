@@ -32,24 +32,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 
-class PaymentObject {
-    public boolean enable;
-    public String month;
-    public String chargeDate;
-
-    public PaymentObject(boolean enable, String month) {
-        this.enable = enable;
-        this.month = month;
-        convertToString(new Date());
-    }
-
-    public void convertToString(Date date) {
-        String pattern = "MM/dd/yyyy hh:mm";
-        SimpleDateFormat format = new SimpleDateFormat(pattern, Locale.ENGLISH);
-        this.chargeDate = format.format(date);
-    }
-}
-
 public class PaymentActivity extends AppCompatActivity {
 
     private String mUserId;
@@ -223,11 +205,62 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     private void PayFunc(String mWhom) {
+
         //successful
-        if (mWhom.equals(MINE))
-            attachToDatabaseMy();
-        else
-            attachToDatabaseOther();
+        if (mWhom.equals(MINE)) {
+            checkIfExpired(mUserId);
+            //attachToDatabaseMy();
+        } else {
+            checkIfExpired(mOtherUID);
+            //attachToDatabaseOther();
+        }
+    }
+
+    private void checkIfExpired(final String uId) {
+        mRoot.child("payment").child(uId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    PaymentObject paymentObject = snapshot.getValue(PaymentObject.class);
+                    if (!paymentObject.expired()) {
+                        progressBar.setVisibility(View.GONE);
+                        Toast.makeText(PaymentActivity.this, "Your Charge Has not Finished Yet!!!", Toast.LENGTH_SHORT).show();
+
+                    } else {
+                        attachToDatabase(uId);
+                    }
+                } else {
+                    progressBar.setVisibility(View.GONE);
+                    Toast.makeText(PaymentActivity.this, "User Not Valid", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                progressBar.setVisibility(View.GONE);
+                Toast.makeText(PaymentActivity.this, "Error on CheckExpired: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void attachToDatabase(String uId) {
+        if (TextUtils.isEmpty(uId)) {
+            Toast.makeText(this, "Uid is Null", Toast.LENGTH_SHORT).show();
+        } else {
+            progressBar.setVisibility(View.VISIBLE);
+            PaymentObject object = new PaymentObject(true, MonthOption.months[mMonthIdx] + "");
+            mRoot.child("payment").child(uId).setValue(object).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+
+                    if (task.isSuccessful())
+                        Toast.makeText(PaymentActivity.this, "Payment Was Successful", Toast.LENGTH_SHORT).show();
+                    else
+                        Toast.makeText(PaymentActivity.this, "Error " + task.getException(), Toast.LENGTH_SHORT).show();
+                    progressBar.setVisibility(View.GONE);
+                }
+            });
+        }
     }
 
     private void attachToDatabaseOther() {
