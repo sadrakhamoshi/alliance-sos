@@ -131,12 +131,43 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     public void PayOffButton(View view) {
-
         if (mWhom == MINE) {
             DialogForSubmit();
         } else {
             VerifyEmail();
         }
+    }
+
+    private void VerifyEmail() {
+        progressBar.setVisibility(View.VISIBLE);
+        mRoot.child("users").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                Iterator iterator = snapshot.getChildren().iterator();
+                mOtherUsername = null;
+                while (iterator.hasNext()) {
+                    DataSnapshot curr = (DataSnapshot) iterator.next();
+                    String email = curr.child("email").getValue().toString();
+                    if (email.equals(mEmail.getText().toString())) {
+                        mOtherUsername = curr.child("userName").getValue().toString();
+                        mOtherUID = curr.getKey();
+                        break;
+                    }
+                }
+                progressBar.setVisibility(View.GONE);
+                if (mOtherUsername != null) {
+                    DialogForSubmit();
+                } else {
+                    Toast.makeText(PaymentActivity.this, "There is No One With this Email", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                progressBar.setVisibility(View.GONE);
+                Toast.makeText(PaymentActivity.this, "", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void DialogForSubmit() {
@@ -172,37 +203,6 @@ public class PaymentActivity extends AppCompatActivity {
         builder.create().show();
     }
 
-    private void VerifyEmail() {
-        progressBar.setVisibility(View.VISIBLE);
-        mRoot.child("users").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                Iterator iterator = snapshot.getChildren().iterator();
-                mOtherUsername = null;
-                while (iterator.hasNext()) {
-                    DataSnapshot curr = (DataSnapshot) iterator.next();
-                    String email = curr.child("email").getValue().toString();
-                    if (email.equals(mEmail.getText().toString())) {
-                        mOtherUsername = curr.child("userName").getValue().toString();
-                        mOtherUID = curr.getKey();
-                        break;
-                    }
-                }
-                progressBar.setVisibility(View.GONE);
-                if (mOtherUsername != null) {
-                    DialogForSubmit();
-                } else {
-                    Toast.makeText(PaymentActivity.this, "There is No One With this Email", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                progressBar.setVisibility(View.GONE);
-                Toast.makeText(PaymentActivity.this, "", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
 
     private void PayFunc(String mWhom) {
 
@@ -217,6 +217,7 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     private void checkIfExpired(final String uId) {
+        progressBar.setVisibility(View.VISIBLE);
         mRoot.child("payment").child(uId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -225,7 +226,6 @@ public class PaymentActivity extends AppCompatActivity {
                     if (!paymentObject.expired()) {
                         progressBar.setVisibility(View.GONE);
                         Toast.makeText(PaymentActivity.this, "Your Charge Has not Finished Yet!!!", Toast.LENGTH_SHORT).show();
-
                     } else {
                         attachToDatabase(uId);
                     }

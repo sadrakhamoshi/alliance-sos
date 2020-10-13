@@ -27,6 +27,7 @@ import android.widget.Toast;
 
 import com.example.alliancesos.Adapters.ShowGroup;
 import com.example.alliancesos.Payment.PaymentActivity;
+import com.example.alliancesos.Payment.PaymentObject;
 import com.example.alliancesos.SendNotificationPack.Token;
 import com.example.alliancesos.Setting.UserSettingActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -49,8 +50,6 @@ import java.util.HashMap;
 public class MainActivity extends AppCompatActivity {
 
     private ProgressBar progressBar, progressBar_group_show;
-
-    private long mGroupCount;
 
     private String mCurrentUserId, mCurrentUserName;
 
@@ -118,28 +117,42 @@ public class MainActivity extends AppCompatActivity {
         createGroup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                RequestNewGroup();
+                CheckForTrial();
             }
         });
     }
 
-    private void getCurrentUserName() {
-        progressBar.setVisibility(View.VISIBLE);
-        mUsersRef.child(mCurrentUserId).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    getCurrentUsernameTask getCurrentUsernameTask = new getCurrentUsernameTask(snapshot);
-                    getCurrentUsernameTask.execute();
+    private void CheckForTrial() {
+        //free version
+        if (listOfGroupName.size() < 1) {
+            RequestNewGroup();
+        }
+        //trial
+        else {
+            progressBar.setVisibility(View.VISIBLE);
+            mRoot.child("payment").child(mCurrentUserId).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        PaymentObject object = snapshot.getValue(PaymentObject.class);
+                        if (object.expired()) {
+                            ExpiredDialog();
+                        } else {
+                            RequestNewGroup();
+                        }
+                    } else {
+                        Toast.makeText(MainActivity.this, "Not Exist Id", Toast.LENGTH_SHORT).show();
+                    }
+                    progressBar.setVisibility(View.GONE);
                 }
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
-                progressBar.setVisibility(View.GONE);
-            }
-        });
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    progressBar.setVisibility(View.GONE);
+                    Toast.makeText(MainActivity.this, "Error in Checking " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
 
     private void RequestNewGroup() {
@@ -268,7 +281,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
-                    mGroupCount++;
                     progressBar.setVisibility(View.GONE);
                 } else {
                     progressBar.setVisibility(View.GONE);
@@ -354,6 +366,25 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void getCurrentUserName() {
+        progressBar.setVisibility(View.VISIBLE);
+        mUsersRef.child(mCurrentUserId).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    getCurrentUsernameTask getCurrentUsernameTask = new getCurrentUsernameTask(snapshot);
+                    getCurrentUsernameTask.execute();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+                progressBar.setVisibility(View.GONE);
+            }
+        });
+    }
+
     public class getCurrentUsernameTask extends AsyncTask<Void, Void, Void> {
 
         private DataSnapshot mSnapShot;
@@ -372,10 +403,26 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... voids) {
             mCurrentUserName = mSnapShot.child("userName").getValue().toString();
-            mGroupCount = mSnapShot.child("Groups").getChildrenCount();
             mGroupAdapter.setUserName(mCurrentUserName);
             return null;
         }
+    }
+
+    private void ExpiredDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialog);
+        builder.setIcon(R.drawable.attention_icon);
+        builder.setTitle("You Are Out Of Trial");
+        builder.setMessage("You Are Out Of Trial . Please Go To Payment Page and Submit New One ... ");
+        builder.setCancelable(false);
+        builder.setNegativeButton("Not Now", null);
+
+        builder.setPositiveButton("okay", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                toPaymentPage();
+            }
+        });
+        builder.create().show();
     }
 
     @Override
@@ -399,6 +446,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void gotoPaymentPage(View view) {
+        toPaymentPage();
+    }
+
+    private void toPaymentPage() {
         Intent intent = new Intent(this, PaymentActivity.class);
         intent.putExtra("userId", mCurrentUserId);
         startActivity(intent);
