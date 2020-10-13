@@ -46,6 +46,7 @@ import com.google.firebase.iid.InstanceIdResult;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -67,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
     private ShowGroup mGroupAdapter;
     private RecyclerView mGroup_rv;
     private ChildEventListener mGroupChangeListener;
+    private ValueEventListener mValueEventListenerGroup;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,7 +102,6 @@ public class MainActivity extends AppCompatActivity {
         mGroupsRef = mRoot.child("groups");
         mUsersRef = mRoot.child("users");
         getCurrentUserName();
-        attachedGroupListener();
         InitializeUI();
     }
 
@@ -195,57 +196,88 @@ public class MainActivity extends AppCompatActivity {
         builder.show();
     }
 
-    private void attachedGroupListener() {
-        final int[] count = {0};
-        if (mGroupChangeListener == null) {
-//            progressBar_group_show.setVisibility(View.VISIBLE);
-            mGroupChangeListener = new ChildEventListener() {
+    private void attachValueListener() {
+        if (mValueEventListenerGroup == null) {
+            Log.v("progress", "start");
+            progressBar_group_show.setVisibility(View.VISIBLE);
+            final int[] count = {0};
+            mValueEventListenerGroup = new ValueEventListener() {
                 @Override
-                public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                    final String name = snapshot.child("groupName").getValue().toString();
-                    final String id = snapshot.child("groupId").getValue().toString();
-                    count[0]++;
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        mGroupAdapter.clearAll();
+                        final long groupCount = snapshot.getChildrenCount();
+
+                        checkTrial(groupCount);
+
+                        Iterator iterator = snapshot.getChildren().iterator();
+                        while (iterator.hasNext()) {
+                            DataSnapshot data = (DataSnapshot) iterator.next();
+                            final String name = data.child("groupName").getValue().toString();
+                            final String id = data.child("groupId").getValue().toString();
+                            mGroupsRef.child(id).addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    UpComingEvent event = snapshot.child("upComingEvent").getValue(UpComingEvent.class);
+                                    mGroupAdapter.add(name, event, id);
+                                    count[0]++;
+                                    if (count[0] >= groupCount) {
+                                        Log.v("progress", "end" + " " + count[0] + " " + snapshot.getChildrenCount());
+                                        progressBar_group_show.setVisibility(View.GONE);
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+                                    Log.v("progress", "end");
+                                    progressBar_group_show.setVisibility(View.GONE);
+                                    Toast.makeText(MainActivity.this, "error in reading upComing: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                            Log.v("progress", count[0] + "");
+                        }
+                    } else {
+                        Toast.makeText(MainActivity.this, "Not Exist", Toast.LENGTH_SHORT).show();
+                        Log.v("progress", "end");
+                        progressBar_group_show.setVisibility(View.GONE);
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
                     progressBar_group_show.setVisibility(View.GONE);
-                    mGroupsRef.child(id).addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            UpComingEvent event = snapshot.child("upComingEvent").getValue(UpComingEvent.class);
-                            mGroupAdapter.add(name, event, id);
+                    Log.v("progress", "end");
+
+                }
+            };
+        }
+        mUsersRef.child(mCurrentUserId).child("Groups").addValueEventListener(mValueEventListenerGroup);
+    }
+
+    private void checkTrial(long count) {
+        if (count > 0)
+            mRoot.child("payment").child(mCurrentUserId).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        PaymentObject object = snapshot.getValue(PaymentObject.class);
+                        if (object.expired()) {
+                            ExpiredDialog();
                         }
 
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-                            progressBar_group_show.setVisibility(View.GONE);
-                            Log.v("progresss", "off");
-                            Toast.makeText(MainActivity.this, "error in reading upComing: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                }
-
-                @Override
-                public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-                }
-
-                @Override
-                public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-
-                }
-
-                @Override
-                public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
+                    } else {
+                        Toast.makeText(MainActivity.this, "Snapshot not Exist", Toast.LENGTH_SHORT).show();
+                        progressBar_group_show.setVisibility(View.GONE);
+                    }
                 }
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
                     progressBar_group_show.setVisibility(View.GONE);
-                    Log.v("progresss", "off");
-                    Toast.makeText(MainActivity.this, "Error in attach child to database :" + error.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "error in checktrial " + error.getMessage(), Toast.LENGTH_SHORT).show();
                 }
-            };
-        }
-        mUsersRef.child(mCurrentUserId).child("Groups").addChildEventListener(mGroupChangeListener);
+            });
     }
 
     private void CreateNewGroup(final String groupName, final String groupId) {
@@ -315,6 +347,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        attachValueListener();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (!Settings.System.canWrite(getApplicationContext())) {
                 Intent intent = new Intent(android.provider.Settings.ACTION_MANAGE_WRITE_SETTINGS);
@@ -327,7 +360,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onStop() {
-        detachmentGroupListener();
+        detachmentValueListener();
         super.onStop();
         if (mAuthStateListener != null) {
             progressBar.setVisibility(View.GONE);
@@ -360,14 +393,15 @@ public class MainActivity extends AppCompatActivity {
 
     public void RefreshPage(View view) {
         mGroupAdapter.clearAll();
-        detachmentGroupListener();
-        attachedGroupListener();
+        detachmentValueListener();
+        attachValueListener();
     }
 
-    private void detachmentGroupListener() {
-        if (mGroupChangeListener != null) {
-            mUsersRef.child(mCurrentUserId).child("Groups").removeEventListener(mGroupChangeListener);
-            mGroupChangeListener = null;
+    private void detachmentValueListener() {
+        if (mValueEventListenerGroup != null) {
+            progressBar_group_show.setVisibility(View.VISIBLE);
+            mUsersRef.child(mCurrentUserId).child("Groups").removeEventListener(mValueEventListenerGroup);
+            mValueEventListenerGroup = null;
         }
     }
 
@@ -441,12 +475,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         progressBar.setVisibility(View.GONE);
-    }
-
-    @Override
-    protected void onDestroy() {
-        progressBar.setVisibility(View.GONE);
-        super.onDestroy();
     }
 
     @Override
