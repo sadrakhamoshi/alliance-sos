@@ -1,6 +1,7 @@
 package com.example.alliancesos.Payment;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -9,6 +10,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -24,13 +26,14 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.paypal.android.sdk.payments.PayPalPayment;
+import com.paypal.android.sdk.payments.PayPalService;
+import com.paypal.android.sdk.payments.PaymentConfirmation;
 
-import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
+import org.json.JSONException;
+
+import java.math.BigDecimal;
 import java.util.Iterator;
-import java.util.Locale;
 
 public class PaymentActivity extends AppCompatActivity {
 
@@ -55,6 +58,8 @@ public class PaymentActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment);
+
+        StartPayPalService();
         Intent intent = getIntent();
         if (intent == null) {
             finish();
@@ -99,6 +104,19 @@ public class PaymentActivity extends AppCompatActivity {
         });
     }
 
+    private void StartPayPalService() {
+        Intent intent = new Intent(this, PayPalService.class);
+
+        intent.putExtra(PayPalService.EXTRA_PAYPAL_CONFIGURATION, PayPalObject.config);
+        startService(intent);
+    }
+
+    @Override
+    protected void onDestroy() {
+        stopService(new Intent(this, PayPalService.class));
+        super.onDestroy();
+    }
+
     private void DialogForMonth() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialog);
         builder.setIcon(R.drawable.time_zone_icon);
@@ -131,10 +149,33 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     public void PayOffButton(View view) {
-        if (mWhom == MINE) {
-            DialogForSubmit();
+        PayPalPayment payment = new PayPalPayment(new BigDecimal(MonthOption.prices[mMonthIdx]), "USD", ",   " +MonthOption.months[mMonthIdx]+" Month",
+                PayPalPayment.PAYMENT_INTENT_SALE);
+
+        Intent intent = new Intent(this, com.paypal.android.sdk.payments.PaymentActivity.class);
+
+        intent.putExtra(PayPalService.EXTRA_PAYPAL_CONFIGURATION, PayPalObject.config);
+        intent.putExtra(com.paypal.android.sdk.payments.PaymentActivity.EXTRA_PAYMENT, payment);
+        startActivityForResult(intent, 0);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode != RESULT_OK)
+            return;
+        else if (requestCode == com.paypal.android.sdk.payments.PaymentActivity.RESULT_EXTRAS_INVALID) {
+            Toast.makeText(this, "Invalid Code Try again", Toast.LENGTH_SHORT).show();
         } else {
-            VerifyEmail();
+            PaymentConfirmation confirm = data.getParcelableExtra(com.paypal.android.sdk.payments.PaymentActivity.EXTRA_RESULT_CONFIRMATION);
+            if (confirm != null) {
+
+                if (mWhom == MINE) {
+                    DialogForSubmit();
+                } else {
+                    VerifyEmail();
+                }
+            }
         }
     }
 
