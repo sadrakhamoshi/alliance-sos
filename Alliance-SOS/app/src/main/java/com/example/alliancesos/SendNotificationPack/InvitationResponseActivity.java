@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.animation.ObjectAnimator;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -15,12 +16,17 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.example.alliancesos.Member;
+import com.example.alliancesos.Payment.PaymentActivity;
+import com.example.alliancesos.Payment.PaymentObject;
 import com.example.alliancesos.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.sql.Time;
 import java.util.HashMap;
@@ -34,6 +40,7 @@ public class InvitationResponseActivity extends AppCompatActivity {
     private String mCurrUserId;
     private String mGroupId, mGroupName;
     DatabaseReference mGroupRef, mUserRef;
+    private DatabaseReference mRoot;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,47 +62,109 @@ public class InvitationResponseActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progress_invitation);
 
         mName_edt = findViewById(R.id.username_for_group_edt);
-        mGroupRef = FirebaseDatabase.getInstance().getReference().child("groups");
-        mUserRef = FirebaseDatabase.getInstance().getReference().child("users");
+        mRoot = FirebaseDatabase.getInstance().getReference();
+        mGroupRef = mRoot.child("groups");
+        mUserRef = mRoot.child("users");
     }
 
     public void addUserToGroup(View view) {
-        progressBar.setVisibility(View.VISIBLE);
         String username = mName_edt.getText().toString();
+
         if (TextUtils.isEmpty(username)) {
             MakeAlertDialog("Attention", "You Have to Set Name...");
         } else {
-            Member member = new Member(mCurrUserId, username);
-            mGroupRef.child(mGroupId).child("members").child(mCurrUserId).setValue(member).addOnCompleteListener(new OnCompleteListener<Void>() {
-                @Override
-                public void onComplete(@NonNull Task<Void> task) {
-                    if (task.isSuccessful()) {
-                        HashMap<String, String> groupInfo = new HashMap<>();
-                        groupInfo.put("groupName", mGroupName);
-                        groupInfo.put("groupId", mGroupId);
-                        mUserRef.child(mCurrUserId).child("Groups").push().setValue(groupInfo).addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                if (task.isSuccessful()) {
-                                    MakeAlertDialog("Attention", "You Added to " + mGroupName);
-                                } else {
-                                    Toast.makeText(InvitationResponseActivity.this, "error in second complete " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                                }
-                                progressBar.setVisibility(View.GONE);
-                            }
-                        });
-                    } else {
-                        progressBar.setVisibility(View.GONE);
-                        Toast.makeText(InvitationResponseActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
-
+            progressBar.setVisibility(View.VISIBLE);
+            CheckTrial(username);
         }
     }
 
-    public void notAddToGroup(View view) {
+    private void addingMemberFunction(String username) {
+        Member member = new Member(mCurrUserId, username);
+        mGroupRef.child(mGroupId).child("members").child(mCurrUserId).setValue(member).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    HashMap<String, String> groupInfo = new HashMap<>();
+                    groupInfo.put("groupName", mGroupName);
+                    groupInfo.put("groupId", mGroupId);
+                    mUserRef.child(mCurrUserId).child("Groups").push().setValue(groupInfo).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()) {
+                                MakeAlertDialog("Attention", "You Added to " + mGroupName);
+                            } else {
+                                Toast.makeText(InvitationResponseActivity.this, "error in second complete " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                            progressBar.setVisibility(View.GONE);
+                        }
+                    });
+                } else {
+                    progressBar.setVisibility(View.GONE);
+                    Toast.makeText(InvitationResponseActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
 
+    private void CheckTrial(final String username) {
+        mRoot.child("payment").child(mCurrUserId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    PaymentObject object = snapshot.getValue(PaymentObject.class);
+                    if (object.expired()) {
+                        progressBar.setVisibility(View.GONE);
+                        ExpiredDialog();
+
+                    } else {
+                        addingMemberFunction(username);
+                    }
+
+                } else {
+                    progressBar.setVisibility(View.GONE);
+                    Toast.makeText(InvitationResponseActivity.this, "notExist", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                progressBar.setVisibility(View.GONE);
+                Toast.makeText(InvitationResponseActivity.this, "Error in " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void ExpiredDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialog);
+        builder.setIcon(R.drawable.attention_icon);
+        builder.setTitle("You Are Out Of Trial");
+        builder.setMessage("You Are Out Of Trial . Please Go To Payment Page and Submit New One ... ");
+        builder.setCancelable(false);
+        builder.setNegativeButton("Not Now", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+                finish();
+                return;
+            }
+        });
+
+        builder.setPositiveButton("okay", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                toPaymentPage();
+            }
+        });
+        builder.create().show();
+    }
+
+    private void toPaymentPage() {
+        Intent intent = new Intent(this, PaymentActivity.class);
+        intent.putExtra("userId", mCurrUserId);
+        startActivity(intent);
+    }
+
+    public void notAddToGroup(View view) {
         MakeAlertDialog("Attention", "Okay Have Nice Day...");
     }
 

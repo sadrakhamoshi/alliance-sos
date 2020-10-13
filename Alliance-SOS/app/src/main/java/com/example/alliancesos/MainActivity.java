@@ -49,6 +49,8 @@ import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final int CREATING_GROUP = 886;
+
     private ProgressBar progressBar, progressBar_group_show;
 
     private String mCurrentUserId, mCurrentUserName;
@@ -117,15 +119,16 @@ public class MainActivity extends AppCompatActivity {
         createGroup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                CheckForTrial();
+                CheckForTrial(CREATING_GROUP);
             }
         });
     }
 
-    private void CheckForTrial() {
+    private void CheckForTrial(final int reqCode) {
         //free version
         if (listOfGroupName.size() < 1) {
-            RequestNewGroup();
+            if (reqCode == CREATING_GROUP)
+                RequestNewGroup();
         }
         //trial
         else {
@@ -138,7 +141,9 @@ public class MainActivity extends AppCompatActivity {
                         if (object.expired()) {
                             ExpiredDialog();
                         } else {
-                            RequestNewGroup();
+
+                            if (reqCode == CREATING_GROUP)
+                                RequestNewGroup();
                         }
                     } else {
                         Toast.makeText(MainActivity.this, "Not Exist Id", Toast.LENGTH_SHORT).show();
@@ -414,7 +419,14 @@ public class MainActivity extends AppCompatActivity {
         builder.setTitle("You Are Out Of Trial");
         builder.setMessage("You Are Out Of Trial . Please Go To Payment Page and Submit New One ... ");
         builder.setCancelable(false);
-        builder.setNegativeButton("Not Now", null);
+        builder.setNegativeButton("Not Now", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+                finish();
+                return;
+            }
+        });
 
         builder.setPositiveButton("okay", new DialogInterface.OnClickListener() {
             @Override
