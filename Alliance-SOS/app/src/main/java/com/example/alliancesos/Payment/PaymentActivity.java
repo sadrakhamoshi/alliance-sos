@@ -7,10 +7,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -29,8 +27,6 @@ import com.google.firebase.database.ValueEventListener;
 import com.paypal.android.sdk.payments.PayPalPayment;
 import com.paypal.android.sdk.payments.PayPalService;
 import com.paypal.android.sdk.payments.PaymentConfirmation;
-
-import org.json.JSONException;
 
 import java.math.BigDecimal;
 import java.util.Iterator;
@@ -78,6 +74,8 @@ public class PaymentActivity extends AppCompatActivity {
                 if (checkedId == R.id.myself_radio) {
                     mEmail.getText().clear();
                     mEmail.setEnabled(false);
+                    mOtherUID = null;
+                    mOtherUsername = null;
                     mWhom = MINE;
                 } else {
                     mEmail.setEnabled(true);
@@ -106,9 +104,19 @@ public class PaymentActivity extends AppCompatActivity {
 
     private void StartPayPalService() {
         Intent intent = new Intent(this, PayPalService.class);
-
         intent.putExtra(PayPalService.EXTRA_PAYPAL_CONFIGURATION, PayPalObject.config);
         startService(intent);
+    }
+
+    private void PayingWithPayPalFunc() {
+        PayPalPayment payment = new PayPalPayment(new BigDecimal(MonthOption.prices[mMonthIdx]), "USD", ",   " + MonthOption.months[mMonthIdx] + " Month",
+                PayPalPayment.PAYMENT_INTENT_SALE);
+
+        Intent intent = new Intent(this, com.paypal.android.sdk.payments.PaymentActivity.class);
+
+        intent.putExtra(PayPalService.EXTRA_PAYPAL_CONFIGURATION, PayPalObject.config);
+        intent.putExtra(com.paypal.android.sdk.payments.PaymentActivity.EXTRA_PAYMENT, payment);
+        startActivityForResult(intent, 0);
     }
 
     @Override
@@ -149,14 +157,12 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     public void PayOffButton(View view) {
-        PayPalPayment payment = new PayPalPayment(new BigDecimal(MonthOption.prices[mMonthIdx]), "USD", ",   " + MonthOption.months[mMonthIdx] + " Month",
-                PayPalPayment.PAYMENT_INTENT_SALE);
 
-        Intent intent = new Intent(this, com.paypal.android.sdk.payments.PaymentActivity.class);
-
-        intent.putExtra(PayPalService.EXTRA_PAYPAL_CONFIGURATION, PayPalObject.config);
-        intent.putExtra(com.paypal.android.sdk.payments.PaymentActivity.EXTRA_PAYMENT, payment);
-        startActivityForResult(intent, 0);
+        if (mWhom == MINE) {
+            DialogForSubmit();
+        } else {
+            VerifyEmail();
+        }
     }
 
     @Override
@@ -169,11 +175,11 @@ public class PaymentActivity extends AppCompatActivity {
         } else {
             PaymentConfirmation confirm = data.getParcelableExtra(com.paypal.android.sdk.payments.PaymentActivity.EXTRA_RESULT_CONFIRMATION);
             if (confirm != null) {
-
-                if (mWhom == MINE) {
-                    DialogForSubmit();
-                } else {
-                    VerifyEmail();
+                //add to database
+                if (mWhom == MINE)
+                    attachToDatabase(mUserId);
+                else {
+                    attachToDatabase(mOtherUID);
                 }
             }
         }
@@ -232,7 +238,10 @@ public class PaymentActivity extends AppCompatActivity {
         builder.setPositiveButton("I agree", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                PayFunc(mWhom);
+
+                //paying
+//                payingWithPayPalFunc();
+                ExpiredFunc(mWhom);
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -245,15 +254,13 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
 
-    private void PayFunc(String mWhom) {
+    private void ExpiredFunc(String mWhom) {
 
         //successful
         if (mWhom.equals(MINE)) {
             checkIfExpired(mUserId);
-            //attachToDatabaseMy();
         } else {
             checkIfExpired(mOtherUID);
-            //attachToDatabaseOther();
         }
     }
 
@@ -268,7 +275,7 @@ public class PaymentActivity extends AppCompatActivity {
                         progressBar.setVisibility(View.GONE);
                         Toast.makeText(PaymentActivity.this, "Your Charge Has not Finished Yet!!!", Toast.LENGTH_SHORT).show();
                     } else {
-                        attachToDatabase(uId);
+                        PayingWithPayPalFunc();
                     }
                 } else {
                     progressBar.setVisibility(View.GONE);
