@@ -28,7 +28,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.sql.Time;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -42,9 +41,12 @@ public class InvitationResponseActivity extends AppCompatActivity {
     DatabaseReference mGroupRef, mUserRef;
     private DatabaseReference mRoot;
 
+    private boolean mIsFirstTime;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mIsFirstTime = false;
         setContentView(R.layout.activity_invitation_response);
         Init();
     }
@@ -68,12 +70,33 @@ public class InvitationResponseActivity extends AppCompatActivity {
     }
 
     public void addUserToGroup(View view) {
-        String username = mName_edt.getText().toString();
+        final String username = mName_edt.getText().toString();
 
         if (TextUtils.isEmpty(username)) {
             MakeAlertDialog("Attention", "You Have to Set Name...");
         } else {
             progressBar.setVisibility(View.VISIBLE);
+            mUserRef.child(mCurrUserId).child("Groups").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        //has group
+                        if (snapshot.getChildrenCount() > 0)
+                            CheckTrial(username);
+
+                    } else {
+                        //don't have any group
+                        mIsFirstTime = true;
+                        addingMemberFunction(username);
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    progressBar.setVisibility(View.GONE);
+                    Toast.makeText(InvitationResponseActivity.this, "Error " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
             CheckTrial(username);
         }
     }
@@ -115,7 +138,6 @@ public class InvitationResponseActivity extends AppCompatActivity {
                     if (object.expired()) {
                         progressBar.setVisibility(View.GONE);
                         ExpiredDialog();
-
                     } else {
                         addingMemberFunction(username);
                     }
@@ -138,7 +160,7 @@ public class InvitationResponseActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialog);
         builder.setIcon(R.drawable.attention_icon);
         builder.setTitle("You Are Out Of Trial");
-        builder.setMessage("You Are Out Of Trial . Please Go To Payment Page and Submit New One ... ");
+        builder.setMessage("You Are Out Of Trial .If You Wanna Accept This Invitation, Please Go To Payment Page and Submit New One ... ");
         builder.setCancelable(false);
         builder.setNegativeButton("Not Now", new DialogInterface.OnClickListener() {
             @Override
@@ -155,7 +177,8 @@ public class InvitationResponseActivity extends AppCompatActivity {
                 toPaymentPage();
             }
         });
-        builder.create().show();
+        if (!mIsFirstTime)
+            builder.create().show();
     }
 
     private void toPaymentPage() {

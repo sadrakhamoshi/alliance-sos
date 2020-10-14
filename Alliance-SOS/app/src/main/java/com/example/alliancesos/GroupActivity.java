@@ -395,27 +395,29 @@ public class GroupActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    mRootRef.child("payment").child(mCurrentUserId).addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            if (snapshot.exists()) {
-                                PaymentObject object = snapshot.getValue(PaymentObject.class);
-                                if (object.expired()) {
-                                    ExpiredDialog();
+                    if (snapshot.getChildrenCount() > 3) {
+                        mRootRef.child("payment").child(mCurrentUserId).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                if (snapshot.exists()) {
+                                    PaymentObject object = snapshot.getValue(PaymentObject.class);
+                                    if (object.expired()) {
+                                        ExpiredDialog();
+                                    }
+                                } else {
+                                    Toast.makeText(GroupActivity.this, "Not Exist payment child", Toast.LENGTH_SHORT).show();
                                 }
-                            } else {
-                                Toast.makeText(GroupActivity.this, "Not Exist payment child", Toast.LENGTH_SHORT).show();
+                                mProgress_check.setVisibility(View.GONE);
                             }
-                            mProgress_check.setVisibility(View.GONE);
-                        }
 
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-                            mProgress_check.setVisibility(View.GONE);
-                            Toast.makeText(GroupActivity.this, "Error in Begin " + error.getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-                    });
-
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+                                mProgress_check.setVisibility(View.GONE);
+                                Toast.makeText(GroupActivity.this, "Error in Begin " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    } else
+                        mProgress_check.setVisibility(View.GONE);
                 } else {
                     mProgress_check.setVisibility(View.GONE);
                     Toast.makeText(GroupActivity.this, "Not Exist", Toast.LENGTH_SHORT).show();

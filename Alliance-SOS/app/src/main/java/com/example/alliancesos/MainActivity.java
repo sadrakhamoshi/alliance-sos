@@ -256,7 +256,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void checkTrial(long count) {
-        if (count > 0)
+        if (count > 1)
             mRoot.child("payment").child(mCurrentUserId).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {

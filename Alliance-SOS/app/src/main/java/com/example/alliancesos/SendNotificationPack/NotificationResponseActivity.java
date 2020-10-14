@@ -1,6 +1,7 @@
 package com.example.alliancesos.SendNotificationPack;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -9,10 +10,12 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -222,7 +225,7 @@ public class NotificationResponseActivity extends AppCompatActivity {
         if (scheduleObject != null) {
             AlarmManager alarmManager = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
             Random r = new Random();
-            int random = r.nextInt(1000);
+            int random = (int) System.currentTimeMillis();
             Intent intent = new Intent(getApplicationContext(), MyAlarmReceiver.class);
             intent.putExtra("ringEnable", mRingOrNotify);
 
@@ -251,7 +254,7 @@ public class NotificationResponseActivity extends AppCompatActivity {
         }
     }
 
-    private void addRequestCodeToDb(final Integer id) {
+    private void addRequestCodeToDb(final long id) {
         mProgressBar.setVisibility(View.VISIBLE);
         new Thread(new Runnable() {
             @Override
@@ -294,7 +297,16 @@ public class NotificationResponseActivity extends AppCompatActivity {
         mProgressBar = findViewById(R.id.progress_notif_response);
         mNames = new ArrayList<>();
         listView = findViewById(R.id.event_member_listView);
-        adapter = new ArrayAdapter<>(getApplicationContext(), android.R.layout.simple_list_item_1, mNames);
+        adapter = new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, mNames) {
+            @NonNull
+            @Override
+            public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+                TextView text = (TextView) view.findViewById(android.R.id.text1);
+                text.setTextColor(Color.RED);
+                return view;
+            }
+        };
         listView.setAdapter(adapter);
     }
 
