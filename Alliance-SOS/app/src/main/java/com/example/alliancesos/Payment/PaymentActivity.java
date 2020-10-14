@@ -149,7 +149,7 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     public void PayOffButton(View view) {
-        PayPalPayment payment = new PayPalPayment(new BigDecimal(MonthOption.prices[mMonthIdx]), "USD", ",   " +MonthOption.months[mMonthIdx]+" Month",
+        PayPalPayment payment = new PayPalPayment(new BigDecimal(MonthOption.prices[mMonthIdx]), "USD", ",   " + MonthOption.months[mMonthIdx] + " Month",
                 PayPalPayment.PAYMENT_INTENT_SALE);
 
         Intent intent = new Intent(this, com.paypal.android.sdk.payments.PaymentActivity.class);
@@ -304,74 +304,7 @@ public class PaymentActivity extends AppCompatActivity {
         }
     }
 
-    private void attachToDatabaseOther() {
-        if (TextUtils.isEmpty(mOtherUID)) {
-            Toast.makeText(this, "Uid is Null", Toast.LENGTH_SHORT).show();
-        } else {
-            progressBar.setVisibility(View.VISIBLE);
-            PaymentObject object = new PaymentObject(true, MonthOption.months[mMonthIdx] + "");
-            mRoot.child("payment").child(mOtherUID).setValue(object).addOnCompleteListener(new OnCompleteListener<Void>() {
-                @Override
-                public void onComplete(@NonNull Task<Void> task) {
-
-                    if (task.isSuccessful())
-                        Toast.makeText(PaymentActivity.this, "Payment Was Successful", Toast.LENGTH_SHORT).show();
-                    else
-                        Toast.makeText(PaymentActivity.this, "Error " + task.getException(), Toast.LENGTH_SHORT).show();
-                    progressBar.setVisibility(View.GONE);
-                }
-            });
-        }
-    }
-
-    private void attachToDatabaseMy() {
-        PaymentObject object = new PaymentObject(true, MonthOption.months[mMonthIdx] + "");
-        progressBar.setVisibility(View.VISIBLE);
-        mRoot.child("payment").child(mUserId).setValue(object).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if (!task.isSuccessful()) {
-                    Toast.makeText(PaymentActivity.this, "Error " + task.getException(), Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(PaymentActivity.this, "Payment Was Successful", Toast.LENGTH_SHORT).show();
-                }
-                progressBar.setVisibility(View.GONE);
-            }
-        });
-    }
-
     public void clickOnOtherOption(View view) {
         DialogForMonth();
-    }
-
-    private class VerifyEmailTask extends AsyncTask<Void, Void, Void> {
-
-        DataSnapshot dataSnapshot;
-
-        public VerifyEmailTask(DataSnapshot snapshot) {
-            this.dataSnapshot = snapshot;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            progressBar.setVisibility(View.GONE);
-            super.onPostExecute(aVoid);
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            Iterator iterator = dataSnapshot.getChildren().iterator();
-
-            while (iterator.hasNext()) {
-                DataSnapshot curr = (DataSnapshot) iterator.next();
-                String email = curr.child("email").getValue().toString();
-                if (email.equals(mEmail.getText().toString())) {
-                    mOtherUsername = curr.child("userName").getValue().toString();
-                    mOtherUID = curr.getKey();
-                    return null;
-                }
-            }
-            return null;
-        }
     }
 }

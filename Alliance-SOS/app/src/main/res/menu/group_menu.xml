@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/home_nav"
+        android:id="@+id/add_member_menu"
         android:icon="@drawable/members_vector"
         android:iconTint="#FFFFFF"
         android:title="Add Member" />
@@ -11,6 +11,11 @@
         android:icon="@drawable/setting_vector"
         android:iconTint="#FFFFFF"
         android:title="Group Setting" />
+    <item
+        android:id="@+id/home_menu"
+        android:icon="@drawable/home_icon"
+        android:iconTint="#FFFFFF"
+        android:title="Home" />
     <item
         android:id="@+id/help_menu"
         android:icon="@drawable/help_vector"

@@ -5,13 +5,16 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -40,6 +43,7 @@ import com.example.alliancesos.Utils.MessageType;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -83,6 +87,7 @@ public class GroupActivity extends AppCompatActivity {
 
     private DatabaseReference mRootRef;
 
+    private BottomNavigationView mBottomNavigationView;
 
     //appbar
     private AppBarLayout mAppBarLayout;
@@ -97,6 +102,26 @@ public class GroupActivity extends AppCompatActivity {
         mCurrentUserName = getIntent().getStringExtra("currUserName");
         mCurrentGroupName = getIntent().getStringExtra("groupName");
         InitializeUI();
+
+        //navigation
+        mBottomNavigationView.setOnNavigationItemReselectedListener(new BottomNavigationView.OnNavigationItemReselectedListener() {
+            @Override
+            public void onNavigationItemReselected(@NonNull MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.add_member_menu:
+                        goToMemberAct();
+                        break;
+                    case R.id.help_menu:
+                        Toast.makeText(GroupActivity.this, "Will Go to Help Us", Toast.LENGTH_SHORT).show();
+                        break;
+                    case R.id.group_sett_menu:
+                        goToGroupProfileAct();
+                        break;
+                    case R.id.home_menu:
+                        break;
+                }
+            }
+        });
     }
 
     private void InitializeUI() {
@@ -130,6 +155,8 @@ public class GroupActivity extends AppCompatActivity {
         ab.setDisplayHomeAsUpEnabled(true);
         ab.setTitle(mCurrentGroupName);
 
+        mBottomNavigationView = findViewById(R.id.navigation);
+
         //ripple
         mRippleBackground = findViewById(R.id.ripple_content);
     }
@@ -138,9 +165,9 @@ public class GroupActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
-        menu.add(0, 1, 1, menuIconWithText(getResources().getDrawable(R.drawable.members_vector, getTheme()), "Add Member"));
-        menu.add(0, 2, 2, menuIconWithText(getResources().getDrawable(R.drawable.setting_vector, getTheme()), "Group Setting"));
-        menu.add(0, 3, 3, menuIconWithText(getResources().getDrawable(R.drawable.help_vector, getTheme()), "Help Us"));
+        menu.add(0, 1, 1, menuIconWithText(getResources().getDrawable(R.drawable.members_vector, getApplicationContext().getTheme()), "Add Member"));
+        menu.add(0, 2, 2, menuIconWithText(getResources().getDrawable(R.drawable.setting_vector, getApplicationContext().getTheme()), "Group Setting"));
+        menu.add(0, 3, 3, menuIconWithText(getResources().getDrawable(R.drawable.help_vector, getApplicationContext().getTheme()), "Help Us"));
         return true;
     }
 
@@ -156,33 +183,44 @@ public class GroupActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 
         switch (item.getItemId()) {
-
             case 3:
                 Toast.makeText(this, "It Will Works Soon ...", Toast.LENGTH_SHORT).show();
                 break;
             case android.R.id.home:
-                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-                finish();
+                goToMainAct();
                 break;
             case 1:
-                Intent toMember = new Intent(getApplicationContext(), MemberActivity.class);
-                toMember.putExtra("groupId", mCurrentGroupId);
-                toMember.putExtra("groupName", mCurrentGroupName);
-                toMember.putExtra("currUsername", mCurrentUserName);
-                toMember.putExtra("currUserId", mCurrentUserId);
-                startActivity(toMember);
+                goToMemberAct();
                 break;
             case 2:
-                Intent goToGroupProfile = new Intent(getApplicationContext(), GroupProfileActivity.class);
-                goToGroupProfile.putExtra("groupId", mCurrentGroupId);
-                goToGroupProfile.putExtra("groupName", mCurrentGroupName);
-                goToGroupProfile.putExtra("userId", mCurrentUserId);
-                startActivity(goToGroupProfile);
+                goToGroupProfileAct();
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void goToMainAct() {
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+    }
+
+    private void goToGroupProfileAct() {
+        Intent goToGroupProfile = new Intent(getApplicationContext(), GroupProfileActivity.class);
+        goToGroupProfile.putExtra("groupId", mCurrentGroupId);
+        goToGroupProfile.putExtra("groupName", mCurrentGroupName);
+        goToGroupProfile.putExtra("userId", mCurrentUserId);
+        startActivity(goToGroupProfile);
+    }
+
+    private void goToMemberAct() {
+        Intent toMember = new Intent(getApplicationContext(), MemberActivity.class);
+        toMember.putExtra("groupId", mCurrentGroupId);
+        toMember.putExtra("groupName", mCurrentGroupName);
+        toMember.putExtra("currUsername", mCurrentUserName);
+        toMember.putExtra("currUserId", mCurrentUserId);
+        startActivity(toMember);
     }
 
     private void MakeAlertDialog() {
@@ -340,9 +378,14 @@ public class GroupActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    private void checkMemberCount() {
+        
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
+        mBottomNavigationView.setSelectedItemId(R.id.home_menu);
         showAllEvent();
     }
 

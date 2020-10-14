@@ -40,10 +40,10 @@
         <Button
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:onClick="SosClick"
-            android:background="@drawable/sos_back_ground"
-            android:text="SOS"
             android:layout_centerInParent="true"
+            android:background="@drawable/sos_back_ground"
+            android:onClick="SosClick"
+            android:text="SOS"
             android:textColor="#FFFFFF"
             android:textSize="25sp"
             android:textStyle="bold" />
