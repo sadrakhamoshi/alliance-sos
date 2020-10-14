@@ -36,6 +36,9 @@ import android.widget.Toast;
 
 import com.example.alliancesos.Adapters.showEvents;
 import com.example.alliancesos.GroupSetting.GroupProfileActivity;
+import com.example.alliancesos.Payment.PayPalObject;
+import com.example.alliancesos.Payment.PaymentActivity;
+import com.example.alliancesos.Payment.PaymentObject;
 import com.example.alliancesos.SendNotificationPack.DataToSend;
 import com.example.alliancesos.SendNotificationPack.SOSLogActivity;
 import com.example.alliancesos.SendNotificationPack.SendingNotification;
@@ -67,7 +70,7 @@ public class GroupActivity extends AppCompatActivity {
 
     private String mCurrentUserName, mCurrentUserId;
 
-    private ProgressBar mProgress;
+    private ProgressBar mProgress, mProgress_check;
 
     //database
     private DatabaseReference mGroupRef;
@@ -90,7 +93,6 @@ public class GroupActivity extends AppCompatActivity {
     private BottomNavigationView mBottomNavigationView;
 
     //appbar
-    private AppBarLayout mAppBarLayout;
     private Toolbar mToolbar;
 
     @Override
@@ -102,11 +104,11 @@ public class GroupActivity extends AppCompatActivity {
         mCurrentUserName = getIntent().getStringExtra("currUserName");
         mCurrentGroupName = getIntent().getStringExtra("groupName");
         InitializeUI();
-
         //navigation
-        mBottomNavigationView.setOnNavigationItemReselectedListener(new BottomNavigationView.OnNavigationItemReselectedListener() {
+        mBottomNavigationView.setSelectedItemId(R.id.home_menu);
+        mBottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
-            public void onNavigationItemReselected(@NonNull MenuItem item) {
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.add_member_menu:
                         goToMemberAct();
@@ -120,6 +122,7 @@ public class GroupActivity extends AppCompatActivity {
                     case R.id.home_menu:
                         break;
                 }
+                return false;
             }
         });
     }
@@ -138,6 +141,7 @@ public class GroupActivity extends AppCompatActivity {
         mRecyclerView.setLayoutManager(new LinearLayoutManager(GroupActivity.this));
 
         mProgress = findViewById(R.id.progress_group_act);
+        mProgress_check = findViewById(R.id.progress_group_activity);
 
         mSchedule = findViewById(R.id.schedule_event);
         mSchedule.setOnClickListener(new View.OnClickListener() {
@@ -149,7 +153,6 @@ public class GroupActivity extends AppCompatActivity {
 
         //appbar
         mToolbar = findViewById(R.id.group_toolbar);
-        mAppBarLayout = findViewById(R.id.group_appbar);
         setSupportActionBar(mToolbar);
         final ActionBar ab = getSupportActionBar();
         ab.setDisplayHomeAsUpEnabled(true);
@@ -228,16 +231,20 @@ public class GroupActivity extends AppCompatActivity {
         String[] options = {"Write Own Message", "Send Picture", "Send Preset Message"};
         final EditText message = new EditText(GroupActivity.this);
         message.setHint("Write Your message...");
+        message.setTextDirection(View.TEXT_DIRECTION_LTR);
+        message.setEnabled(false);
         final AlertDialog.Builder builder = new AlertDialog.Builder(GroupActivity.this, R.style.AlertDialog);
+        builder.setView(message);
         builder.setSingleChoiceItems(options, 2, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 whichOption[0] = which;
                 if (which == 0) {
-                    if (message.getParent() != null)
-                        ((ViewGroup) message.getParent()).removeView(message);
-                    builder.setView(message);
-                    builder.create().show();
+                    message.requestFocus();
+                    message.setError(" Message required !");
+                    message.setEnabled(true);
+                } else {
+                    message.setEnabled(false);
                 }
             }
         });
@@ -247,7 +254,11 @@ public class GroupActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int which) {
                 switch (whichOption[0]) {
                     case 0:
-                        sendOwnMessage(message);
+                        if (TextUtils.isEmpty(message.getText())) {
+                            Toast.makeText(GroupActivity.this, "Message Must Not Empty", Toast.LENGTH_SHORT).show();
+                        } else {
+                            sendOwnMessage(message);
+                        }
                         break;
                     case 1:
                         pickAndSendPicture();
@@ -281,10 +292,10 @@ public class GroupActivity extends AppCompatActivity {
                         AddSOSToDB addSOSToDB = new AddSOSToDB(data);
                         addSOSToDB.execute();
                     } else {
-                        Toast.makeText(GroupActivity.this, "No message is exist", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(GroupActivity.this, "Admin hasn't set Preset Message ...", Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    Toast.makeText(GroupActivity.this, "not exist", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(GroupActivity.this, "Admin hasn't set Preset Message ...", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -379,12 +390,50 @@ public class GroupActivity extends AppCompatActivity {
     }
 
     private void checkMemberCount() {
-        
+        mProgress_check.setVisibility(View.VISIBLE);
+        mGroupRef.child(mCurrentGroupId).child("members").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    mRootRef.child("payment").child(mCurrentUserId).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if (snapshot.exists()) {
+                                PaymentObject object = snapshot.getValue(PaymentObject.class);
+                                if (object.expired()) {
+                                    ExpiredDialog();
+                                }
+                            } else {
+                                Toast.makeText(GroupActivity.this, "Not Exist payment child", Toast.LENGTH_SHORT).show();
+                            }
+                            mProgress_check.setVisibility(View.GONE);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                            mProgress_check.setVisibility(View.GONE);
+                            Toast.makeText(GroupActivity.this, "Error in Begin " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+                } else {
+                    mProgress_check.setVisibility(View.GONE);
+                    Toast.makeText(GroupActivity.this, "Not Exist", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                mProgress_check.setVisibility(View.GONE);
+                Toast.makeText(GroupActivity.this, "Error in begin " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+        checkMemberCount();
         mBottomNavigationView.setSelectedItemId(R.id.home_menu);
         showAllEvent();
     }
@@ -455,7 +504,6 @@ public class GroupActivity extends AppCompatActivity {
 
     public void SosClick(View view) {
         mRippleBackground.startRippleAnimation();
-
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
@@ -506,5 +554,35 @@ public class GroupActivity extends AppCompatActivity {
             });
             return null;
         }
+    }
+
+    private void ExpiredDialog() {
+        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(this, R.style.AlertDialog);
+        builder.setIcon(R.drawable.attention_icon);
+        builder.setTitle("You Are Out Of Trial");
+        builder.setMessage("You Are Out Of Trial . Please Go To Payment Page and Submit New One ... ");
+        builder.setCancelable(false);
+        builder.setNegativeButton("Not Now", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+                finish();
+                return;
+            }
+        });
+
+        builder.setPositiveButton("okay", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                toPaymentPage();
+            }
+        });
+        builder.create().show();
+    }
+
+    private void toPaymentPage() {
+        Intent intent = new Intent(this, PaymentActivity.class);
+        intent.putExtra("userId", mCurrentUserId);
+        startActivity(intent);
     }
 }
