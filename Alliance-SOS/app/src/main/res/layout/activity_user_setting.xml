@@ -311,7 +311,7 @@
                     android:drawablePadding="10dp"
                     android:drawableTint="#323131"
                     android:gravity="center_vertical"
-                    android:text="Donate My Credit To Friend"
+                    android:text="Donate Credit To Friend"
                     android:textSize="17sp" />
 
                 <ImageView

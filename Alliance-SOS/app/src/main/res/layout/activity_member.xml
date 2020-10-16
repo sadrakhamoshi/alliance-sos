@@ -4,15 +4,50 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/member_back_ground"
+    android:background="@drawable/member_add_back"
     android:orientation="vertical"
-    android:padding="20dp"
     tools:context=".MemberActivity">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#004E4343"
+        android:layoutDirection="ltr">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/member_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/ToolbarTheme"
+            app:titleTextAppearance="@style/Toolbar.TitleText"
+            app:titleTextColor="#FFFFFF" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:gravity="center"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:background="@drawable/select_back"
+        android:drawableLeft="@drawable/payment_icon"
+        android:drawablePadding="10dp"
+        android:onClick="transferCredit"
+        android:padding="15dp"
+        android:text="Transfer Credit"
+        android:textColor="#FFFFFF"
+        android:textDirection="ltr"
+        android:textSize="26sp"
+        android:textStyle="bold" />
+
 
     <SearchView
         android:id="@+id/target_user_search_view"
         android:layout_width="match_parent"
         android:layout_height="75dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="60dp"
+        android:layout_marginRight="10dp"
         android:background="@drawable/input_sign_up_back"
         android:onClick="SearchingMembers"
         android:padding="10dp"
@@ -33,14 +68,15 @@
         android:id="@+id/progress_add_member"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:layout_gravity="center_horizontal" />
+        android:layout_gravity="center_horizontal"
+        android:visibility="gone" />
 
     <ListView
         android:id="@+id/members_list_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="30dp" />
+        android:layout_marginTop="30dp"
+        android:padding="15dp" />
 
 
 </LinearLayout>

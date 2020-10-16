@@ -8,7 +8,7 @@
     tools:context=".GroupActivity">
 
     <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/group_appbar"
+        android:id="@+id/app_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#004E4343"
@@ -26,14 +26,15 @@
 
     <com.skyfishjy.library.RippleBackground
         android:id="@+id/ripple_content"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/app_bar"
         android:layout_above="@id/group_sos_log"
         android:layout_centerInParent="true"
         android:layout_marginBottom="15dp"
         app:rb_color="#FA7878"
         app:rb_duration="2000"
-        app:rb_radius="32dp"
+        app:rb_radius="25dp"
         app:rb_rippleAmount="4"
         app:rb_scale="6">
 

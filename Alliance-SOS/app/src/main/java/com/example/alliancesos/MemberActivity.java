@@ -2,17 +2,27 @@ package com.example.alliancesos;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.TextUtils;
+import android.text.style.ImageSpan;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+
+import androidx.appcompat.widget.Toolbar;
+
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ProgressBar;
@@ -20,6 +30,7 @@ import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.alliancesos.Payment.TransferActivity;
 import com.example.alliancesos.SendNotificationPack.DataToSend;
 import com.example.alliancesos.SendNotificationPack.SendingNotification;
 import com.example.alliancesos.Utils.MessageType;
@@ -54,6 +65,7 @@ public class MemberActivity extends AppCompatActivity {
     private DatabaseReference mGroupRef, mUserRef;
     private ChildEventListener mMembersEventListener;
 
+    private Toolbar mToolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,6 +117,43 @@ public class MemberActivity extends AppCompatActivity {
                 }
             }
         });
+
+        mToolbar = findViewById(R.id.member_toolbar);
+        setSupportActionBar(mToolbar);
+        final ActionBar ab = getSupportActionBar();
+        ab.setDisplayHomeAsUpEnabled(true);
+        ab.setTitle("");
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        menu.add(0, 1, 1, menuIconWithText(getResources().getDrawable(R.drawable.payment_icon, getApplicationContext().getTheme()), "Transfer Credit"));
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == 1) {
+            goToTransferPage();
+        } else if (item.getItemId() == android.R.id.home) {
+            finish();
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void goToTransferPage() {
+        Intent intent = new Intent(this, TransferActivity.class);
+        intent.putExtra("userId", mHostUserId);
+        startActivity(intent);
+    }
+
+    private CharSequence menuIconWithText(Drawable r, String title) {
+        r.setBounds(0, 0, r.getIntrinsicWidth(), r.getIntrinsicHeight());
+        SpannableString sb = new SpannableString("    " + title);
+        ImageSpan imageSpan = new ImageSpan(r, ImageSpan.ALIGN_BOTTOM);
+        sb.setSpan(imageSpan, 0, 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        return sb;
     }
 
     private void addToGroup(final String addition_member) {
@@ -218,6 +267,10 @@ public class MemberActivity extends AppCompatActivity {
     }
 
     public void SearchingMembers(View view) {
+    }
+
+    public void transferCredit(View view) {
+        goToTransferPage();
     }
 
     public class AddingMemberTask extends AsyncTask<Void, Void, Void> {
