@@ -115,34 +115,6 @@
 
         </RadioGroup>
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layoutDirection="ltr"
-            android:onClick="goToDonatePage">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_centerVertical="true"
-                android:layout_marginTop="15dp"
-                android:layoutDirection="ltr"
-                android:text="Donate My Credit To S.E ?"
-                android:textColor="#03A9F4"
-                android:textSize="24sp"
-                android:textStyle="bold" />
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_centerVertical="true"
-                android:src="@drawable/right_arrow"
-                app:tint="#009688" />
-
-        </RelativeLayout>
-
         <TextView
             android:id="@+id/more_option"
             android:layout_width="wrap_content"

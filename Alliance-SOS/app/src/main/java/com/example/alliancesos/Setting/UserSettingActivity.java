@@ -46,6 +46,7 @@ import com.example.alliancesos.DbForRingtone.ChoiceApplication;
 import com.example.alliancesos.DbForRingtone.ringtone;
 import com.example.alliancesos.DoNotDisturb.NotDisturbActivity;
 import com.example.alliancesos.MainActivity;
+import com.example.alliancesos.Payment.TransferActivity;
 import com.example.alliancesos.R;
 import com.example.alliancesos.UserObject;
 import com.firebase.ui.auth.data.model.User;
@@ -279,30 +280,6 @@ public class UserSettingActivity extends AppCompatActivity {
                 if (snapshot.exists()) {
                     GetBasicInfoTask task = new GetBasicInfoTask(snapshot);
                     task.execute();
-//                    String id = snapshot.child("id").getValue().toString();
-//                    String userName = snapshot.child("userName").getValue().toString();
-//                    String email = snapshot.child("email").getValue().toString();
-//                    String token = snapshot.child("token").getValue().toString();
-//                    String pass = snapshot.child("password").getValue().toString();
-//                    String language = snapshot.child("language").getValue().toString();
-//                    String timeZone = snapshot.child("timeZone").getValue().toString();
-//                    mUpdatedImageUrl = snapshot.child("image").getValue().toString();
-//                    mCurrUserInfo = new UserObject(id, userName, email, pass, token);
-//                    mCurrUserInfo.setLanguage(language);
-//                    mCurrUserInfo.setTimeZone(timeZone);
-//                    if (!TextUtils.isEmpty(mUpdatedImageUrl)) {
-//                        loadingDialog.showDialog();
-//                        RequestCreator requestCreator = Picasso.get().load(mUpdatedImageUrl);
-//                        requestCreator.into(mBackUserImage);
-//                        requestCreator.into(mUserImage);
-//                        loadingDialog.hideDialog();
-//                    }
-//                    runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            setInfoToUi();
-//                        }
-//                    });
                 } else {
                     progressBar.setVisibility(View.GONE);
                     Toast.makeText(UserSettingActivity.this, "Not Exist", Toast.LENGTH_SHORT).show();
@@ -713,6 +690,14 @@ public class UserSettingActivity extends AppCompatActivity {
             } else {
                 progressBar.setVisibility(View.GONE);
             }
+        }
+    }
+
+    public void goToDonatePage(View view) {
+        if (isEditMode) {
+            Intent intent = new Intent(this, TransferActivity.class);
+            intent.putExtra("userId", mUserId);
+            startActivity(intent);
         }
     }
 }

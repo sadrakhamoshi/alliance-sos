@@ -323,10 +323,4 @@ public class PaymentActivity extends AppCompatActivity {
     public void clickOnOtherOption(View view) {
         DialogForMonth();
     }
-
-    public void goToDonatePage(View view) {
-        Intent intent = new Intent(this, TransferActivity.class);
-        intent.putExtra("userId", mUserId);
-        startActivity(intent);
-    }
 }

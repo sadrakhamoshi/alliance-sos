@@ -295,6 +295,34 @@
 
             </RelativeLayout>
 
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:layout_marginTop="15dp"
+                android:onClick="goToDonatePage">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_centerVertical="true"
+                    android:layout_marginTop="15dp"
+                    android:background="#00000000"
+                    android:drawableLeft="@drawable/payment_icon"
+                    android:drawablePadding="10dp"
+                    android:drawableTint="#323131"
+                    android:gravity="center_vertical"
+                    android:text="Donate My Credit To Friend"
+                    android:textSize="17sp" />
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/right_arrow" />
+
+            </RelativeLayout>
+
             <Button
                 android:id="@+id/update_user_setting_btn"
                 android:layout_width="wrap_content"
