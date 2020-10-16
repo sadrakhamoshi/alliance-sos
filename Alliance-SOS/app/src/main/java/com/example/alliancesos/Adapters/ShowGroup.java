@@ -33,6 +33,10 @@ public class ShowGroup extends RecyclerView.Adapter<ShowGroup.ViewHolder> {
         mGroupNames = names;
     }
 
+    public ArrayList<String> getData() {
+        return mGroupIds;
+    }
+
     public void setUserName(String name) {
         this.mUsername = name;
     }
@@ -65,12 +69,10 @@ public class ShowGroup extends RecyclerView.Adapter<ShowGroup.ViewHolder> {
             @Override
             public void onClick(View v) {
                 Intent toGroupActivity = new Intent(mContext, GroupActivity.class);
-
                 toGroupActivity.putExtra("groupName", mGroupNames.get(position));
                 toGroupActivity.putExtra("groupId", mGroupIds.get(position));
                 toGroupActivity.putExtra("currUserName", mUsername);
                 toGroupActivity.putExtra("currUserId", mUserId);
-
                 mContext.startActivity(toGroupActivity);
             }
         });
@@ -100,6 +102,18 @@ public class ShowGroup extends RecyclerView.Adapter<ShowGroup.ViewHolder> {
     @Override
     public int getItemCount() {
         return mGroupNames.size();
+    }
+
+    public void removeItem(int position) {
+        mGroupNames.remove(position);
+        mGroupIds.remove(position);
+        notifyDataSetChanged();
+    }
+
+    public void restoreItem(String mUsername, String mUserId, int position) {
+        mGroupNames.add(position, mUsername);
+        mGroupIds.add(position, mUserId);
+        notifyItemInserted(position);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

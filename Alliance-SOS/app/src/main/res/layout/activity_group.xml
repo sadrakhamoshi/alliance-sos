@@ -98,14 +98,16 @@
         android:padding="7dp"
         android:textDirection="ltr" />
 
+
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/navigation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:background="@drawable/navigation"
-        app:itemIconTint="#FFFFFF"
-        app:itemTextColor="#610000"
+        app:itemIconTint="@color/bnv_tab_item_foreground"
+        app:itemTextColor="#BD0000"
+        app:labelVisibilityMode="labeled"
         app:menu="@menu/group_menu" />
 
 </RelativeLayout>

@@ -110,7 +110,7 @@ public class InvitationResponseActivity extends AppCompatActivity {
                     HashMap<String, String> groupInfo = new HashMap<>();
                     groupInfo.put("groupName", mGroupName);
                     groupInfo.put("groupId", mGroupId);
-                    mUserRef.child(mCurrUserId).child("Groups").push().setValue(groupInfo).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    mUserRef.child(mCurrUserId).child("Groups").child(mGroupId).setValue(groupInfo).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {

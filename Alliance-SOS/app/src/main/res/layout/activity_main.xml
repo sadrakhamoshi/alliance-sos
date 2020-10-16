@@ -8,6 +8,7 @@
     tools:context=".MainActivity">
 
     <LinearLayout
+        android:id="@+id/linear_layout_main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/create_group_btn"
@@ -23,9 +24,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
+                android:onClick="gotoPaymentPage"
                 android:textColor="#FFFFFF"
                 android:textSize="24sp"
-                android:onClick="gotoPaymentPage"
                 android:textStyle="bold"
                 tools:text="Kieren" />
 
@@ -48,18 +49,13 @@
 
         </RelativeLayout>
 
-<!--        <Button-->
-        <!--            android:layout_width="match_parent"-->
-        <!--            android:layout_height="wrap_content"-->
-        <!--            android:onClick="gotoPaymentPage"-->
-        <!--            android:text="peyment" />-->
-
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/group_pattern_recycle"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layoutDirection="ltr" />
+            android:layoutDirection="ltr"
+            android:onClick="clickOnRecycleView" />
     </LinearLayout>
 
     <Button

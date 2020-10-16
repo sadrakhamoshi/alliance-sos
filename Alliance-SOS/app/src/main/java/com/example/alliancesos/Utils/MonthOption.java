@@ -34,4 +34,19 @@ public class MonthOption {
             322.80,
             355.08
     };
+    public final static double[] discount = new double[]{
+            2.69,
+            12.91,
+            22.60,
+            41.96,
+            58.10,
+            71.02,
+            80.70,
+            87.16,
+            99.42,
+            111.04,
+            122.02,
+            132.35,
+            142.03
+    };
 }

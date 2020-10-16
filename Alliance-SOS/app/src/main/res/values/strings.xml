@@ -17,4 +17,12 @@
     <string name="signUpwithgoogel" translatable="true">SginUp Via Google</string>
     <string name="notificationChannel_id" translatable="true"></string>
     <string name="notificationChannel_name" translatable="true">FirebaseNotificationChannel</string>
+
+    <string name="home">Home</string>
+    <string name="sett">Group Setting</string>
+    <string name="help">Help Us</string>
+    <string name="addmembers">Add Member</string>
+
+    <string name="six_month_strik">6 Month <strike>$16.14</strike>  $12.91</string>
+    <string name="tweleve_month_strik">12 Month <strike>$32.28</strike>  $22.60</string>
 </resources>

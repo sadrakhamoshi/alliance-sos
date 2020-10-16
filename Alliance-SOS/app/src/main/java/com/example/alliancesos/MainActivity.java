@@ -4,11 +4,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -26,6 +28,7 @@ import android.widget.Toast;
 
 
 import com.example.alliancesos.Adapters.ShowGroup;
+import com.example.alliancesos.Adapters.SwipeToDeleteCallback;
 import com.example.alliancesos.Payment.PaymentActivity;
 import com.example.alliancesos.Payment.PaymentObject;
 import com.example.alliancesos.SendNotificationPack.Token;
@@ -33,6 +36,7 @@ import com.example.alliancesos.Setting.UserSettingActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -50,6 +54,7 @@ import java.util.Iterator;
 
 public class MainActivity extends AppCompatActivity {
 
+    private LinearLayout mLinearLayout;
     private static final int CREATING_GROUP = 886;
 
     private ProgressBar progressBar, progressBar_group_show;
@@ -79,6 +84,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void Initialize() {
+        //layout
+        mLinearLayout = findViewById(R.id.linear_layout_main);
+
         //progress
         progressBar = findViewById(R.id.progress_main);
         progressBar_group_show = findViewById(R.id.progress_main_group_show);
@@ -123,6 +131,7 @@ public class MainActivity extends AppCompatActivity {
                 CheckForTrial(CREATING_GROUP);
             }
         });
+        enableSwipeToDeleteAndUndo();
     }
 
     private void CheckForTrial(final int reqCode) {
@@ -142,7 +151,6 @@ public class MainActivity extends AppCompatActivity {
                         if (object.expired()) {
                             ExpiredDialog();
                         } else {
-
                             if (reqCode == CREATING_GROUP)
                                 RequestNewGroup();
                         }
@@ -314,7 +322,7 @@ public class MainActivity extends AppCompatActivity {
         HashMap<String, String> groupInfo = new HashMap<>();
         groupInfo.put("groupName", groupName);
         groupInfo.put("groupId", groupId);
-        mUsersRef.child(mCurrentUserId).child("Groups").push().setValue(groupInfo).addOnCompleteListener(new OnCompleteListener<Void>() {
+        mUsersRef.child(mCurrentUserId).child("Groups").child(groupId).setValue(groupInfo).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
@@ -457,8 +465,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.cancel();
-                finish();
-                return;
+//                finish();
+//                return;
             }
         });
 
@@ -494,4 +502,60 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra("userId", mCurrentUserId);
         startActivity(intent);
     }
+
+    private void enableSwipeToDeleteAndUndo() {
+        SwipeToDeleteCallback swipeToDeleteCallback = new SwipeToDeleteCallback(this) {
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
+
+                final int position = viewHolder.getAdapterPosition();
+                final String name = mGroupAdapter.getData().get(position);
+                final String id = mGroupAdapter.getData().get(position);
+//                mGroupAdapter.removeItem(position);
+                clearGroupsForUser(position, id);
+
+                Snackbar snackbar = Snackbar
+                        .make(mLinearLayout, "Item was removed from the list.", Snackbar.LENGTH_LONG);
+                snackbar.setAction("UNDO", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+
+                        mGroupAdapter.restoreItem(name, id, position);
+                        mGroup_rv.scrollToPosition(position);
+                    }
+                });
+                snackbar.setActionTextColor(Color.YELLOW);
+                snackbar.show();
+            }
+        };
+
+        ItemTouchHelper itemTouchhelper = new ItemTouchHelper(swipeToDeleteCallback);
+        itemTouchhelper.attachToRecyclerView(mGroup_rv);
+    }
+
+    private void clearGroupsForUser(final int position, final String id) {
+        progressBar.setVisibility(View.VISIBLE);
+        mGroupsRef.child(id).child("members").child(mCurrentUserId).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    mUsersRef.child(mCurrentUserId).child("Groups").child(id).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()) {
+                                mGroupAdapter.removeItem(position);
+                            } else {
+                                Toast.makeText(MainActivity.this, task.getException() + "", Toast.LENGTH_SHORT).show();
+                            }
+                            progressBar.setVisibility(View.GONE);
+                        }
+                    });
+                } else {
+                    progressBar.setVisibility(View.GONE);
+                    Toast.makeText(MainActivity.this, task.getException() + "", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
 }

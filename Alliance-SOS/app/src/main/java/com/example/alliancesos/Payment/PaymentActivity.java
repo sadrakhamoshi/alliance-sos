@@ -7,14 +7,18 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.fonts.Font;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
+import com.example.alliancesos.Adapters.PriceAdapter;
 import com.example.alliancesos.R;
 import com.example.alliancesos.Utils.MonthOption;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -28,8 +32,11 @@ import com.paypal.android.sdk.payments.PayPalPayment;
 import com.paypal.android.sdk.payments.PayPalService;
 import com.paypal.android.sdk.payments.PaymentConfirmation;
 
+import java.awt.font.TextAttribute;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Map;
 
 public class PaymentActivity extends AppCompatActivity {
 
@@ -45,7 +52,7 @@ public class PaymentActivity extends AppCompatActivity {
 
     private String[] mMonth_Option;
     private String mWhom;
-    private int mMonthIdx;
+    public static int mMonthIdx;
 
     private ProgressBar progressBar;
 
@@ -58,8 +65,8 @@ public class PaymentActivity extends AppCompatActivity {
         StartPayPalService();
         Intent intent = getIntent();
         if (intent == null) {
-            finish();
-            return;
+//            finish();
+//            return;
         } else {
             mUserId = intent.getStringExtra("userId");
             mRoot = FirebaseDatabase.getInstance().getReference();
@@ -129,12 +136,14 @@ public class PaymentActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialog);
         builder.setIcon(R.drawable.time_zone_icon);
         builder.setTitle("Pick Option");
-        builder.setSingleChoiceItems(mMonth_Option, 0, new DialogInterface.OnClickListener() {
+        final PriceAdapter adapter = new PriceAdapter(PaymentActivity.this);
+        builder.setAdapter(adapter, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 mMonthIdx = which;
             }
         });
+
         builder.setPositiveButton("Ok", null);
         builder.create().show();
     }
@@ -313,5 +322,11 @@ public class PaymentActivity extends AppCompatActivity {
 
     public void clickOnOtherOption(View view) {
         DialogForMonth();
+    }
+
+    public void goToDonatePage(View view) {
+        Intent intent = new Intent(this, TransferActivity.class);
+        intent.putExtra("userId", mUserId);
+        startActivity(intent);
     }
 }

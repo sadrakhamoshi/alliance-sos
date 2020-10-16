@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/price_pattern_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="10dp"
+    android:layoutDirection="ltr"
+    android:padding="10dp">
+
+
+    <TextView
+        android:id="@+id/without_discount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_marginLeft="15dp"
+        android:textColor="@color/red"
+        android:textDirection="ltr"
+        android:textSize="13sp"
+        android:textStyle="italic"
+        tools:text="$dfdfdasf" />
+
+    <TextView
+        android:id="@+id/month_transfer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:textDirection="ltr"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        tools:text="dffdfdf" />
+
+    <TextView
+        android:id="@+id/with_discount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:textColor="#60B300"
+        android:textDirection="ltr"
+        android:textSize="17sp"
+        android:textStyle="italic"
+        tools:text="$dfdfdasf" />
+
+</RelativeLayout>
