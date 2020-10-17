@@ -93,10 +93,8 @@ public class MainActivity extends AppCompatActivity {
 
         //auth
         mFirebaseAuth = FirebaseAuth.getInstance();
-        if (mFirebaseAuth.getCurrentUser() == null) {
+        if (mFirebaseAuth == null || mFirebaseAuth.getCurrentUser() == null)
             gotToLoginPage();
-        }
-        gotToLoginPage();
         mCurrentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         mAuthStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -104,7 +102,6 @@ public class MainActivity extends AppCompatActivity {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user == null) {
                     gotToLoginPage();
-
                 } else {
                 }
             }
