@@ -48,7 +48,8 @@
             android:layout_alignParentRight="true"
             android:onClick="onExitEditMode"
             android:src="@drawable/check_icon"
-            android:visibility="gone" />
+            android:visibility="gone"
+            app:tint="#000000" />
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/userImage_setting"

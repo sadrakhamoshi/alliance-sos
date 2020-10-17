@@ -14,8 +14,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.alliancesos.R;
-import com.example.alliancesos.Utils.MonthOption;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -76,10 +77,10 @@ public class TransferActivity extends AppCompatActivity {
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                             if (snapshot.exists()) {
                                 paymentObject = snapshot.getValue(PaymentObject.class);
-                                if (!TextUtils.isEmpty(paymentObject.month))
-                                    mAmount.setText("Charged in " + paymentObject.chargeDate + "for   " + paymentObject.month + "  Months");
-                                else
+                                if (TextUtils.isEmpty(paymentObject.month) || paymentObject.expired())
                                     mAmount.setText("You Don't Have Credit...");
+                                else
+                                    mAmount.setText(paymentObject.month + "  Months");
                                 progressBar.setVisibility(View.GONE);
 
                             } else {
@@ -116,7 +117,7 @@ public class TransferActivity extends AppCompatActivity {
                 Toast.makeText(this, "You Can't Donate Credits because you don't have some", Toast.LENGTH_SHORT).show();
             }
             Integer month = Integer.parseInt(mMonthCount.getText().toString().trim());
-            if (paymentObject.donateExpired(month))
+            if (paymentObject.donateExpired(month) || month != 0)
                 Toast.makeText(this, "The input month is out of your range", Toast.LENGTH_SHORT).show();
             else
                 checkForTransfer(month);
@@ -139,7 +140,6 @@ public class TransferActivity extends AppCompatActivity {
                         break;
                     }
                 }
-                progressBar.setVisibility(View.GONE);
                 if (mOtherUsername != null) {
                     DialogForSubmit(month);
                 } else {
@@ -160,7 +160,7 @@ public class TransferActivity extends AppCompatActivity {
         builder.setIcon(R.drawable.sos_icon);
         builder.setTitle("Attention");
         builder.setCancelable(false);
-        String message = "Mont : " + mMonthCount.getText().toString() + "\n";
+        String message = "Month : " + mMonthCount.getText().toString() + "\n";
         String email = mT_Email.getText().toString();
         if (mOtherUsername == null) {
             Toast.makeText(this, "There isn't user with this email ", Toast.LENGTH_SHORT).show();
@@ -172,8 +172,7 @@ public class TransferActivity extends AppCompatActivity {
         builder.setPositiveButton("I agree", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-
-                Transfering(month);
+                Transferring(month);
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -185,14 +184,45 @@ public class TransferActivity extends AppCompatActivity {
         builder.create().show();
     }
 
-    private void Transfering(Integer month) {
-        mRoot.child("payment").child(mOtherUID).setValue(new PaymentObject(true, month + ""));
-        mRoot.child("payment").child(mUserId).child("month").setValue((Integer.parseInt(paymentObject.month) - month) + "").addOnSuccessListener(new OnSuccessListener<Void>() {
+    private void Transferring(final Integer month) {
+        progressBar.setVisibility(View.VISIBLE);
+        mRoot.child("payment").child(mOtherUID).setValue(new PaymentObject(true, month + "")).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
-            public void onSuccess(Void aVoid) {
-                Toast.makeText(TransferActivity.this, "Successfully Transfer", Toast.LENGTH_SHORT).show();
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    mRoot.child("payment").child(mUserId).child("month").setValue((Integer.parseInt(paymentObject.month) - month) + "")
+                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (task.isSuccessful()) {
+                                        TransferResultDialog(true, "Transfer Was Successful ....");
+                                    } else {
+                                        TransferResultDialog(false, task.getException() + "");
+                                    }
+                                }
+                            });
+                } else {
+                    TransferResultDialog(false, task.getException() + "");
+                }
             }
         });
+    }
 
+    public void goBackTransfer(View view) {
+        finish();
+        return;
+    }
+
+    private void TransferResultDialog(boolean success, String msg) {
+        progressBar.setVisibility(View.GONE);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialog);
+        builder.setTitle("Result");
+        builder.setIcon(R.drawable.check_icon);
+        String message = msg;
+        if (!success) {
+            builder.setIcon(R.drawable.close_icon);
+        }
+        builder.setMessage(message);
+        builder.create().show();
     }
 }
