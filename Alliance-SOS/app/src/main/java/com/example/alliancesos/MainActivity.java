@@ -92,14 +92,20 @@ public class MainActivity extends AppCompatActivity {
         progressBar_group_show = findViewById(R.id.progress_main_group_show);
 
         //auth
-        mCurrentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         mFirebaseAuth = FirebaseAuth.getInstance();
+        if (mFirebaseAuth.getCurrentUser() == null) {
+            gotToLoginPage();
+        }
+        gotToLoginPage();
+        mCurrentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         mAuthStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user == null) {
                     gotToLoginPage();
+
+                } else {
                 }
             }
         };
