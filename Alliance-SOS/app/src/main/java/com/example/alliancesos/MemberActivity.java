@@ -56,7 +56,7 @@ public class MemberActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private Button mAddToGroup;
     private ListView mMembersListView;
-    private SearchView mUsername;
+    private EditText mUsername;
 
     private ArrayList<String> mMembersList;
     private ArrayAdapter<String> adapter;
@@ -109,7 +109,7 @@ public class MemberActivity extends AppCompatActivity {
         mAddToGroup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String addition_member = mUsername.getQuery().toString();
+                String addition_member = mUsername.getText().toString();
                 if (TextUtils.isEmpty(addition_member)) {
                     Toast.makeText(MemberActivity.this, "You Have to write Members Username....", Toast.LENGTH_LONG).show();
                 } else {

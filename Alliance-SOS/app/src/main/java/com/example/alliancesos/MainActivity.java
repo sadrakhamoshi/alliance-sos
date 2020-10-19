@@ -78,7 +78,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.v("log", "onCreate");
         setContentView(R.layout.activity_main);
         Initialize();
     }
@@ -245,7 +244,6 @@ public class MainActivity extends AppCompatActivity {
                                     Toast.makeText(MainActivity.this, "error in reading upComing: " + error.getMessage(), Toast.LENGTH_SHORT).show();
                                 }
                             });
-                            Log.v("progress", count[0] + "");
                         }
                     } else {
                         Toast.makeText(MainActivity.this, "Not Exist", Toast.LENGTH_SHORT).show();

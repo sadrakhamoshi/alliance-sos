@@ -5,16 +5,12 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.res.ResourcesCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Resources;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -27,8 +23,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -36,7 +30,6 @@ import android.widget.Toast;
 
 import com.example.alliancesos.Adapters.showEvents;
 import com.example.alliancesos.GroupSetting.GroupProfileActivity;
-import com.example.alliancesos.Payment.PayPalObject;
 import com.example.alliancesos.Payment.PaymentActivity;
 import com.example.alliancesos.Payment.PaymentObject;
 import com.example.alliancesos.SendNotificationPack.DataToSend;
@@ -45,7 +38,6 @@ import com.example.alliancesos.SendNotificationPack.SendingNotification;
 import com.example.alliancesos.Utils.MessageType;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -61,8 +53,10 @@ import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -84,7 +78,8 @@ public class GroupActivity extends AppCompatActivity {
     private showEvents mShowEventAdapter;
     private ArrayList<Event> mEventList;
 
-    private ChildEventListener mEventListener;
+    private ChildEventListener childEventListener;
+    private ValueEventListener mValueEventListener;
 
     private StorageReference mSOSImagesRef;
 
@@ -443,17 +438,68 @@ public class GroupActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mEventListener != null) {
-            mGroupRef.child(mCurrentGroupId).child("events").removeEventListener(mEventListener);
-            mEventListener = null;
+        if (childEventListener != null) {
+            mGroupRef.child(mCurrentGroupId).child("events").removeEventListener(childEventListener);
+            childEventListener = null;
         }
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        detachement();
+    }
+
+    private void detachement() {
+        if (mValueEventListener != null)
+            mGroupRef.child(mCurrentGroupId).child("events").removeEventListener(mValueEventListener);
+        mValueEventListener = null;
+    }
+
+    private void attacheValueListener() {
+        if (mValueEventListener == null) {
+            Date date = new Date();
+            final long time = date.getTime() - 1000 * 60;
+            mProgress.setVisibility(View.VISIBLE);
+            mValueEventListener = new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        Iterator iterator = snapshot.getChildren().iterator();
+                        List<Event> newEvents = new ArrayList<>();
+                        while (iterator.hasNext()) {
+                            DataSnapshot dataSnapshot = (DataSnapshot) iterator.next();
+                            Event event = dataSnapshot.getValue(Event.class);
+                            Long value = event.getTimeInMillisecond() * -1;
+                            if (time < value) {
+                                newEvents.add(event);
+//                                mShowEventAdapter.add(event);
+                            } else {
+                                //delete from database
+                            }
+                        }
+                        Collections.sort(newEvents);
+                        mShowEventAdapter.addAll(newEvents);
+                    }
+                    mProgress.setVisibility(View.GONE);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    mProgress.setVisibility(View.VISIBLE);
+                    Toast.makeText(GroupActivity.this, "Error in showing event " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            };
+        }
+        mGroupRef.child(mCurrentGroupId).child("events").addValueEventListener(mValueEventListener);
+    }
+
+
     private void attachListener() {
-        if (mEventListener == null) {
+        if (childEventListener == null) {
             final Date date = new Date();
             final long time = date.getTime() - 1000 * 60;
-            mEventListener = new ChildEventListener() {
+            childEventListener = new ChildEventListener() {
                 @Override
                 public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                     try {
@@ -490,12 +536,13 @@ public class GroupActivity extends AppCompatActivity {
 
                 }
             };
-            mGroupRef.child(mCurrentGroupId).child("events").addChildEventListener(mEventListener);
+            mGroupRef.child(mCurrentGroupId).child("events").addChildEventListener(childEventListener);
         }
     }
 
     private void showAllEvent() {
-        attachListener();
+//        attachListener();
+        attacheValueListener();
     }
 
     public void goToSOSLog(View view) {

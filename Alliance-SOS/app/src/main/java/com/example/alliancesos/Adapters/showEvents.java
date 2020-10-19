@@ -18,6 +18,7 @@ import com.example.alliancesos.R;
 import com.example.alliancesos.SpecificEventActivity;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.TimeZone;
 
 public class showEvents extends RecyclerView.Adapter<showEvents.ViewHolder> {
@@ -61,6 +62,12 @@ public class showEvents extends RecyclerView.Adapter<showEvents.ViewHolder> {
     @Override
     public int getItemCount() {
         return mEventList.size();
+    }
+
+    public void addAll(List<Event> events) {
+        mEventList.clear();
+        mEventList.addAll(events);
+        notifyDataSetChanged();
     }
 
     public void add(Event newEvent) {

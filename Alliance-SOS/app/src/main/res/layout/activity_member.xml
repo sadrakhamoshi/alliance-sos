@@ -26,12 +26,12 @@
 
     <TextView
         android:layout_width="wrap_content"
-        android:gravity="center"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:background="@drawable/select_back"
         android:drawableLeft="@drawable/payment_icon"
         android:drawablePadding="10dp"
+        android:gravity="center"
         android:onClick="transferCredit"
         android:padding="15dp"
         android:text="Transfer Credit"
@@ -41,7 +41,7 @@
         android:textStyle="bold" />
 
 
-    <SearchView
+    <EditText
         android:id="@+id/target_user_search_view"
         android:layout_width="match_parent"
         android:layout_height="75dp"
@@ -49,8 +49,11 @@
         android:layout_marginTop="60dp"
         android:layout_marginRight="10dp"
         android:background="@drawable/input_sign_up_back"
+        android:drawableStart="@drawable/search_icon"
+        android:layoutDirection="ltr"
         android:onClick="SearchingMembers"
         android:padding="10dp"
+        android:textDirection="ltr"
         android:textStyle="bold" />
 
     <Button
