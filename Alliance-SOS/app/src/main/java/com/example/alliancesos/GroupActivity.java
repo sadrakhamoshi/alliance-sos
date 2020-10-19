@@ -52,11 +52,14 @@ import com.skyfishjy.library.RippleBackground;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -78,7 +81,6 @@ public class GroupActivity extends AppCompatActivity {
     private showEvents mShowEventAdapter;
     private ArrayList<Event> mEventList;
 
-    private ChildEventListener childEventListener;
     private ValueEventListener mValueEventListener;
 
     private StorageReference mSOSImagesRef;
@@ -322,7 +324,6 @@ public class GroupActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                         if (task.isSuccessful()) {
-                            Log.v("taskk", "Successful");
                             photoPath.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Uri> task) {
@@ -438,9 +439,9 @@ public class GroupActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (childEventListener != null) {
-            mGroupRef.child(mCurrentGroupId).child("events").removeEventListener(childEventListener);
-            childEventListener = null;
+        if (mValueEventListener != null) {
+            mGroupRef.child(mCurrentGroupId).child("events").removeEventListener(mValueEventListener);
+            mValueEventListener = null;
         }
     }
 
@@ -458,8 +459,6 @@ public class GroupActivity extends AppCompatActivity {
 
     private void attacheValueListener() {
         if (mValueEventListener == null) {
-            Date date = new Date();
-            final long time = date.getTime() - 1000 * 60;
             mProgress.setVisibility(View.VISIBLE);
             mValueEventListener = new ValueEventListener() {
                 @Override
@@ -471,9 +470,9 @@ public class GroupActivity extends AppCompatActivity {
                             DataSnapshot dataSnapshot = (DataSnapshot) iterator.next();
                             Event event = dataSnapshot.getValue(Event.class);
                             Long value = event.getTimeInMillisecond() * -1;
-                            if (time < value) {
+
+                            if (checkIfPassedDate(event)) {
                                 newEvents.add(event);
-//                                mShowEventAdapter.add(event);
                             } else {
                                 //delete from database
                             }
@@ -494,54 +493,14 @@ public class GroupActivity extends AppCompatActivity {
         mGroupRef.child(mCurrentGroupId).child("events").addValueEventListener(mValueEventListener);
     }
 
-
-    private void attachListener() {
-        if (childEventListener == null) {
-            final Date date = new Date();
-            final long time = date.getTime() - 1000 * 60;
-            childEventListener = new ChildEventListener() {
-                @Override
-                public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                    try {
-                        Event event = snapshot.getValue(Event.class);
-                        Long value = event.getTimeInMillisecond() * -1;
-                        if (time < value) {
-                            mShowEventAdapter.add(event);
-                        } else {
-                            //delete task from data base
-                        }
-                        mProgress.setVisibility(View.GONE);
-                    } catch (Exception e) {
-                        Toast.makeText(GroupActivity.this, "Error in cast :" + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                }
-
-                @Override
-                public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-                }
-
-                @Override
-                public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-
-                }
-
-                @Override
-                public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-
-                }
-            };
-            mGroupRef.child(mCurrentGroupId).child("events").addChildEventListener(childEventListener);
-        }
+    private boolean checkIfPassedDate(Event event) {
+        Date now = new Date();
+        Date eventConversion = event.getScheduleObject().GetDate_DateFormat(event.getCreatedTimezoneId(), TimeZone.getDefault().getID());
+        Log.v("diffrenec", now + "   " + eventConversion);
+        return now.before(eventConversion);
     }
 
     private void showAllEvent() {
-//        attachListener();
         attacheValueListener();
     }
 

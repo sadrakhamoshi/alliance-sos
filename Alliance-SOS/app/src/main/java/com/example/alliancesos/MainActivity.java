@@ -515,16 +515,8 @@ public class MainActivity extends AppCompatActivity {
 //                mGroupAdapter.removeItem(position);
                 clearGroupsForUser(position, id);
 
-                Snackbar snackbar = Snackbar
-                        .make(mLinearLayout, "Item was removed from the list.", Snackbar.LENGTH_LONG);
-                snackbar.setAction("UNDO", new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
+                Snackbar snackbar = Snackbar.make(mLinearLayout, "Item was removed from the list.", Snackbar.LENGTH_LONG);
 
-                        mGroupAdapter.restoreItem(name, id, position);
-                        mGroup_rv.scrollToPosition(position);
-                    }
-                });
                 snackbar.setActionTextColor(Color.YELLOW);
                 snackbar.show();
             }
@@ -544,7 +536,6 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
-                                mGroupAdapter.removeItem(position);
                             } else {
                                 Toast.makeText(MainActivity.this, task.getException() + "", Toast.LENGTH_SHORT).show();
                             }
