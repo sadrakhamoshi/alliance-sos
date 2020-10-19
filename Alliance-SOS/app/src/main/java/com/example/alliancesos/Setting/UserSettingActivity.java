@@ -35,6 +35,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -45,6 +46,7 @@ import com.example.alliancesos.DbForRingtone.ChoiceApplication;
 import com.example.alliancesos.DbForRingtone.ringtone;
 import com.example.alliancesos.DoNotDisturb.NotDisturbActivity;
 import com.example.alliancesos.MainActivity;
+import com.example.alliancesos.Payment.TransferActivity;
 import com.example.alliancesos.R;
 import com.example.alliancesos.UserObject;
 import com.firebase.ui.auth.data.model.User;
@@ -61,6 +63,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.RequestCreator;
 import com.theartofdev.edmodo.cropper.CropImage;
@@ -104,6 +107,8 @@ public class UserSettingActivity extends AppCompatActivity {
 
 
     public static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 123;
+
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -268,41 +273,23 @@ public class UserSettingActivity extends AppCompatActivity {
     }
 
     private void getInfoOfCurrentUser() {
+        progressBar.setVisibility(View.VISIBLE);
         mUserRef.child(mUserId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    String id = snapshot.child("id").getValue().toString();
-                    String userName = snapshot.child("userName").getValue().toString();
-                    String email = snapshot.child("email").getValue().toString();
-                    String token = snapshot.child("token").getValue().toString();
-                    String pass = snapshot.child("password").getValue().toString();
-                    String language = snapshot.child("language").getValue().toString();
-                    String timeZone = snapshot.child("timeZone").getValue().toString();
-                    mUpdatedImageUrl = snapshot.child("image").getValue().toString();
-                    mCurrUserInfo = new UserObject(id, userName, email, pass, token);
-                    mCurrUserInfo.setLanguage(language);
-                    mCurrUserInfo.setTimeZone(timeZone);
-                    if (!TextUtils.isEmpty(mUpdatedImageUrl)) {
-                        loadingDialog.showDialog();
-                        RequestCreator requestCreator = Picasso.get().load(mUpdatedImageUrl);
-                        requestCreator.into(mBackUserImage);
-                        requestCreator.into(mUserImage);
-                        loadingDialog.hideDialog();
-                    }
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            setInfoToUi();
-                        }
-                    });
+                    GetBasicInfoTask task = new GetBasicInfoTask(snapshot);
+                    task.execute();
+                } else {
+                    progressBar.setVisibility(View.GONE);
+                    Toast.makeText(UserSettingActivity.this, "Not Exist", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Toast.makeText(UserSettingActivity.this, error.getMessage() + "\n" + error.getDetails(), Toast.LENGTH_SHORT).show();
-                loadingDialog.hideDialog();
+                progressBar.setVisibility(View.GONE);
             }
         });
     }
@@ -311,13 +298,14 @@ public class UserSettingActivity extends AppCompatActivity {
         mEmail.setText(mCurrUserInfo.getEmail());
         mPass.setText(mCurrUserInfo.getPassword());
         mUsername.setText(mCurrUserInfo.getUserName());
-//        mTime.setText(mCurrUserInfo.getTimeZone());
         mTime.setText(TimeZone.getDefault().getID());
         mLanguage.setText(mCurrUserInfo.getLanguage());
         mRingEnable.setChecked(true);
     }
 
     private void InitUI() {
+        progressBar = findViewById(R.id.progress_user_setting);
+
         mBackUserImage = findViewById(R.id.back_user_image);
         mUserImage = findViewById(R.id.userImage_setting);
 
@@ -586,7 +574,6 @@ public class UserSettingActivity extends AppCompatActivity {
         mPass.setEnabled(true);
         mUsername.setEnabled(true);
         mRingEnable.setEnabled(true);
-//        mTime.setEnabled(true);
         mLanguage.setEnabled(true);
         mChosePhoto.setVisibility(View.VISIBLE);
     }
@@ -600,12 +587,11 @@ public class UserSettingActivity extends AppCompatActivity {
         mPass.setEnabled(false);
         mUsername.setEnabled(false);
         mRingEnable.setEnabled(false);
-//        mTime.setEnabled(false);
         mLanguage.setEnabled(false);
         mChosePhoto.setVisibility(View.GONE);
     }
 
-    public void exiteUserSetting(View view) {
+    public void exitUserSetting(View view) {
         onBackPressed();
     }
 
@@ -653,5 +639,65 @@ public class UserSettingActivity extends AppCompatActivity {
         InputFilter[] filter1 = new InputFilter[]{filter};
         mEmail.setFilters(filter1);
         mUsername.setFilters(filter1);
+    }
+
+    public class GetBasicInfoTask extends AsyncTask<Void, Void, Void> {
+
+        DataSnapshot dataSnapshot;
+        RequestCreator requestCreator;
+
+        public GetBasicInfoTask(DataSnapshot dataSnapshot) {
+            this.dataSnapshot = dataSnapshot;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            String id = dataSnapshot.child("id").getValue().toString();
+            String userName = dataSnapshot.child("userName").getValue().toString();
+            String email = dataSnapshot.child("email").getValue().toString();
+            String token = dataSnapshot.child("token").getValue().toString();
+            String pass = dataSnapshot.child("password").getValue().toString();
+            String language = dataSnapshot.child("language").getValue().toString();
+            String timeZone = dataSnapshot.child("timeZone").getValue().toString();
+            mUpdatedImageUrl = dataSnapshot.child("image").getValue().toString();
+            mCurrUserInfo = new UserObject(id, userName, email, pass, token);
+            mCurrUserInfo.setLanguage(language);
+            mCurrUserInfo.setTimeZone(timeZone);
+            if (!TextUtils.isEmpty(mUpdatedImageUrl)) {
+                requestCreator = Picasso.get().load(mUpdatedImageUrl);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            setInfoToUi();
+            if (requestCreator != null) {
+                requestCreator.into(mBackUserImage);
+                requestCreator.into(mUserImage, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                        progressBar.setVisibility(View.GONE);
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        Toast.makeText(UserSettingActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                        progressBar.setVisibility(View.GONE);
+                    }
+                });
+            } else {
+                progressBar.setVisibility(View.GONE);
+            }
+        }
+    }
+
+    public void goToDonatePage(View view) {
+        if (isEditMode) {
+            Intent intent = new Intent(this, TransferActivity.class);
+            intent.putExtra("userId", mUserId);
+            startActivity(intent);
+        }
     }
 }

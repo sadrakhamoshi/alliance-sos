@@ -28,11 +28,13 @@ import com.google.firebase.ml.naturallanguage.translate.FirebaseTranslatorOption
 
 public class LogInPage extends AppCompatActivity {
 
+    private ProgressBar progressBar;
+
     private EditText mEmail;
     private TextInputEditText mPass;
     private Button mLogIn;
     private String ClientID = "648692468099-fgpjgivrk64lmp71murg2rbs7aik02hu.apps.googleusercontent.com";
-    
+
     //authentication
     private FirebaseAuth mFirebaseAuth;
 
@@ -41,7 +43,6 @@ public class LogInPage extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log_in_page);
         Initialized();
-
     }
 
     @Override
@@ -62,6 +63,7 @@ public class LogInPage extends AppCompatActivity {
         mEmail = findViewById(R.id.email_edt_text);
         mPass = findViewById(R.id.pass_edt_text);
         mLogIn = findViewById(R.id.login_btn);
+        progressBar = findViewById(R.id.progress_logIn);
         SetUpButtons();
     }
 
@@ -76,20 +78,17 @@ public class LogInPage extends AppCompatActivity {
 
     void LogInWithEmail() {
         if (checkLogInCondition()) {
-            ((ProgressBar) findViewById(R.id.progress_logIn)).setVisibility(View.VISIBLE);
+            progressBar.setVisibility(View.VISIBLE);
             mFirebaseAuth.signInWithEmailAndPassword(mEmail.getText().toString(), mPass.getText().toString())
                     .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
                                 Toast.makeText(getApplicationContext(), "Successfully Logged In", Toast.LENGTH_LONG).show();
-                                ((ProgressBar) findViewById(R.id.progress_logIn)).setVisibility(View.GONE);
-
                                 GoToMainPage();
-
                                 return;
                             } else {
-                                ((ProgressBar) findViewById(R.id.progress_logIn)).setVisibility(View.GONE);
+                                progressBar.setVisibility(View.GONE);
                                 Toast.makeText(getApplicationContext(), task.getException().getMessage(), Toast.LENGTH_LONG).show();
                             }
                         }
@@ -107,9 +106,11 @@ public class LogInPage extends AppCompatActivity {
     }
 
     private void GoToMainPage() {
+        progressBar.setVisibility(View.GONE);
         Intent main = new Intent(getApplicationContext(), MainActivity.class);
         startActivity(main);
         finish();
+        return;
     }
 
     public void goToSignUpPage(View view) {
@@ -117,43 +118,42 @@ public class LogInPage extends AppCompatActivity {
     }
 
     public void logInViaGoogle(View view) {
-        FirebaseTranslatorOptions options =
-                new FirebaseTranslatorOptions.Builder()
-                        .setSourceLanguage(FirebaseTranslateLanguage.EN)
-                        .setTargetLanguage(FirebaseTranslateLanguage.ID)
-                        .build();
-
-        final FirebaseTranslator englishGermanTranslator =
-                FirebaseNaturalLanguage.getInstance().getTranslator(options);
-        FirebaseModelDownloadConditions conditions = new FirebaseModelDownloadConditions.Builder()
-                .requireWifi()
-                .build();
-        englishGermanTranslator.downloadModelIfNeeded(conditions)
-                .addOnSuccessListener(
-                        new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void v) {
-                                englishGermanTranslator.translate("how Are You .i Fine Thanks").addOnSuccessListener(new OnSuccessListener<String>() {
-                                    @Override
-                                    public void onSuccess(String s) {
-                                        Toast.makeText(LogInPage.this, s, Toast.LENGTH_LONG).show();
-                                    }
-                                }).addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-                                        Toast.makeText(LogInPage.this, e.getMessage(), Toast.LENGTH_SHORT).show();
-                                    }
-                                });
-                            }
-                        })
-                .addOnFailureListener(
-                        new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-
-                                Toast.makeText(LogInPage.this, e.getMessage(), Toast.LENGTH_SHORT).show();
-                            }
-                        });
-
     }
+    //        FirebaseTranslatorOptions options =
+//                new FirebaseTranslatorOptions.Builder()
+//                        .setSourceLanguage(FirebaseTranslateLanguage.EN)
+//                        .setTargetLanguage(FirebaseTranslateLanguage.ID)
+//                        .build();
+//
+//        final FirebaseTranslator englishGermanTranslator =
+//                FirebaseNaturalLanguage.getInstance().getTranslator(options);
+//        FirebaseModelDownloadConditions conditions = new FirebaseModelDownloadConditions.Builder()
+//                .requireWifi()
+//                .build();
+//        englishGermanTranslator.downloadModelIfNeeded(conditions)
+//                .addOnSuccessListener(
+//                        new OnSuccessListener<Void>() {
+//                            @Override
+//                            public void onSuccess(Void v) {
+//                                englishGermanTranslator.translate("how Are You .i Fine Thanks").addOnSuccessListener(new OnSuccessListener<String>() {
+//                                    @Override
+//                                    public void onSuccess(String s) {
+//                                        Toast.makeText(LogInPage.this, s, Toast.LENGTH_LONG).show();
+//                                    }
+//                                }).addOnFailureListener(new OnFailureListener() {
+//                                    @Override
+//                                    public void onFailure(@NonNull Exception e) {
+//                                        Toast.makeText(LogInPage.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+//                                    }
+//                                });
+//                            }
+//                        })
+//                .addOnFailureListener(
+//                        new OnFailureListener() {
+//                            @Override
+//                            public void onFailure(@NonNull Exception e) {
+//
+//                                Toast.makeText(LogInPage.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+//                            }
+//                        });
 }

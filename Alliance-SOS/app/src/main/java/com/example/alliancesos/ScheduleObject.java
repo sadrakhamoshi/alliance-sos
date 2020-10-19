@@ -72,6 +72,26 @@ public class ScheduleObject implements Serializable {
         SimpleDateFormat df = new SimpleDateFormat(pattern, Locale.ENGLISH);
         String res = df.format(newDate);
         return res;
+    }
 
+    public Date GetDate_DateFormat(String mFrom_TimeZoneId, String mTo_TimezoneId) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.YEAR, Integer.parseInt(this.getDateTime().getYear()));
+        calendar.set(Calendar.MONTH, Integer.parseInt(this.getDateTime().getMonth()));
+        calendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(this.getDateTime().getDay()));
+        calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(this.getDateTime().getHour()));
+        calendar.set(Calendar.MINUTE, Integer.parseInt(this.getDateTime().getMinute()));
+        calendar.set(Calendar.SECOND, 0);
+
+        TimeZone from = TimeZone.getTimeZone(mFrom_TimeZoneId);
+        TimeZone to = TimeZone.getTimeZone(mTo_TimezoneId);
+        int from_offset = from.getOffset(Calendar.ZONE_OFFSET);
+        int to_offset = to.getOffset(Calendar.ZONE_OFFSET);
+
+        int diff = to_offset - from_offset;
+
+        long time = calendar.getTimeInMillis() + diff;
+        Date newDate = new Date(time);
+        return newDate;
     }
 }

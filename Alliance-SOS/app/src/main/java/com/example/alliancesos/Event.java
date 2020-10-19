@@ -5,7 +5,7 @@ import android.text.TextUtils;
 import java.io.Serializable;
 import java.util.TimeZone;
 
-public class Event implements Serializable {
+public class Event implements Serializable, Comparable<Event> {
     private String eventId;
     private String createdBy;
     private long timeInMillisecond;
@@ -64,5 +64,15 @@ public class Event implements Serializable {
 
     public void setScheduleObject(ScheduleObject scheduleObject) {
         this.scheduleObject = scheduleObject;
+    }
+
+    @Override
+    public int compareTo(Event o) {
+
+        if (this.getTimeInMillisecond() - o.getTimeInMillisecond() < 0)
+            return 1;
+        if (this.getTimeInMillisecond() - o.getTimeInMillisecond() > 0)
+            return -1;
+        return 0;
     }
 }

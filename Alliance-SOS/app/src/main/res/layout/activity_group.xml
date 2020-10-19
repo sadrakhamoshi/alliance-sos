@@ -8,7 +8,7 @@
     tools:context=".GroupActivity">
 
     <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/group_appbar"
+        android:id="@+id/app_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#004E4343"
@@ -26,24 +26,25 @@
 
     <com.skyfishjy.library.RippleBackground
         android:id="@+id/ripple_content"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_above="@id/group_sos_log"
+        android:layout_below="@id/app_bar"
         android:layout_centerInParent="true"
         android:layout_marginBottom="15dp"
         app:rb_color="#FA7878"
         app:rb_duration="2000"
-        app:rb_radius="32dp"
+        app:rb_radius="25dp"
         app:rb_rippleAmount="4"
         app:rb_scale="6">
 
         <Button
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:onClick="SosClick"
-            android:background="@drawable/sos_back_ground"
-            android:text="SOS"
             android:layout_centerInParent="true"
+            android:background="@drawable/sos_back_ground"
+            android:onClick="SosClick"
+            android:text="SOS"
             android:textColor="#FFFFFF"
             android:textSize="25sp"
             android:textStyle="bold" />
@@ -73,6 +74,12 @@
         android:textSize="25sp"
         android:textStyle="italic" />
 
+    <ProgressBar
+        android:id="@+id/progress_group_activity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="gone" />
 
     <ProgressBar
         android:id="@+id/progress_group_act"
@@ -85,12 +92,13 @@
         android:id="@+id/event_list_rv"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_above="@id/navigation"
         android:layout_below="@id/schedule_event"
         android:layout_marginTop="10dp"
-        android:background="@drawable/event_list_back"
         android:layoutDirection="ltr"
-        android:padding="7dp"
+        android:padding="9dp"
         android:textDirection="ltr" />
+
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/navigation"
@@ -98,8 +106,9 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:background="@drawable/navigation"
-        app:itemIconTint="#FFFFFF"
-        app:itemTextColor="#610000"
+        app:itemIconTint="@color/bnv_tab_item_foreground"
+        app:itemTextColor="#BD0000"
+        app:labelVisibilityMode="labeled"
         app:menu="@menu/group_menu" />
 
 </RelativeLayout>

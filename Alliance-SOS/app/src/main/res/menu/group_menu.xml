@@ -1,19 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/home_nav"
+        android:id="@+id/home_menu"
+        android:enabled="true"
+        android:icon="@drawable/home_icon"
+        android:iconTint="#FFFFFF"
+        android:title="@string/home" />
+    <item
+        android:id="@+id/add_member_menu"
+        android:enabled="true"
         android:icon="@drawable/members_vector"
         android:iconTint="#FFFFFF"
-        android:title="Add Member" />
+        android:title="@string/addmembers" />
     <item
         android:id="@+id/group_sett_menu"
+        android:enabled="true"
         android:icon="@drawable/setting_vector"
         android:iconTint="#FFFFFF"
-        android:title="Group Setting" />
+        android:title="@string/sett" />
+
     <item
         android:id="@+id/help_menu"
+        android:enabled="true"
         android:icon="@drawable/help_vector"
         android:iconTint="#FFFFFF"
-        android:title="Help Us" />
+        android:title="@string/help" />
 </menu>

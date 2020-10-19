@@ -326,6 +326,7 @@ public class GroupProfileActivity extends AppCompatActivity {
 
                         @Override
                         public void onError(Exception e) {
+                            mProgress.setVisibility(View.GONE);
                             Toast.makeText(GroupProfileActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     };

@@ -19,10 +19,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+import android.widget.VideoView;
 
 import com.example.alliancesos.DbForRingtone.AppDatabase;
 import com.example.alliancesos.DbForRingtone.ChoiceApplication;
 import com.example.alliancesos.DbForRingtone.ringtone;
+import com.example.alliancesos.Payment.PaymentObject;
 import com.example.alliancesos.SendNotificationPack.Token;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -45,8 +47,6 @@ public class SignUpPage extends AppCompatActivity {
     private EditText mUsername;
     private Button mSignUp;
 
-//    private String mToken;
-
     private Token mToken;
     private String userId;
 
@@ -59,6 +59,8 @@ public class SignUpPage extends AppCompatActivity {
 
     private ChoiceApplication mChoiceDB;
     private Uri ring;
+
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,6 +86,18 @@ public class SignUpPage extends AppCompatActivity {
         InitializeComp();
     }
 
+    @Override
+    protected void onPause() {
+        progressBar.setVisibility(View.GONE);
+        super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        progressBar.setVisibility(View.GONE);
+    }
+
     private void InitializeComp() {
 
         //database
@@ -97,6 +111,7 @@ public class SignUpPage extends AppCompatActivity {
         mEmail = findViewById(R.id.email_sign_up_page_edt_text);
         mPassword = findViewById(R.id.pass_sign_up_page_edt_text);
         mConfirmPassword = findViewById(R.id.confirm_pass_sign_up_page_edt_text);
+        progressBar = ((ProgressBar) findViewById(R.id.progress_signUp_page));
 
         mUsername = findViewById(R.id.username_sign_up_page_edt_text);
         mSignUp = findViewById(R.id.sign_up_btn);
@@ -110,6 +125,7 @@ public class SignUpPage extends AppCompatActivity {
 
     void CreateAccount() {
         if (checkSignUpCondition()) {
+            progressBar.setVisibility(View.VISIBLE);
             mFirebaseAuth.createUserWithEmailAndPassword(mEmail.getText().toString(), mPassword.getText().toString())
                     .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                         @Override
@@ -120,6 +136,7 @@ public class SignUpPage extends AppCompatActivity {
                                 pushDataInDatabase.execute();
 
                             } else {
+                                progressBar.setVisibility(View.GONE);
                                 Toast.makeText(getApplicationContext(), task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                             }
                         }
@@ -160,15 +177,12 @@ public class SignUpPage extends AppCompatActivity {
             @Override
             public void onSuccess(InstanceIdResult instanceIdResult) {
                 String newToken = instanceIdResult.getToken();
-
                 mToken = new Token(newToken);
-
                 String key = mFirebaseAuth.getCurrentUser().getUid();
                 userId = key;
-
                 UserObject userObject = new UserObject(key, mUsername.getText().toString(), mEmail.getText().toString(), mPassword.getText().toString(), mToken.getToken());
-
                 mUserDatabaseRef.child(key).setValue(userObject);
+                mRootDatabase.child("payment").child(key).setValue(new PaymentObject(false, ""));
             }
         });
     }
@@ -178,12 +192,12 @@ public class SignUpPage extends AppCompatActivity {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            ((ProgressBar) findViewById(R.id.progress_signUp_page)).setVisibility(View.VISIBLE);
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
+            progressBar.setVisibility(View.GONE);
             startActivity(new Intent(SignUpPage.this, MainActivity.class));
             finish();
             return;

@@ -8,6 +8,7 @@
     tools:context=".MainActivity">
 
     <LinearLayout
+        android:id="@+id/linear_layout_main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/create_group_btn"
@@ -23,6 +24,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
+                android:onClick="gotoPaymentPage"
                 android:textColor="#FFFFFF"
                 android:textSize="24sp"
                 android:textStyle="bold"
@@ -47,18 +49,13 @@
 
         </RelativeLayout>
 
-        <ProgressBar
-            android:id="@+id/progress_main"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:visibility="gone" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/group_pattern_recycle"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layoutDirection="ltr" />
+            android:layoutDirection="ltr"
+            android:onClick="clickOnRecycleView" />
     </LinearLayout>
 
     <Button
@@ -87,6 +84,20 @@
         android:text="User Setting"
         android:textAllCaps="false"
         android:textColor="#FFFFFF" />
+
+    <ProgressBar
+        android:id="@+id/progress_main_group_show"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="gone" />
+
+    <ProgressBar
+        android:id="@+id/progress_main"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="gone" />
 
 
 </RelativeLayout>
