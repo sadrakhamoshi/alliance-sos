@@ -376,8 +376,7 @@ public class SetScheduleActivity extends AppCompatActivity {
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     String name = snapshot.child(mEvent.getEventId()).child("scheduleObject").child("title").getValue().toString();
                     DateTime date = snapshot.child(mEvent.getEventId()).child("scheduleObject").child("dateTime").getValue(DateTime.class);
-                    String time = date.DisplayTime();
-                    mGroupsRef.child(mGroupId).child("upComingEvent").setValue(new UpComingEvent(name, time)).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    mGroupsRef.child(mGroupId).child("upComingEvent").setValue(new UpComingEvent(name, date)).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (!task.isSuccessful()) {

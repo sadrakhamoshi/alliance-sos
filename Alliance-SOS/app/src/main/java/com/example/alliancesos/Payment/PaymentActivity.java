@@ -177,18 +177,19 @@ public class PaymentActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode != RESULT_OK)
+        if (resultCode != RESULT_OK) {
             return;
-        else if (requestCode == com.paypal.android.sdk.payments.PaymentActivity.RESULT_EXTRAS_INVALID) {
+
+        } else if (requestCode == com.paypal.android.sdk.payments.PaymentActivity.RESULT_EXTRAS_INVALID) {
+
             Toast.makeText(this, "Invalid Code Try again", Toast.LENGTH_SHORT).show();
+
         } else {
             PaymentConfirmation confirm = data.getParcelableExtra(com.paypal.android.sdk.payments.PaymentActivity.EXTRA_RESULT_CONFIRMATION);
             if (confirm != null) {
                 //add to database
                 if (mWhom == MINE)
                     attachToDatabase(mUserId);
-            } else {
-                progressBar.setVisibility(View.GONE);
             }
         }
     }
@@ -283,6 +284,7 @@ public class PaymentActivity extends AppCompatActivity {
                         progressBar.setVisibility(View.GONE);
                         Toast.makeText(PaymentActivity.this, "Your Charge Has not Finished Yet!!!", Toast.LENGTH_SHORT).show();
                     } else {
+                        progressBar.setVisibility(View.GONE);
                         PayingWithPayPalFunc();
                     }
                 } else {

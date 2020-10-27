@@ -10,7 +10,7 @@ public class Groups {
         id = i;
         admin = ad;
         image = "";
-        upComingEvent = new UpComingEvent("nothing", "_____");
+        upComingEvent = new UpComingEvent("nothing", null);
     }
 
     public UpComingEvent getUpComingEvent() {
