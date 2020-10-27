@@ -187,9 +187,8 @@ public class PaymentActivity extends AppCompatActivity {
                 //add to database
                 if (mWhom == MINE)
                     attachToDatabase(mUserId);
-                else {
-                    attachToDatabase(mOtherUID);
-                }
+            } else {
+                progressBar.setVisibility(View.GONE);
             }
         }
     }
@@ -244,7 +243,7 @@ public class PaymentActivity extends AppCompatActivity {
             message += ("Username : " + mOtherUsername + "\n");
         }
         builder.setMessage(message);
-        builder.setPositiveButton("I agree", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton("Go To PayPal", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
 
@@ -301,23 +300,19 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     private void attachToDatabase(String uId) {
-        if (TextUtils.isEmpty(uId)) {
-            Toast.makeText(this, "Uid is Null", Toast.LENGTH_SHORT).show();
-        } else {
-            progressBar.setVisibility(View.VISIBLE);
-            PaymentObject object = new PaymentObject(true, MonthOption.months[mMonthIdx] + "");
-            mRoot.child("payment").child(uId).setValue(object).addOnCompleteListener(new OnCompleteListener<Void>() {
-                @Override
-                public void onComplete(@NonNull Task<Void> task) {
+        progressBar.setVisibility(View.VISIBLE);
+        PaymentObject object = new PaymentObject(true, MonthOption.months[mMonthIdx] + "");
+        mRoot.child("payment").child(uId).setValue(object).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
 
-                    if (task.isSuccessful())
-                        Toast.makeText(PaymentActivity.this, "Payment Was Successful", Toast.LENGTH_SHORT).show();
-                    else
-                        Toast.makeText(PaymentActivity.this, "Error " + task.getException(), Toast.LENGTH_SHORT).show();
-                    progressBar.setVisibility(View.GONE);
-                }
-            });
-        }
+                if (task.isSuccessful())
+                    Toast.makeText(PaymentActivity.this, "Payment Was Successful", Toast.LENGTH_SHORT).show();
+                else
+                    Toast.makeText(PaymentActivity.this, "Error " + task.getException(), Toast.LENGTH_SHORT).show();
+                progressBar.setVisibility(View.GONE);
+            }
+        });
     }
 
     public void clickOnOtherOption(View view) {
