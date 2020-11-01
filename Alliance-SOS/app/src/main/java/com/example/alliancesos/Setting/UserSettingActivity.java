@@ -36,6 +36,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -45,6 +46,7 @@ import com.example.alliancesos.DbForRingtone.AppDatabase;
 import com.example.alliancesos.DbForRingtone.ChoiceApplication;
 import com.example.alliancesos.DbForRingtone.ringtone;
 import com.example.alliancesos.DoNotDisturb.NotDisturbActivity;
+import com.example.alliancesos.LogInPage;
 import com.example.alliancesos.MainActivity;
 import com.example.alliancesos.Payment.TransferActivity;
 import com.example.alliancesos.R;
@@ -63,6 +65,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.paypal.android.sdk.payments.LoginActivity;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.RequestCreator;
@@ -85,6 +88,7 @@ public class UserSettingActivity extends AppCompatActivity {
 
     private static final int PICK_RING = 1;
 
+    private RelativeLayout mLogOutLayout;
     private boolean emailChange, isEditMode;
     private ImageView mEditMode, mExitEditMode;
     private Button mUpdate_btn;
@@ -105,6 +109,9 @@ public class UserSettingActivity extends AppCompatActivity {
     private ViewDialog loadingDialog;
     private ChoiceApplication mChoiceDB;
 
+    private FirebaseAuth mFirebaseAuth;
+    private FirebaseAuth.AuthStateListener mAuthStateListener;
+
 
     public static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 123;
 
@@ -114,7 +121,15 @@ public class UserSettingActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_setting);
-
+        mFirebaseAuth = FirebaseAuth.getInstance();
+        mAuthStateListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user == null)
+                    goToLogInPage();
+            }
+        };
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -130,6 +145,7 @@ public class UserSettingActivity extends AppCompatActivity {
         }
         Initialize();
     }
+
 
     @Override
     protected void onResume() {
@@ -304,6 +320,7 @@ public class UserSettingActivity extends AppCompatActivity {
     }
 
     private void InitUI() {
+        mLogOutLayout = findViewById(R.id.log_out_layout);
         progressBar = findViewById(R.id.progress_user_setting);
 
         mBackUserImage = findViewById(R.id.back_user_image);
@@ -559,6 +576,8 @@ public class UserSettingActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        if (mAuthStateListener != null)
+            mFirebaseAuth.addAuthStateListener(mAuthStateListener);
         if (!isEditMode) {
             getInfoOfCurrentUser();
         }
@@ -566,6 +585,7 @@ public class UserSettingActivity extends AppCompatActivity {
 
 
     private void goToEditMode() {
+        mLogOutLayout.setVisibility(View.VISIBLE);
         isEditMode = true;
         mEditMode.setVisibility(View.GONE);
         mExitEditMode.setVisibility(View.VISIBLE);
@@ -579,6 +599,7 @@ public class UserSettingActivity extends AppCompatActivity {
     }
 
     private void exitEditMode() {
+        mLogOutLayout.setVisibility(View.GONE);
         isEditMode = false;
         mEditMode.setVisibility(View.VISIBLE);
         mExitEditMode.setVisibility(View.GONE);
@@ -593,6 +614,44 @@ public class UserSettingActivity extends AppCompatActivity {
 
     public void exitUserSetting(View view) {
         onBackPressed();
+    }
+
+    public void LogOut(View view) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialog);
+        builder.setIcon(R.drawable.attention_icon);
+        builder.setTitle("Attention");
+        builder.setMessage("Are you Sure You Want to Logout ?");
+        builder.setCancelable(true);
+        builder.setNegativeButton("Cancel", null);
+        builder.setPositiveButton("Yes ", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                makeTokenNull();
+            }
+        });
+        builder.create().show();
+    }
+
+    private void makeTokenNull() {
+        loadingDialog.showDialog();
+        mUserRef.child(mUserId).child("token").setValue("").addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    FirebaseAuth.getInstance().signOut();
+                } else {
+                    Toast.makeText(UserSettingActivity.this, "Error " + task.getException(), Toast.LENGTH_SHORT).show();
+                }
+                loadingDialog.hideDialog();
+            }
+        });
+    }
+
+    private void goToLogInPage() {
+        Intent goToLogIn = new Intent(getApplicationContext(), LogInPage.class);
+        startActivity(goToLogIn);
+        finish();
+        return;
     }
 
     public class updateRingtoneTask extends AsyncTask<Void, Void, Void> {
