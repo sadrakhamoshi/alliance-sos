@@ -327,7 +327,10 @@ public class SetScheduleActivity extends AppCompatActivity {
         time = new TimePickerDialog.OnTimeSetListener() {
             @Override
             public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                mTime_edt.setText(hourOfDay + ":" + minute);
+                String minute_str = minute + "";
+                if (minute < 10)
+                    minute_str = "0" + minute_str;
+                mTime_edt.setText(hourOfDay + ":" + minute_str);
                 mHour = hourOfDay + "";
                 mMinute = minute + "";
                 Toast.makeText(SetScheduleActivity.this, "Time Is " + mHour + " : " + mMinute, Toast.LENGTH_LONG).show();
