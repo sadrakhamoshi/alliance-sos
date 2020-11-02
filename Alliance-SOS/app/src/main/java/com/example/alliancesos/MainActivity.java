@@ -465,8 +465,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.cancel();
-//                finish();
-//                return;
             }
         });
 
@@ -509,11 +507,9 @@ public class MainActivity extends AppCompatActivity {
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
 
                 final int position = viewHolder.getAdapterPosition();
-//                final String name = mGroupAdapter.getData().get(position);
                 final HashMap<String, String> item = mGroupAdapter.getData(position);
-                final UpComingEvent item_upcoming = mGroupAdapter.getData_upcoming(position);
-//                mGroupAdapter.removeItem(position);
-                clearGroupsForUser(position, item, item_upcoming);
+                mGroupAdapter.clearAll();
+                clearGroupsForUser(item);
 
                 Snackbar snackbar = Snackbar.make(mLinearLayout, "Item was removed from the list.", Snackbar.LENGTH_LONG);
 
@@ -526,7 +522,7 @@ public class MainActivity extends AppCompatActivity {
         itemTouchhelper.attachToRecyclerView(mGroup_rv);
     }
 
-    private void clearGroupsForUser(final int position, final HashMap<String, String> item, UpComingEvent item_upcoming) {
+    private void clearGroupsForUser(final HashMap<String, String> item) {
         final String id = item.get("id");
         progressBar.setVisibility(View.VISIBLE);
         mGroupsRef.child(id).child("members").child(mCurrentUserId).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
