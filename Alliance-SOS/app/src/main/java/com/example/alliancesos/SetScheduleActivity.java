@@ -327,7 +327,10 @@ public class SetScheduleActivity extends AppCompatActivity {
         time = new TimePickerDialog.OnTimeSetListener() {
             @Override
             public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                mTime_edt.setText(hourOfDay + ":" + minute);
+                String minute_str = minute + "";
+                if (minute < 10)
+                    minute_str = "0" + minute_str;
+                mTime_edt.setText(hourOfDay + ":" + minute_str);
                 mHour = hourOfDay + "";
                 mMinute = minute + "";
                 Toast.makeText(SetScheduleActivity.this, "Time Is " + mHour + " : " + mMinute, Toast.LENGTH_LONG).show();
@@ -376,8 +379,7 @@ public class SetScheduleActivity extends AppCompatActivity {
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     String name = snapshot.child(mEvent.getEventId()).child("scheduleObject").child("title").getValue().toString();
                     DateTime date = snapshot.child(mEvent.getEventId()).child("scheduleObject").child("dateTime").getValue(DateTime.class);
-                    String time = date.DisplayTime();
-                    mGroupsRef.child(mGroupId).child("upComingEvent").setValue(new UpComingEvent(name, time)).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    mGroupsRef.child(mGroupId).child("upComingEvent").setValue(new UpComingEvent(name, date)).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (!task.isSuccessful()) {

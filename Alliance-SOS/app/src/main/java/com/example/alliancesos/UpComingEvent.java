@@ -1,22 +1,33 @@
 package com.example.alliancesos;
 
+import java.sql.Time;
+import java.util.Calendar;
+import java.util.TimeZone;
+
 public class UpComingEvent {
     private String upcomingName;
-    private String upcomingTime;
+    private DateTime upcomingTime;
+    private String sourceTimeZoneId;
 
     public UpComingEvent() {
+
     }
 
-    public UpComingEvent(String name, String time) {
+    public UpComingEvent(String name, DateTime time) {
         upcomingName = name;
         upcomingTime = time;
+        sourceTimeZoneId = TimeZone.getDefault().getID();
+    }
+
+    public String getSourceTimeZoneId() {
+        return sourceTimeZoneId;
     }
 
     public String getUpcomingName() {
         return upcomingName;
     }
 
-    public String getUpcomingTime() {
+    public DateTime getUpcomingTime() {
         return upcomingTime;
     }
 
@@ -24,7 +35,8 @@ public class UpComingEvent {
         this.upcomingName = upcomingName;
     }
 
-    public void setUpcomingTime(String upcomingTime) {
+    public void setUpcomingTime(DateTime upcomingTime) {
         this.upcomingTime = upcomingTime;
     }
+
 }

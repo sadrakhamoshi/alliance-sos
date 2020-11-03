@@ -72,7 +72,6 @@ public class MainActivity extends AppCompatActivity {
 
     private ShowGroup mGroupAdapter;
     private RecyclerView mGroup_rv;
-    private ChildEventListener mGroupChangeListener;
     private ValueEventListener mValueEventListenerGroup;
 
     @Override
@@ -384,8 +383,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void logOut(View view) {
-        if (mGroupChangeListener != null) {
-            mGroupsRef.removeEventListener(mGroupChangeListener);
+        if (mValueEventListenerGroup != null) {
+            mGroupsRef.removeEventListener(mValueEventListenerGroup);
         }
         FirebaseAuth.getInstance().signOut();
         gotToLoginPage();
@@ -466,8 +465,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.cancel();
-//                finish();
-//                return;
             }
         });
 
@@ -510,10 +507,9 @@ public class MainActivity extends AppCompatActivity {
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
 
                 final int position = viewHolder.getAdapterPosition();
-                final String name = mGroupAdapter.getData().get(position);
-                final String id = mGroupAdapter.getData().get(position);
-//                mGroupAdapter.removeItem(position);
-                clearGroupsForUser(position, id);
+                final HashMap<String, String> item = mGroupAdapter.getData(position);
+                mGroupAdapter.clearAll();
+                clearGroupsForUser(item);
 
                 Snackbar snackbar = Snackbar.make(mLinearLayout, "Item was removed from the list.", Snackbar.LENGTH_LONG);
 
@@ -526,7 +522,8 @@ public class MainActivity extends AppCompatActivity {
         itemTouchhelper.attachToRecyclerView(mGroup_rv);
     }
 
-    private void clearGroupsForUser(final int position, final String id) {
+    private void clearGroupsForUser(final HashMap<String, String> item) {
+        final String id = item.get("id");
         progressBar.setVisibility(View.VISIBLE);
         mGroupsRef.child(id).child("members").child(mCurrentUserId).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override

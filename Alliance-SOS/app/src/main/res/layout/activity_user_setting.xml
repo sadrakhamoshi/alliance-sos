@@ -324,6 +324,29 @@
 
             </RelativeLayout>
 
+            <RelativeLayout
+                android:id="@+id/log_out_layout"
+                android:layout_width="match_parent"
+                android:layout_height="65dp"
+                android:onClick="LogOut"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#1AFF0000"
+                    android:drawableLeft="@drawable/power_off_icon"
+                    android:drawablePadding="10dp"
+                    android:foreground="@drawable/select_back"
+                    android:gravity="center_vertical"
+                    android:padding="10dp"
+                    android:text="Logout"
+                    android:textColor="#FFFFFF"
+                    android:textSize="17sp"
+                    android:textStyle="bold" />
+
+            </RelativeLayout>
+
             <Button
                 android:id="@+id/update_user_setting_btn"
                 android:layout_width="wrap_content"

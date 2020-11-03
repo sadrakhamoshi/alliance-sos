@@ -1,6 +1,7 @@
 package com.example.alliancesos.SendNotificationPack;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -124,7 +125,7 @@ public class SendingNotification {
                             }
 
                         } else {
-                          //  Toast.makeText(mContext, "not For Your self..:)", Toast.LENGTH_SHORT).show();
+                            //  Toast.makeText(mContext, "not For Your self..:)", Toast.LENGTH_SHORT).show();
                         }
                     }
                     isInSendMode = false;
@@ -146,7 +147,8 @@ public class SendingNotification {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
                     String token = snapshot.child("token").getValue().toString();
-                    sendNotif(token, userNameForThisGroup, userId);
+                    if (!TextUtils.isEmpty(token))
+                        sendNotif(token, userNameForThisGroup, userId);
                 } else {
                     Toast.makeText(mContext, "not exist for sending notifi....", Toast.LENGTH_SHORT).show();
                 }

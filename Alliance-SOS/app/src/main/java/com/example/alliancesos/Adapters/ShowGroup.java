@@ -15,8 +15,11 @@ import com.example.alliancesos.R;
 import com.example.alliancesos.UpComingEvent;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.TimeZone;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+
 
 public class ShowGroup extends RecyclerView.Adapter<ShowGroup.ViewHolder> {
 
@@ -33,8 +36,15 @@ public class ShowGroup extends RecyclerView.Adapter<ShowGroup.ViewHolder> {
         mGroupNames = names;
     }
 
-    public ArrayList<String> getData() {
-        return mGroupIds;
+    public HashMap<String, String> getData(int position) {
+        HashMap<String, String> item = new HashMap<>();
+        item.put("id", mGroupIds.get(position));
+        item.put("name", mGroupNames.get(position));
+        return item;
+    }
+
+    public UpComingEvent getData_upcoming(int position) {
+        return mUpComingEventArrayList.get(position);
     }
 
     public void setUserName(String name) {
@@ -63,7 +73,10 @@ public class ShowGroup extends RecyclerView.Adapter<ShowGroup.ViewHolder> {
         }
         holder.groupEvent.setText("event: " + eventName);
 
-        holder.groupTime.setText("Date:" + currEvent.getUpcomingTime());
+
+        String upComingEventDate = getUpcomingDate(currEvent);
+
+        holder.groupTime.setText("Date: " + upComingEventDate);
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -76,6 +89,16 @@ public class ShowGroup extends RecyclerView.Adapter<ShowGroup.ViewHolder> {
                 mContext.startActivity(toGroupActivity);
             }
         });
+    }
+
+    private String getUpcomingDate(UpComingEvent currEvent) {
+        if (currEvent.getUpcomingTime() == null) {
+            return "_____";
+        }
+        String curr_zoneId = TimeZone.getDefault().getID();
+        String source_zoneId = currEvent.getSourceTimeZoneId();
+        String converted_date = currEvent.getUpcomingTime().ConvertTime(source_zoneId, curr_zoneId);
+        return converted_date;
     }
 
     public void add(String name, UpComingEvent upComingEvent, String id) {
