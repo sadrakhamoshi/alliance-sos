@@ -18,6 +18,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -66,6 +67,7 @@ public class GroupProfileActivity extends AppCompatActivity {
     private boolean edit_mode;
 
     private ProgressBar mProgress;
+    private RelativeLayout mRelativeLayout;
 
 
     @Override
@@ -131,6 +133,7 @@ public class GroupProfileActivity extends AppCompatActivity {
     }
 
     private void InitUI() {
+        mRelativeLayout = findViewById(R.id.group_member_layout);
         mProgress = findViewById(R.id.loading_bar_group_setting);
         mSavePreset = findViewById(R.id.save_preset_group_setting);
         mEdit_image = findViewById(R.id.edit_group_setting);
@@ -295,6 +298,7 @@ public class GroupProfileActivity extends AppCompatActivity {
                     if (mCanChangeGroupImage) {
                         mPreset.setVisibility(View.VISIBLE);
                         mSavePreset.setVisibility(View.VISIBLE);
+                        mRelativeLayout.setVisibility(View.VISIBLE);
                     }
                     mUsername_edt.setText(mUpdatedUsername);
                     mNoDisturb.setChecked(mUpdatedNotDisturb);
@@ -369,5 +373,11 @@ public class GroupProfileActivity extends AppCompatActivity {
 
     public void exitGroupSetting(View view) {
         onBackPressed();
+    }
+
+    public void goToGroupMembers(View view) {
+        Intent gotToMembers = new Intent(this, GroupMemberActivity.class);
+        gotToMembers.putExtra("groupId", mGroupId);
+        startActivity(gotToMembers);
     }
 }

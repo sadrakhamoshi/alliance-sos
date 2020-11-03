@@ -51,13 +51,14 @@
             android:layout_marginRight="5dp"
             android:src="@drawable/edit_icon"
             app:tint="@color/red" />
+
         <ImageView
             android:layout_width="28dp"
             android:layout_height="28dp"
-            android:onClick="exitGroupSetting"
             android:layout_alignParentLeft="true"
             android:layout_marginTop="5dp"
             android:layout_marginRight="5dp"
+            android:onClick="exitGroupSetting"
             android:src="@drawable/back_vector"
             app:tint="@color/red" />
 
@@ -83,104 +84,148 @@
 
     </RelativeLayout>
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:layout_marginTop="15dp">
 
-        <EditText
-            android:id="@+id/username_group_setting"
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#00000000"
-            android:drawableLeft="@drawable/single_user_icon"
-            android:drawablePadding="10dp"
-            android:enabled="false"
-            android:gravity="center_vertical"
-            android:hint="Username For this group.."
-            android:padding="10dp" />
-
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:layout_marginTop="15dp"
-        android:padding="10dp">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#00000000"
-            android:drawableLeft="@drawable/alarm_off_icon"
-            android:drawablePadding="10dp"
-            android:gravity="center_vertical"
-            android:text="Do Not Disturb"
-            android:textSize="17sp" />
-
-        <CheckBox
-            android:id="@+id/disturb_group_setting"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:enabled="false" />
-
-    </RelativeLayout>
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:layout_marginTop="15dp">
-
-        <EditText
-            android:id="@+id/preset_message_group_setting"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#00000000"
-            android:drawableLeft="@drawable/message_icon"
-            android:drawablePadding="10dp"
-            android:enabled="false"
-            android:gravity="center_vertical"
-            android:hint="Write new Preset message..."
-            android:padding="10dp"
-            android:visibility="gone" />
-
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <Button
-        android:id="@+id/save_preset_group_setting"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="right"
-        android:layout_marginRight="10dp"
-        android:background="@drawable/login_btn"
-        android:onClick="addNewPresetMessage"
-        android:text="Save Preset"
-        android:textAllCaps="false"
-        android:textColor="#FFFFFF"
-        android:visibility="gone" />
+            android:orientation="vertical">
 
 
-    <ProgressBar
-        android:id="@+id/loading_bar_group_setting"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:visibility="gone" />
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginTop="15dp">
 
-    <Button
-        android:id="@+id/update_group_setting"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="40dp"
-        android:background="@drawable/login_btn"
-        android:onClick="updateGroupProfile"
-        android:text="Update"
-        android:textAllCaps="false"
-        android:textColor="#FFFFFF"
-        android:visibility="gone" />
+                <EditText
+                    android:id="@+id/username_group_setting"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#00000000"
+                    android:drawableLeft="@drawable/single_user_icon"
+                    android:drawablePadding="10dp"
+                    android:enabled="false"
+                    android:gravity="center_vertical"
+                    android:hint="Username For this group.."
+                    android:padding="10dp" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginTop="15dp"
+                android:padding="10dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#00000000"
+                    android:drawableLeft="@drawable/alarm_off_icon"
+                    android:drawablePadding="10dp"
+                    android:gravity="center_vertical"
+                    android:text="Do Not Disturb"
+                    android:textSize="17sp" />
+
+                <CheckBox
+                    android:id="@+id/disturb_group_setting"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:enabled="false" />
+
+            </RelativeLayout>
+
+
+            <RelativeLayout
+                android:id="@+id/group_member_layout"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginTop="15dp"
+                android:onClick="goToGroupMembers"
+                android:padding="10dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#00000000"
+                    android:drawablePadding="10dp"
+                    android:gravity="center_vertical"
+                    android:text="Show Group Members "
+                    android:textSize="17sp" />
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/right_arrow" />
+
+
+            </RelativeLayout>
+
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginTop="15dp">
+
+                <EditText
+                    android:id="@+id/preset_message_group_setting"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#00000000"
+                    android:drawableLeft="@drawable/message_icon"
+                    android:drawablePadding="10dp"
+                    android:enabled="false"
+                    android:gravity="center_vertical"
+                    android:hint="Write new Preset message..."
+                    android:padding="10dp"
+                    android:visibility="gone" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <Button
+                android:id="@+id/save_preset_group_setting"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:layout_marginRight="10dp"
+                android:background="@drawable/login_btn"
+                android:onClick="addNewPresetMessage"
+                android:text="Save Preset"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF"
+                android:visibility="gone" />
+
+
+            <ProgressBar
+                android:id="@+id/loading_bar_group_setting"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/update_group_setting"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="40dp"
+                android:background="@drawable/login_btn"
+                android:onClick="updateGroupProfile"
+                android:text="Update"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF"
+                android:visibility="gone" />
+        </LinearLayout>
+    </ScrollView>
 
 
 </LinearLayout>

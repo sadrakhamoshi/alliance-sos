@@ -22,6 +22,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".GroupSetting.GroupMemberActivity"></activity>
         <activity android:name=".Payment.TransferActivity" />
         <activity android:name=".Payment.PaymentActivity" />
         <activity android:name=".SpecificSOSActivity" />
