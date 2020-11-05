@@ -104,21 +104,6 @@ public class SetScheduleActivity extends AppCompatActivity {
 
     private void getCurrentTimezone() {
         mAuthorTimezone = TimeZone.getDefault().getID();
-//        mRootRef.child("users").child(mAuthorId).addListenerForSingleValueEvent(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot snapshot) {
-//                if (snapshot.exists()) {
-//                    mAuthorTimezone = snapshot.child("timeZone").getValue().toString();
-//                } else {
-//                    Toast.makeText(SetScheduleActivity.this, "not exist user...", Toast.LENGTH_SHORT).show();
-//                }
-//            }
-//
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError error) {
-//                Toast.makeText(SetScheduleActivity.this, "onCancelled " + error.getMessage(), Toast.LENGTH_SHORT).show();
-//            }
-//        });
     }
 
     private void Initialize() {
@@ -188,8 +173,9 @@ public class SetScheduleActivity extends AppCompatActivity {
                 ScheduleObject scheduleObject = new ScheduleObject(title, description);
                 scheduleObject.setDateTime(dateTime);
                 try {
-                    Date formattedDate = computeScheduleInMilliSecond(scheduleObject.getDateTime());
-                    mEvent = new Event("", mAuthorUserName, formattedDate.getTime() * -1, scheduleObject, mAuthorTimezone);
+                    long milliSecond = computeScheduleInMilliSecond(scheduleObject.getDateTime());
+
+                    mEvent = new Event("", mAuthorUserName, milliSecond - 1, scheduleObject, mAuthorTimezone);
                     sendMessage();
                 } catch (Exception e) {
                     Toast.makeText(SetScheduleActivity.this, "Error in Parsing catch : " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -206,13 +192,13 @@ public class SetScheduleActivity extends AppCompatActivity {
         builder.show();
     }
 
-    private Date computeScheduleInMilliSecond(DateTime dateTime) throws ParseException {
+    private long computeScheduleInMilliSecond(DateTime dateTime) throws ParseException {
         int Month = Integer.parseInt(dateTime.getMonth()) + 1;
         String dt = dateTime.getYear() + "-" + Month + "-" + dateTime.getDay() + "T" + dateTime.getHour() + ":" + dateTime.getMinute() + ":0Z";
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-
+        int offset = TimeZone.getDefault().getOffset(Calendar.ZONE_OFFSET);
         Date date = format.parse(dt);
-        return date;
+        return date.getTime() - offset;
     }
 
     private void sendMessage() {

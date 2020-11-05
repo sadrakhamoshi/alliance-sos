@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/help"
+    android:padding="7dp"
+    tools:context=".HelpActivity">
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:onClick="exitHelp"
+        android:src="@drawable/back_vector"
+        app:tint="#FFFFFF" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:fontFamily="sans-serif-condensed-light"
+        android:text="@string/help"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:orientation="vertical">
+
+        <EditText
+            android:id="@+id/subject_help"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_marginBottom="15dp"
+            android:background="@drawable/input_sign_up_back"
+            android:drawableLeft="@drawable/subject_icon"
+            android:drawablePadding="10dp"
+            android:fontFamily="sans-serif-condensed-light"
+            android:hint="Subject ..."
+            android:layoutDirection="ltr"
+            android:padding="15dp"
+            android:textColor="#FFFFFF"
+            android:textColorHint="@color/white"
+            android:textDirection="ltr" />
+
+        <EditText
+            android:id="@+id/message_help"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="15dp"
+            android:background="@drawable/input_sign_up_back"
+            android:drawableLeft="@drawable/message_icon"
+            android:drawablePadding="10dp"
+            android:drawableTint="@color/white"
+            android:fontFamily="sans-serif-condensed-light"
+            android:hint="Write Your Suggestion ..."
+            android:layoutDirection="ltr"
+            android:minHeight="60dp"
+            android:padding="15dp"
+            android:textColor="#FFFFFF"
+            android:textColorHint="@color/white"
+            android:textDirection="ltr" />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:background="#33009688"
+            android:foreground="@drawable/select_back"
+            android:onClick="SendEmail"
+            android:text="Send Mail"
+            android:textColor="#FFF7F7"
+            android:textStyle="bold" />
+
+
+    </LinearLayout>
+
+</RelativeLayout>

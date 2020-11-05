@@ -111,7 +111,7 @@ public class GroupActivity extends AppCompatActivity {
                         goToMemberAct();
                         break;
                     case R.id.help_menu:
-                        Toast.makeText(GroupActivity.this, "Will Go to Help Us", Toast.LENGTH_SHORT).show();
+                        goToHelpPage();
                         break;
                     case R.id.group_sett_menu:
                         goToGroupProfileAct();
@@ -184,7 +184,7 @@ public class GroupActivity extends AppCompatActivity {
 
         switch (item.getItemId()) {
             case 3:
-                Toast.makeText(this, "It Will Works Soon ...", Toast.LENGTH_SHORT).show();
+                goToHelpPage();
                 break;
             case android.R.id.home:
                 goToMainAct();
@@ -197,6 +197,10 @@ public class GroupActivity extends AppCompatActivity {
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void goToHelpPage() {
+        startActivity(new Intent(this, HelpActivity.class));
     }
 
     private void goToMainAct() {
