@@ -47,6 +47,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -336,20 +337,38 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void UpdateToken() {
-        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(MainActivity.this, new OnSuccessListener<InstanceIdResult>() {
+        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(new OnCompleteListener<String>() {
             @Override
-            public void onSuccess(InstanceIdResult instanceIdResult) {
-                Token newToken = new Token(instanceIdResult.getToken());
-                mUsersRef.child(mCurrentUserId).child("token").setValue(newToken.getToken()).addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if (!task.isSuccessful()) {
-                            Toast.makeText(MainActivity.this, "couldn't update token :" + task.getException(), Toast.LENGTH_SHORT).show();
+            public void onComplete(@NonNull Task<String> task) {
+                if (task.isSuccessful()) {
+                    Token newToken = new Token(task.getResult());
+                    mUsersRef.child(mCurrentUserId).child("token").setValue(newToken.getToken()).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (!task.isSuccessful()) {
+                                Toast.makeText(MainActivity.this, "couldn't update token :" + task.getException(), Toast.LENGTH_SHORT).show();
+                            }
                         }
-                    }
-                });
+                    });
+                } else {
+                    finish();
+                }
             }
         });
+//        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(MainActivity.this, new OnSuccessListener<InstanceIdResult>() {
+//            @Override
+//            public void onSuccess(InstanceIdResult instanceIdResult) {
+//                Token newToken = new Token(instanceIdResult.getToken());
+//                mUsersRef.child(mCurrentUserId).child("token").setValue(newToken.getToken()).addOnCompleteListener(new OnCompleteListener<Void>() {
+//                    @Override
+//                    public void onComplete(@NonNull Task<Void> task) {
+//                        if (!task.isSuccessful()) {
+//                            Toast.makeText(MainActivity.this, "couldn't update token :" + task.getException(), Toast.LENGTH_SHORT).show();
+//                        }
+//                    }
+//                });
+//            }
+//        });
     }
 
     @Override

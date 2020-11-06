@@ -17,7 +17,7 @@
     <string name="signUpwithgoogel" translatable="true">SginUp Via Google</string>
     <string name="notificationChannel_id" translatable="true"></string>
     <string name="notificationChannel_name" translatable="true">FirebaseNotificationChannel</string>
-
+    <string name="server_client_id">648692468099-7tuc7c2vlq8cimdcc1kunbvibgdk79li.apps.googleusercontent.com</string>
     <string name="home">Home</string>
     <string name="sett">Group Setting</string>
     <string name="help">Help Us</string>

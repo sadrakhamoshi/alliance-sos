@@ -15,6 +15,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -38,14 +39,22 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.Arrays;
 import java.util.List;
@@ -57,6 +66,8 @@ public class SignUpPage extends AppCompatActivity {
     private TextInputEditText mPassword, mConfirmPassword;
     private EditText mUsername;
     private Button mSignUp;
+
+    private String ClientID = "688735100332-a5a9ipcij7nrj6ro104rditckhodedba.apps.googleusercontent.com";
 
     private Token mToken;
     private String userId;
@@ -75,8 +86,6 @@ public class SignUpPage extends AppCompatActivity {
 
     private static final int RC_SIGN_IN = 1;
     private GoogleSignInClient mGoogleSignInClient;
-    private List<AuthUI.IdpConfig> providers = Arrays.asList(
-            new AuthUI.IdpConfig.GoogleBuilder().build());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,14 +97,15 @@ public class SignUpPage extends AppCompatActivity {
                 mChoiceDB = new ChoiceApplication(SignUpPage.this);
             }
         }).start();
-
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(ClientID)
+                .requestEmail()
+                .build();
+        
+        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
         findViewById(R.id.google_sign_up_btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                        .requestEmail()
-                        .build();
-                mGoogleSignInClient = GoogleSignIn.getClient(getApplicationContext(), gso);
                 Intent signInIntent = mGoogleSignInClient.getSignInIntent();
                 startActivityForResult(signInIntent, RC_SIGN_IN);
             }
@@ -108,17 +118,75 @@ public class SignUpPage extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode != RESULT_OK)
-            Toast.makeText(this, "result code " + resultCode, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "result code ", Toast.LENGTH_SHORT).show();
+
         else if (requestCode == RC_SIGN_IN && resultCode == RESULT_OK) {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             try {
                 GoogleSignInAccount account = task.getResult(ApiException.class);
-                Toast.makeText(this, account.getDisplayName(), Toast.LENGTH_SHORT).show();
+                firebaseAuthWithGoogle(account);
+
             } catch (Exception e) {
                 Toast.makeText(this, "error" + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
 
             }
         }
+    }
+
+    private void firebaseAuthWithGoogle(final GoogleSignInAccount account) {
+        AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
+        mFirebaseAuth.signInWithCredential(credential)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            // Sign in success, update UI with the signed-in user's information
+                            Toast.makeText(SignUpPage.this, "signInWithCredential:success", Toast.LENGTH_SHORT).show();
+                            final String user = mFirebaseAuth.getCurrentUser().getUid();
+                            mUserDatabaseRef.child(user).addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    if (snapshot.exists()) {
+                                        gotoMainActivity();
+                                        Toast.makeText(SignUpPage.this, "exist", Toast.LENGTH_SHORT).show();
+                                    } else {
+                                        Toast.makeText(SignUpPage.this, "not exist", Toast.LENGTH_SHORT).show();
+                                        updateUi(account);
+                                        pushDataInDatabase pushDataInDatabase = new pushDataInDatabase();
+                                        pushDataInDatabase.execute();
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+                                    finish();
+                                }
+                            });
+//                            if (mUserDatabaseRef.child(user) == null) {
+//                                Toast.makeText(SignUpPage.this, "not exist", Toast.LENGTH_SHORT).show();
+//                                updateUi(account);
+//                                pushDataInDatabase pushDataInDatabase = new pushDataInDatabase();
+//                                pushDataInDatabase.execute();
+//                            } else {
+//                                Toast.makeText(SignUpPage.this, "exist" + mUserDatabaseRef.child(user).child("id").getKey()
+//                                        , Toast.LENGTH_SHORT).show();
+//                            }
+
+                        } else {
+                            // If sign in fails, display a message to the user.
+                            Toast.makeText(SignUpPage.this, "Authentication Failed.", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+    }
+
+    private void updateUi(GoogleSignInAccount account) {
+        if (account.getDisplayName().length() == 0)
+            mUsername.setText("NoName");
+        else
+            mUsername.setText(account.getDisplayName().trim());
+        mEmail.setText(account.getEmail());
+        mPassword.setText("---");
     }
 
     @Override
@@ -208,10 +276,10 @@ public class SignUpPage extends AppCompatActivity {
     }
 
     private void getTokenAndSignUp() {
-        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(SignUpPage.this, new OnSuccessListener<InstanceIdResult>() {
+        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(new OnCompleteListener<String>() {
             @Override
-            public void onSuccess(InstanceIdResult instanceIdResult) {
-                String newToken = instanceIdResult.getToken();
+            public void onComplete(@NonNull Task<String> task) {
+                String newToken = task.getResult();
                 mToken = new Token(newToken);
                 String key = mFirebaseAuth.getCurrentUser().getUid();
                 userId = key;
@@ -220,6 +288,11 @@ public class SignUpPage extends AppCompatActivity {
                 mRootDatabase.child("payment").child(key).setValue(new PaymentObject(false, ""));
             }
         });
+//        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(SignUpPage.this, new OnSuccessListener<InstanceIdResult>() {
+//            @Override
+//            public void onSuccess(InstanceIdResult instanceIdResult) {
+//            }
+//        });
     }
 
     public class pushDataInDatabase extends AsyncTask<Void, Void, Void> {
@@ -233,8 +306,7 @@ public class SignUpPage extends AppCompatActivity {
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
             progressBar.setVisibility(View.GONE);
-            startActivity(new Intent(SignUpPage.this, MainActivity.class));
-            finish();
+            gotoMainActivity();
             return;
         }
 
@@ -243,10 +315,18 @@ public class SignUpPage extends AppCompatActivity {
             getTokenAndSignUp();
             ring = Uri.parse("android.resource://" + getPackageName() + "/raw/game");
             userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-            ringtone ringtone = new ringtone(userId, ring.toString());
-            mChoiceDB.appDatabase.dao().insert(ringtone);
+            if (mChoiceDB.appDatabase.dao().currentPath(userId) == null) {
+                ringtone ringtone = new ringtone(userId, ring.toString());
+                mChoiceDB.appDatabase.dao().insert(ringtone);
+            }
             return null;
         }
+    }
+
+    private void gotoMainActivity() {
+        startActivity(new Intent(SignUpPage.this, MainActivity.class));
+        finish();
+        return;
     }
 
 }
