@@ -38,6 +38,7 @@
             android:textColorHint="#FFFFFF">
 
             <EditText
+                android:fontFamily="sans-serif-condensed-light"
                 android:id="@+id/email_edt_text"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -62,6 +63,7 @@
             app:passwordToggleTint="#FFFFFF">
 
             <com.google.android.material.textfield.TextInputEditText
+                android:fontFamily="sans-serif-condensed-light"
                 android:id="@+id/pass_edt_text"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -122,17 +124,6 @@
 
         </RelativeLayout>
 
-        <Button
-            android:id="@+id/log_in_via_google_btn"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_marginTop="16dp"
-            android:background="@drawable/signup_btn"
-            android:onClick="logInViaGoogle"
-            android:text="Login via Google"
-            android:textAllCaps="false"
-            android:textColor="#fff" />
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -144,6 +135,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textSize="18sp"
                 android:text="Don't have an account?  "
                 android:textColor="#FFFFFF" />
 
@@ -151,7 +143,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:onClick="goToSignUpPage"
-                android:text="Create one!"
+                android:text="Create one "
+                android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="#0073FF" />
 

@@ -78,8 +78,7 @@ public class SignUpPage extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                String[] tzIds = TimeZone.getAvailableIDs();
-                Toast.makeText(SignUpPage.this, tzIds.length + "", Toast.LENGTH_SHORT).show();
+
             }
         });
 
