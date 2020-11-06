@@ -142,7 +142,6 @@ public class SetScheduleActivity extends AppCompatActivity {
                             Event curr_event = dataSnapshot.getValue(Event.class);
                             long milisecond = curr_event.getTimeInMillisecond() * -1;
                             if (milisecond < min) {
-                                Log.v("conversion", milisecond + " " + min);
                                 min = milisecond;
                                 upcome = curr_event;
                             }

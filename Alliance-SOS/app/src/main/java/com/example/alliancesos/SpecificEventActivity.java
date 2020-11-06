@@ -122,6 +122,23 @@ public class SpecificEventActivity extends AppCompatActivity {
                 }
             }).start();
         } else {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    RequestCode rq = mChoiceDB.appDatabase.requestDao().getById(mCurrentEvent.getEventId());
+                    if (rq == null) {
+                        setAlarmOn();
+                    }
+                    else{
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(SpecificEventActivity.this, "req is exist already...", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                }
+            }).start();
             Toast.makeText(this, "You already in the event...", Toast.LENGTH_SHORT).show();
         }
     }
@@ -271,7 +288,7 @@ public class SpecificEventActivity extends AppCompatActivity {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 if (calendar.getTime() > System.currentTimeMillis()) {
                     alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTime(), pendingIntent);
-                    Toast.makeText(this, "set Successfully", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(this, "set Successfully", Toast.LENGTH_SHORT).show();
                 }
             }
         } else {

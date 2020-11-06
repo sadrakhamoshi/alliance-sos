@@ -178,12 +178,11 @@
         </RelativeLayout>
 
 
-        <Button
+        <com.google.android.gms.common.SignInButton
             android:id="@+id/google_sign_up_btn"
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:layout_marginTop="16dp"
-            android:background="@drawable/signup_btn"
             android:text="@string/signUpwithgoogel"
             android:textAllCaps="false"
             android:textColor="#fff" />

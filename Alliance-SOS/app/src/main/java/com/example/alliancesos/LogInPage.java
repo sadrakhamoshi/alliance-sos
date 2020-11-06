@@ -52,7 +52,6 @@ public class LogInPage extends AppCompatActivity {
         if (currUser != null) {
             Toast.makeText(this, "You already logged in", Toast.LENGTH_SHORT).show();
             GoToMainPage();
-            return;
         } else {
             Toast.makeText(this, "You have to sign up first", Toast.LENGTH_SHORT).show();
         }
@@ -118,42 +117,6 @@ public class LogInPage extends AppCompatActivity {
     }
 
     public void logInViaGoogle(View view) {
+
     }
-    //        FirebaseTranslatorOptions options =
-//                new FirebaseTranslatorOptions.Builder()
-//                        .setSourceLanguage(FirebaseTranslateLanguage.EN)
-//                        .setTargetLanguage(FirebaseTranslateLanguage.ID)
-//                        .build();
-//
-//        final FirebaseTranslator englishGermanTranslator =
-//                FirebaseNaturalLanguage.getInstance().getTranslator(options);
-//        FirebaseModelDownloadConditions conditions = new FirebaseModelDownloadConditions.Builder()
-//                .requireWifi()
-//                .build();
-//        englishGermanTranslator.downloadModelIfNeeded(conditions)
-//                .addOnSuccessListener(
-//                        new OnSuccessListener<Void>() {
-//                            @Override
-//                            public void onSuccess(Void v) {
-//                                englishGermanTranslator.translate("how Are You .i Fine Thanks").addOnSuccessListener(new OnSuccessListener<String>() {
-//                                    @Override
-//                                    public void onSuccess(String s) {
-//                                        Toast.makeText(LogInPage.this, s, Toast.LENGTH_LONG).show();
-//                                    }
-//                                }).addOnFailureListener(new OnFailureListener() {
-//                                    @Override
-//                                    public void onFailure(@NonNull Exception e) {
-//                                        Toast.makeText(LogInPage.this, e.getMessage(), Toast.LENGTH_SHORT).show();
-//                                    }
-//                                });
-//                            }
-//                        })
-//                .addOnFailureListener(
-//                        new OnFailureListener() {
-//                            @Override
-//                            public void onFailure(@NonNull Exception e) {
-//
-//                                Toast.makeText(LogInPage.this, e.getMessage(), Toast.LENGTH_SHORT).show();
-//                            }
-//                        });
 }

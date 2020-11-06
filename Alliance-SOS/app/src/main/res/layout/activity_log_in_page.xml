@@ -34,11 +34,10 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            app:hintTextColor="#FFFFFF"
-            android:textColorHint="#FFFFFF">
+            android:textColorHint="#FFFFFF"
+            app:hintTextColor="#FFFFFF">
 
             <EditText
-                android:fontFamily="sans-serif-condensed-light"
                 android:id="@+id/email_edt_text"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -46,6 +45,7 @@
                 android:drawableLeft="@drawable/email_icon"
                 android:drawablePadding="10dp"
                 android:drawableTint="#FFFFFF"
+                android:fontFamily="sans-serif-condensed-light"
                 android:hint="@string/email_hint"
                 android:inputType="textEmailAddress"
                 android:padding="7dp"
@@ -58,23 +58,23 @@
             android:layout_height="60dp"
             android:layoutDirection="ltr"
             android:textColorHint="#FFFFFF"
-            app:passwordToggleEnabled="true"
             app:hintTextColor="#FFFFFF"
+            app:passwordToggleEnabled="true"
             app:passwordToggleTint="#FFFFFF">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:fontFamily="sans-serif-condensed-light"
                 android:id="@+id/pass_edt_text"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@drawable/input_sign_up_back"
                 android:drawableStart="@drawable/password_icon"
-                android:drawableTint="#FFFFFF"
-                android:hint="@string/password_hint"
-                android:padding="7dp"
                 android:drawablePadding="10dp"
-                android:textColor="#fff"
+                android:drawableTint="#FFFFFF"
+                android:fontFamily="sans-serif-condensed-light"
+                android:hint="@string/password_hint"
                 android:inputType="textPassword"
+                android:padding="7dp"
+                android:textColor="#fff"
                 android:textDirection="ltr" />
 
         </com.google.android.material.textfield.TextInputLayout>
@@ -87,7 +87,6 @@
             android:background="@drawable/round_button"
             android:text="@string/login_btn"
             android:textAllCaps="false"
-
             android:textColor="#fff" />
 
         <RelativeLayout
@@ -124,6 +123,16 @@
 
         </RelativeLayout>
 
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/signup_btn"
+            android:onClick="logInViaGoogle"
+            android:text="Login via Google"
+            android:textAllCaps="false"
+            android:textColor="#fff" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -135,7 +144,6 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="18sp"
                 android:text="Don't have an account?  "
                 android:textColor="#FFFFFF" />
 
@@ -143,10 +151,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:onClick="goToSignUpPage"
-                android:text="Create one "
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="#0073FF" />
+                android:text="Create one!"
+                android:textColor="#0073FF"
+                android:textStyle="bold" />
 
         </LinearLayout>
 
