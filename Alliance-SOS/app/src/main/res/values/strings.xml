@@ -25,4 +25,7 @@
 
     <string name="six_month_strik">6 Month <strike>$16.14</strike>  $12.91</string>
     <string name="tweleve_month_strik">12 Month <strike>$32.28</strike>  $22.60</string>
+
+    <string name="donation_txt">We are always looking for ways we can improve Allaince SOS . If there is a feature that you would like to
+    see in a future release. Please write to us using the below form ..</string>
 </resources>

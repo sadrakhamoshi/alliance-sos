@@ -101,7 +101,7 @@ public class SignUpPage extends AppCompatActivity {
                 .requestIdToken(ClientID)
                 .requestEmail()
                 .build();
-        
+
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
         findViewById(R.id.google_sign_up_btn).setOnClickListener(new View.OnClickListener() {
             @Override

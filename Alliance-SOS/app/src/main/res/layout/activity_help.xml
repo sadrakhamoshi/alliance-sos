@@ -8,7 +8,22 @@
     android:padding="7dp"
     tools:context=".HelpActivity">
 
+    <TextView
+        android:id="@+id/doneation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/layout"
+        android:layout_below="@id/back"
+        android:fontFamily="sans-serif-condensed-light"
+        android:gravity="center"
+        android:layoutDirection="ltr"
+        android:text="@string/donation_txt"
+        android:textColor="@color/white"
+        android:textDirection="ltr"
+        android:textSize="20sp" />
+
     <ImageView
+        android:id="@+id/back"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
@@ -26,6 +41,7 @@
         android:textSize="20sp" />
 
     <LinearLayout
+        android:id="@+id/layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
@@ -73,6 +89,17 @@
             android:foreground="@drawable/select_back"
             android:onClick="SendEmail"
             android:text="Send Mail"
+            android:textColor="#FFF7F7"
+            android:textStyle="bold" />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:background="#33009688"
+            android:foreground="@drawable/select_back"
+            android:onClick="Donation"
+            android:text="Donation"
             android:textColor="#FFF7F7"
             android:textStyle="bold" />
 
