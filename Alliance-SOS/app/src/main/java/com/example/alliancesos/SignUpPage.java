@@ -106,8 +106,9 @@ public class SignUpPage extends AppCompatActivity {
         findViewById(R.id.google_sign_up_btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-                startActivityForResult(signInIntent, RC_SIGN_IN);
+//                Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+//                startActivityForResult(signInIntent, RC_SIGN_IN);
+                signOutFromGoogle();
             }
         });
 
@@ -118,7 +119,7 @@ public class SignUpPage extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode != RESULT_OK)
-            Toast.makeText(this, "result code ", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "result code " + requestCode, Toast.LENGTH_SHORT).show();
 
         else if (requestCode == RC_SIGN_IN && resultCode == RESULT_OK) {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
@@ -178,6 +179,18 @@ public class SignUpPage extends AppCompatActivity {
                         }
                     }
                 });
+    }
+
+    private void signOutFromGoogle() {
+        mGoogleSignInClient.signOut().addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful())
+                    Toast.makeText(SignUpPage.this, "sign out successfully", Toast.LENGTH_SHORT).show();
+                else
+                    Toast.makeText(SignUpPage.this, "" + task.getException(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void updateUi(GoogleSignInAccount account) {

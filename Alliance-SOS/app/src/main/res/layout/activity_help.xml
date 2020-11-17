@@ -92,17 +92,34 @@
             android:textColor="#FFF7F7"
             android:textStyle="bold" />
 
-        <Button
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
-            android:background="#33009688"
-            android:foreground="@drawable/select_back"
-            android:onClick="Donation"
-            android:text="Donation"
-            android:textColor="#FFF7F7"
-            android:textStyle="bold" />
+            android:fontFamily="sans-serif-condensed"
+            android:text="Do You Want To Donate Us ?"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
 
+        <ImageButton
+            android:id="@+id/paypal_btn"
+            android:layout_width="match_parent"
+            android:layout_height="41dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginBottom="20dp"
+            android:background="@drawable/paypal_back_btn"
+            android:onClick="Donation"
+            android:src="@drawable/paypal"
+            android:textColor="#FFF7F7"
+            android:textStyle="bold"
+            android:visibility="visible" />
+
+        <include
+            android:id="@+id/googlePayButton"
+            layout="@layout/googlepay_button"
+            android:visibility="visible" />
 
     </LinearLayout>
 

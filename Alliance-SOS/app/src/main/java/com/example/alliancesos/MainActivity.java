@@ -355,20 +355,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-//        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(MainActivity.this, new OnSuccessListener<InstanceIdResult>() {
-//            @Override
-//            public void onSuccess(InstanceIdResult instanceIdResult) {
-//                Token newToken = new Token(instanceIdResult.getToken());
-//                mUsersRef.child(mCurrentUserId).child("token").setValue(newToken.getToken()).addOnCompleteListener(new OnCompleteListener<Void>() {
-//                    @Override
-//                    public void onComplete(@NonNull Task<Void> task) {
-//                        if (!task.isSuccessful()) {
-//                            Toast.makeText(MainActivity.this, "couldn't update token :" + task.getException(), Toast.LENGTH_SHORT).show();
-//                        }
-//                    }
-//                });
-//            }
-//        });
     }
 
     @Override
