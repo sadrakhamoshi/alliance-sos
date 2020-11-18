@@ -64,6 +64,7 @@ public class HelpActivity extends AppCompatActivity {
         InitUi();
         // PAYPAL
         StartPayPalService();
+
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
             Toast.makeText(this, "You Can't Use Google Pay....", Toast.LENGTH_LONG).show();
         } else {
@@ -73,7 +74,6 @@ public class HelpActivity extends AppCompatActivity {
     }
 
     public void SendEmail(View view) {
-
         if (TextUtils.isEmpty(message.getText())) {
             Toast.makeText(this, "Please Write Something ...", Toast.LENGTH_SHORT).show();
             return;
@@ -88,13 +88,11 @@ public class HelpActivity extends AppCompatActivity {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void possiblyShowGooglePayButton() {
-
         final Optional<JSONObject> isReadyToPayJson = PaymentsUtil.getIsReadyToPayRequest();
         if (!isReadyToPayJson.isPresent()) {
             Toast.makeText(this, "not show", Toast.LENGTH_SHORT).show();
             return;
         }
-
         // The call to isReadyToPay is asynchronous and returns a Task. We need to provide an
         // OnCompleteListener to be triggered when the result of the call is known.
         IsReadyToPayRequest request = IsReadyToPayRequest.fromJson(isReadyToPayJson.get().toString());
@@ -134,8 +132,10 @@ public class HelpActivity extends AppCompatActivity {
     }
 
     private void handlePaymentSuccess(PaymentData paymentData) {
-
         // Token will be null if PaymentDataRequest was not constructed using fromJson(String).
+        if (paymentData == null)
+            return;
+
         final String paymentInfo = paymentData.toJson();
         if (paymentInfo == null) {
             Toast.makeText(this, "Null", Toast.LENGTH_SHORT).show();
@@ -173,9 +173,6 @@ public class HelpActivity extends AppCompatActivity {
             PaymentData paymentData = PaymentData.getFromIntent(data);
             handlePaymentSuccess(paymentData);
 
-        } else if (requestCode == com.paypal.android.sdk.payments.PaymentActivity.RESULT_EXTRAS_INVALID) {
-            Toast.makeText(this, "Invalid Code Try again", Toast.LENGTH_SHORT).show();
-
         } else if (resultCode == RESULT_OK && requestCode == PAYMENT_REQ) {
             PaymentConfirmation confirm = data.getParcelableExtra(com.paypal.android.sdk.payments.PaymentActivity.EXTRA_RESULT_CONFIRMATION);
             if (confirm != null) {
@@ -183,6 +180,10 @@ public class HelpActivity extends AppCompatActivity {
             } else {
                 Toast.makeText(this, "Something is wrong", Toast.LENGTH_SHORT).show();
             }
+
+        } else if (requestCode == com.paypal.android.sdk.payments.PaymentActivity.RESULT_EXTRAS_INVALID) {
+            Toast.makeText(this, "Invalid Code Try again", Toast.LENGTH_SHORT).show();
+
         }
     }
 
@@ -201,7 +202,6 @@ public class HelpActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 try {
-//                    requestPayment(v);
                     makeDialog(PAY_WITH_GPAY, v);
                 } catch (Exception e) {
                     Toast.makeText(HelpActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();

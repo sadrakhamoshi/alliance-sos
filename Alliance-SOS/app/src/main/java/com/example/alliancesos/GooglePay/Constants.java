@@ -15,7 +15,7 @@ public class Constants {
      *
      * @value #PAYMENTS_ENVIRONMENT
      */
-    public static final int PAYMENTS_ENVIRONMENT = WalletConstants.ENVIRONMENT_TEST;
+    public static final int PAYMENTS_ENVIRONMENT = WalletConstants.ENVIRONMENT_PRODUCTION;
 
     /**
      * The allowed networks to be requested from the API. If the user has cards from networks not
@@ -68,7 +68,7 @@ public class Constants {
      *
      * @value #PAYMENT_GATEWAY_TOKENIZATION_NAME
      */
-    public static final String PAYMENT_GATEWAY_TOKENIZATION_NAME = "example";
+    public static final String PAYMENT_GATEWAY_TOKENIZATION_NAME = "aciworldwide";
 
     /**
      * Custom parameters required by the processor/gateway.
@@ -81,7 +81,7 @@ public class Constants {
     public static final HashMap<String, String> PAYMENT_GATEWAY_TOKENIZATION_PARAMETERS =
             new HashMap<String, String>() {{
                 put("gateway", PAYMENT_GATEWAY_TOKENIZATION_NAME);
-                put("gatewayMerchantId", "exampleGatewayMerchantId");
+                put("gatewayMerchantId", "05679669572808561515");
                 // Your processor may require additional parameters.
             }};
 

@@ -126,51 +126,25 @@
             android:textStyle="bold"
             android:visibility="gone" />
 
-        <RadioGroup
-            android:id="@+id/radio_group_whom"
+        <ImageButton
+            android:id="@+id/paypal_button"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:checkedButton="@id/myself_radio"
-            android:orientation="vertical"
-            android:visibility="gone">
+            android:layout_height="41dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginBottom="20dp"
+            android:background="@drawable/paypal_back_btn"
+            android:onClick="PayOffButton_PayPal"
+            android:src="@drawable/paypal"
+            android:textColor="#FFF7F7"
+            android:textStyle="bold"
+            android:visibility="visible" />
 
-            <RadioButton
-                android:id="@+id/myself_radio"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:buttonTint="@color/colorAccent"
-                android:text="For My Self"
-                android:textColor="#FFFFFF"
-                android:textSize="18sp"
-                android:textStyle="italic" />
-
-            <RadioButton
-                android:id="@+id/other_radio"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:buttonTint="@color/colorAccent"
-                android:text="For Other Person"
-                android:textColor="#FFFFFF"
-                android:textSize="18sp"
-                android:textStyle="italic" />
-        </RadioGroup>
-
-
-        <EditText
-            android:id="@+id/email_payment"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/input_sign_up_back"
-            android:drawableLeft="@drawable/email_icon"
-            android:drawablePadding="10dp"
-            android:enabled="false"
-            android:hint="@string/email_hint"
-            android:inputType="textEmailAddress"
-            android:padding="10dp"
-            android:textColor="#FFFFFF"
-            android:textStyle="italic"
-            android:visibility="gone" />
+        <include
+            android:id="@+id/google_button"
+            layout="@layout/googlepay_button"
+            android:visibility="visible" />
 
     </LinearLayout>
 
@@ -180,7 +154,6 @@
         android:background="@drawable/input_sign_up_back"
         android:drawableLeft="@drawable/payment_icon"
         android:drawablePadding="15dp"
-        android:onClick="PayOffButton"
         android:padding="10dp"
         android:text="Pay off"
         android:textColor="#FFFFFF"

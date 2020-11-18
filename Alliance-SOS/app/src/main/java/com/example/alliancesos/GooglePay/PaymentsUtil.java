@@ -82,8 +82,8 @@ public class PaymentsUtil {
         return new JSONObject() {{
             put("type", "PAYMENT_GATEWAY");
             put("parameters", new JSONObject() {{
-                put("gateway", "example");
-                put("gatewayMerchantId", "exampleGatewayMerchantId");
+                put("gateway", "aciworldwide");
+                put("gatewayMerchantId", "05679669572808561515");
             }});
         }};
     }
@@ -100,7 +100,7 @@ public class PaymentsUtil {
      * @see <a
      * href="https://developers.google.com/pay/api/android/reference/object#PaymentMethodTokenizationSpecification">PaymentMethodTokenizationSpecification</a>
      */
-    private static JSONObject getDirectTokenizationSpecification()
+        private static JSONObject getDirectTokenizationSpecification()
             throws JSONException, RuntimeException {
         if (Constants.DIRECT_TOKENIZATION_PARAMETERS.isEmpty()
                 || Constants.DIRECT_TOKENIZATION_PUBLIC_KEY.isEmpty()
@@ -163,14 +163,6 @@ public class PaymentsUtil {
         JSONObject parameters = new JSONObject();
         parameters.put("allowedAuthMethods", getAllowedCardAuthMethods());
         parameters.put("allowedCardNetworks", getAllowedCardNetworks());
-        // Optionally, you can add billing address/phone number associated with a CARD payment method.
-//        parameters.put("billingAddressRequired", true);
-//
-//        JSONObject billingAddressParameters = new JSONObject();
-//        billingAddressParameters.put("format", "FULL");
-//
-//        parameters.put("billingAddressParameters", billingAddressParameters);
-
         cardPaymentMethod.put("parameters", parameters);
 
         return cardPaymentMethod;
