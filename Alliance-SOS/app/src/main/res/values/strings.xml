@@ -17,12 +17,16 @@
     <string name="signUpwithgoogel" translatable="true">SginUp Via Google</string>
     <string name="notificationChannel_id" translatable="true"></string>
     <string name="notificationChannel_name" translatable="true">FirebaseNotificationChannel</string>
-
+    <string name="server_client_id">648692468099-7tuc7c2vlq8cimdcc1kunbvibgdk79li.apps.googleusercontent.com</string>
     <string name="home">Home</string>
     <string name="sett">Group Setting</string>
     <string name="help">Help Us</string>
     <string name="addmembers">Add Member</string>
-
+    <string name="googlepay_button_content_description">Google Pay</string>
+    <string name="marchentId">05679669572808561515</string>
     <string name="six_month_strik">6 Month <strike>$16.14</strike>  $12.91</string>
     <string name="tweleve_month_strik">12 Month <strike>$32.28</strike>  $22.60</string>
+
+    <string name="donation_txt">We are always looking for ways we can improve Allaince SOS . If there is a feature that you would like to
+    see in a future release. Please write to us using the below form ..</string>
 </resources>

@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.alliancesos">
 
+
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.VIBRATE" />
@@ -22,7 +23,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".GroupSetting.GroupMemberActivity"></activity>
+        <activity android:name=".HelpActivity"></activity>
+        <activity android:name=".GroupSetting.GroupMemberActivity" />
         <activity android:name=".Payment.TransferActivity" />
         <activity android:name=".Payment.PaymentActivity" />
         <activity android:name=".SpecificSOSActivity" />
@@ -63,6 +65,9 @@
             android:name=".DeviceAlarm.MyAlarmReceiver"
             android:enabled="true"
             android:exported="true" />
+        <meta-data
+            android:name="com.google.android.gms.wallet.api.enabled"
+            android:value="true" />
     </application>
 
 </manifest>

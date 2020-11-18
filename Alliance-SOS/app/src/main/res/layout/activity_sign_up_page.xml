@@ -32,9 +32,9 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            app:hintTextColor="#FFFFFF"
+            android:textColorHint="#FFFFFF"
 
-            android:textColorHint="#FFFFFF">
+            app:hintTextColor="#FFFFFF">
 
             <EditText
                 android:id="@+id/username_sign_up_page_edt_text"
@@ -44,6 +44,7 @@
                 android:drawableLeft="@drawable/username_icon"
                 android:drawablePadding="10dp"
                 android:drawableTint="#FFFFFF"
+                android:fontFamily="sans-serif-condensed-light"
                 android:hint="@string/username_hint"
                 android:padding="7dp"
                 android:textColor="#FFFFFF" />
@@ -54,9 +55,9 @@
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:layout_marginTop="7dp"
-            app:hintTextColor="#fff"
+            android:textColorHint="#FFFFFF"
 
-            android:textColorHint="#FFFFFF">
+            app:hintTextColor="#fff">
 
             <EditText
                 android:id="@+id/email_sign_up_page_edt_text"
@@ -66,6 +67,7 @@
                 android:drawableLeft="@drawable/email_icon"
                 android:drawablePadding="10dp"
                 android:drawableTint="#FFFFFF"
+                android:fontFamily="sans-serif-condensed-light"
                 android:hint="@string/email_hint"
                 android:importantForAutofill="auto"
                 android:inputType="textEmailAddress"
@@ -80,8 +82,8 @@
             android:layout_marginTop="7dp"
             android:layoutDirection="ltr"
             android:textColorHint="#FFFFFF"
-            app:passwordToggleEnabled="true"
             app:hintTextColor="#FFFFFF"
+            app:passwordToggleEnabled="true"
 
             app:passwordToggleTint="#FFFFFF">
 
@@ -93,6 +95,7 @@
                 android:drawableStart="@drawable/password_icon"
                 android:drawablePadding="10dp"
                 android:drawableTint="#FFFFFF"
+                android:fontFamily="sans-serif-condensed-light"
                 android:hint="@string/password_hint"
                 android:inputType="textPassword"
                 android:padding="3dp"
@@ -107,8 +110,8 @@
             android:layout_marginTop="7dp"
             android:layoutDirection="ltr"
             android:textColorHint="#FFFFFF"
-            app:passwordToggleEnabled="true"
             app:hintTextColor="#FFFFFF"
+            app:passwordToggleEnabled="true"
 
             app:passwordToggleTint="#FFFFFF">
 
@@ -120,6 +123,7 @@
                 android:drawableStart="@drawable/password_icon"
                 android:drawablePadding="10dp"
                 android:drawableTint="#FFFFFF"
+                android:fontFamily="sans-serif-condensed-light"
                 android:hint="@string/confirm_password_hint"
                 android:inputType="textPassword"
                 android:padding="3dp"
@@ -174,12 +178,11 @@
         </RelativeLayout>
 
 
-        <Button
+        <com.google.android.gms.common.SignInButton
             android:id="@+id/google_sign_up_btn"
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:layout_marginTop="16dp"
-            android:background="@drawable/signup_btn"
             android:text="@string/signUpwithgoogel"
             android:textAllCaps="false"
             android:textColor="#fff" />

@@ -15,11 +15,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "688735100332-002cf71n1kqiueosvafok9avnsd6q08o.apps.googleusercontent.com",
+          "client_id": "688735100332-8jokalq03612sskeejbl1n9vhi3segoo.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.alliancesos",
-            "certificate_hash": "91041653b076d9cca5a1478dc70914b0370f5adf"
+            "certificate_hash": "2bcedd41afdf616e51822c6179f91a98dabb628a"
           }
         },
         {
@@ -36,8 +36,15 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "688735100332-a5a9ipcij7nrj6ro104rditckhodedba.apps.googleusercontent.com",
+              "client_id": "688735100332-s6ol42obotk87kslh8umsvb272erk1i1.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "688735100332-8b44ac0om9k91ofv36a79mmcrcdq46qc.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.freelancer.Alliance-SOS"
+              }
             }
           ]
         }

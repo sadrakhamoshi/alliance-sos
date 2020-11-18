@@ -16,6 +16,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -44,6 +45,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Random;
 import java.util.TimeZone;
@@ -58,7 +60,6 @@ public class SetScheduleActivity extends AppCompatActivity {
     private Event mEvent;
 
     private String mGroupId, mGroupName;
-
 
     //database
     private DatabaseReference mGroupsRef, mRootRef;
@@ -75,6 +76,9 @@ public class SetScheduleActivity extends AppCompatActivity {
 
     //ApplicationChoicer
     private ChoiceApplication mChoiceDB;
+
+    //valueEventListener
+    private ValueEventListener mEventListener;
 
 
     //time
@@ -104,21 +108,6 @@ public class SetScheduleActivity extends AppCompatActivity {
 
     private void getCurrentTimezone() {
         mAuthorTimezone = TimeZone.getDefault().getID();
-//        mRootRef.child("users").child(mAuthorId).addListenerForSingleValueEvent(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot snapshot) {
-//                if (snapshot.exists()) {
-//                    mAuthorTimezone = snapshot.child("timeZone").getValue().toString();
-//                } else {
-//                    Toast.makeText(SetScheduleActivity.this, "not exist user...", Toast.LENGTH_SHORT).show();
-//                }
-//            }
-//
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError error) {
-//                Toast.makeText(SetScheduleActivity.this, "onCancelled " + error.getMessage(), Toast.LENGTH_SHORT).show();
-//            }
-//        });
     }
 
     private void Initialize() {
@@ -135,6 +124,53 @@ public class SetScheduleActivity extends AppCompatActivity {
         setupButtons();
 
         InitializeTime_Date();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (mEventListener == null) {
+            mEventListener = new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        long min = Long.MAX_VALUE;
+                        Event upcome = null;
+                        Iterator iterator = snapshot.getChildren().iterator();
+                        while (iterator.hasNext()) {
+                            DataSnapshot dataSnapshot = (DataSnapshot) iterator.next();
+                            Event curr_event = dataSnapshot.getValue(Event.class);
+                            long milisecond = curr_event.getTimeInMillisecond() * -1;
+                            if (milisecond < min) {
+                                min = milisecond;
+                                upcome = curr_event;
+                            }
+                        }
+                        if (upcome != null) {
+                            Toast.makeText(SetScheduleActivity.this, upcome + "", Toast.LENGTH_SHORT).show();
+                            mGroupsRef.child(mGroupId).child("upComingEvent").setValue(new UpComingEvent(upcome.getScheduleObject().getTitle(),
+                                    upcome.getScheduleObject().getDateTime())).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (!task.isSuccessful()) {
+                                        Toast.makeText(SetScheduleActivity.this, task.getException() + "", Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                            });
+                        }
+
+                    } else {
+                        Toast.makeText(SetScheduleActivity.this, "Error Not Exist", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Toast.makeText(SetScheduleActivity.this, "Error " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            };
+            mGroupsRef.child(mGroupId).child("events").addValueEventListener(mEventListener);
+        }
     }
 
     private void setupButtons() {
@@ -188,8 +224,9 @@ public class SetScheduleActivity extends AppCompatActivity {
                 ScheduleObject scheduleObject = new ScheduleObject(title, description);
                 scheduleObject.setDateTime(dateTime);
                 try {
-                    Date formattedDate = computeScheduleInMilliSecond(scheduleObject.getDateTime());
-                    mEvent = new Event("", mAuthorUserName, formattedDate.getTime() * -1, scheduleObject, mAuthorTimezone);
+                    long milliSecond = computeScheduleInMilliSecond(scheduleObject.getDateTime());
+
+                    mEvent = new Event("", mAuthorUserName, milliSecond * (-1), scheduleObject, mAuthorTimezone);
                     sendMessage();
                 } catch (Exception e) {
                     Toast.makeText(SetScheduleActivity.this, "Error in Parsing catch : " + e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -206,13 +243,13 @@ public class SetScheduleActivity extends AppCompatActivity {
         builder.show();
     }
 
-    private Date computeScheduleInMilliSecond(DateTime dateTime) throws ParseException {
+    private long computeScheduleInMilliSecond(DateTime dateTime) throws ParseException {
         int Month = Integer.parseInt(dateTime.getMonth()) + 1;
         String dt = dateTime.getYear() + "-" + Month + "-" + dateTime.getDay() + "T" + dateTime.getHour() + ":" + dateTime.getMinute() + ":0Z";
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-
+        int offset = TimeZone.getDefault().getOffset(Calendar.ZONE_OFFSET);
         Date date = format.parse(dt);
-        return date;
+        return date.getTime() - offset;
     }
 
     private void sendMessage() {
@@ -243,14 +280,13 @@ public class SetScheduleActivity extends AppCompatActivity {
                     HashMap<String, String> hashMap = new HashMap<>();
                     hashMap.put("id", mAuthorId);
                     //adding event creator to member of event
-                    ((ProgressBar) findViewById(R.id.progress_set_schedule)).setVisibility(View.VISIBLE);
+                    ((ProgressBar) findViewById(R.id.progress_set_schedule)).setVisibility(View.GONE);
 
                     mGroupsRef.child(mGroupId).child("events").child(key).child("members").child(mAuthorId).setValue(hashMap).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
-                                SortUpcomingEventTask sort = new SortUpcomingEventTask();
-                                sort.execute();
+
                             } else {
                                 Toast.makeText(SetScheduleActivity.this, "Can't add Author to event members...", Toast.LENGTH_SHORT).show();
                             }
@@ -347,55 +383,6 @@ public class SetScheduleActivity extends AppCompatActivity {
     public void backOnSetSchedule(View view) {
         finish();
         return;
-    }
-
-    public class SortUpcomingEventTask extends AsyncTask<Void, Void, Void> {
-
-        public String errorMessage;
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            ((ProgressBar) findViewById(R.id.progress_set_schedule)).setVisibility(View.GONE);
-            if (!TextUtils.isEmpty(errorMessage)) {
-                Toast.makeText(SetScheduleActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(SetScheduleActivity.this, "successfully  done ...", Toast.LENGTH_SHORT).show();
-            }
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            errorMessage = "";
-            ((ProgressBar) findViewById(R.id.progress_set_schedule)).setVisibility(View.VISIBLE);
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            final Query query = mGroupsRef.child(mGroupId).child("events").orderByChild("timeInMillisecond");
-            query.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    String name = snapshot.child(mEvent.getEventId()).child("scheduleObject").child("title").getValue().toString();
-                    DateTime date = snapshot.child(mEvent.getEventId()).child("scheduleObject").child("dateTime").getValue(DateTime.class);
-                    mGroupsRef.child(mGroupId).child("upComingEvent").setValue(new UpComingEvent(name, date)).addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            if (!task.isSuccessful()) {
-                                errorMessage = "error in sortUpcoming " + task.getException();
-                            }
-                        }
-                    });
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    errorMessage = "error in sortUpcoming " + error.getMessage();
-                }
-            });
-            return null;
-        }
     }
 
     private void SetAlarmForMySelf(Integer id, Date calendar) {
