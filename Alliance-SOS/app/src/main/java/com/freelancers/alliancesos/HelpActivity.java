@@ -21,7 +21,6 @@ import android.widget.Toast;
 import com.freelancers.alliancesos.GooglePay.PaymentsUtil;
 import com.freelancers.alliancesos.Payment.PayPalObject;
 import com.freelancers.alliancesos.Utils.DonationOption;
-import com.freelancers.alliancesos.databinding.ActivityMainBinding;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.wallet.AutoResolveHelper;
@@ -42,7 +41,7 @@ import java.util.Optional;
 public class HelpActivity extends AppCompatActivity {
     private static final String DESCT_EMAIL = "help@sosmail.me";
     EditText subject, message;
-    private static final int PAYMENT_REQ = 295;
+    private static final int PAYMENT_REQ_PAYPAL = 295;
     private static final int LOAD_PAYMENT_DATA_REQUEST_CODE = 991;
     private static final int PAY_WITH_PAYPAL = 615;
     private static final int PAY_WITH_GPAY = 250;
@@ -123,7 +122,7 @@ public class HelpActivity extends AppCompatActivity {
 
         intent.putExtra(PayPalService.EXTRA_PAYPAL_CONFIGURATION, PayPalObject.config);
         intent.putExtra(com.paypal.android.sdk.payments.PaymentActivity.EXTRA_PAYMENT, payment);
-        startActivityForResult(intent, PAYMENT_REQ);
+        startActivityForResult(intent, PAYMENT_REQ_PAYPAL);
     }
 
     private void handlePaymentSuccess(PaymentData paymentData) {
@@ -159,7 +158,7 @@ public class HelpActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode != RESULT_FIRST_USER) {
+        if (resultCode != RESULT_OK) {
             Toast.makeText(this, "not Okay " + resultCode, Toast.LENGTH_SHORT).show();
             return;
         }
@@ -168,14 +167,13 @@ public class HelpActivity extends AppCompatActivity {
             PaymentData paymentData = PaymentData.getFromIntent(data);
             handlePaymentSuccess(paymentData);
 
-        } else if (resultCode == RESULT_OK && requestCode == PAYMENT_REQ) {
+        } else if (resultCode == RESULT_OK && requestCode == PAYMENT_REQ_PAYPAL) {
             PaymentConfirmation confirm = data.getParcelableExtra(com.paypal.android.sdk.payments.PaymentActivity.EXTRA_RESULT_CONFIRMATION);
             if (confirm != null) {
                 Toast.makeText(this, "Thanks for Your Donation ...", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(this, "Something is wrong", Toast.LENGTH_SHORT).show();
             }
-
         } else if (requestCode == com.paypal.android.sdk.payments.PaymentActivity.RESULT_EXTRAS_INVALID) {
             Toast.makeText(this, "Invalid Code Try again", Toast.LENGTH_SHORT).show();
 

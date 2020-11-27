@@ -24,9 +24,11 @@ public class Constants {
      * @value #SUPPORTED_NETWORKS
      */
     public static final List<String> SUPPORTED_NETWORKS = Arrays.asList(
+            "AMEX",
             "DISCOVER",
             "JCB",
-            "MASTERCARD");
+            "MASTERCARD",
+            "VISA");
 
     /**
      * The Google Pay API may return cards on file on Google.com (PAN_ONLY) and/or a device token on
