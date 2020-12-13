@@ -84,14 +84,14 @@ public class SignUpPage extends AppCompatActivity {
                 .build();
 
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
-        findViewById(R.id.google_sign_up_btn).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-//                Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-//                startActivityForResult(signInIntent, RC_SIGN_IN);
-                signOutFromGoogle();
-            }
-        });
+//        findViewById(R.id.google_sign_up_btn).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+////                Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+////                startActivityForResult(signInIntent, RC_SIGN_IN);
+//                signOutFromGoogle();
+//            }
+//        });
 
         InitializeComp();
     }
@@ -144,16 +144,6 @@ public class SignUpPage extends AppCompatActivity {
                                     finish();
                                 }
                             });
-//                            if (mUserDatabaseRef.child(user) == null) {
-//                                Toast.makeText(SignUpPage.this, "not exist", Toast.LENGTH_SHORT).show();
-//                                updateUi(account);
-//                                pushDataInDatabase pushDataInDatabase = new pushDataInDatabase();
-//                                pushDataInDatabase.execute();
-//                            } else {
-//                                Toast.makeText(SignUpPage.this, "exist" + mUserDatabaseRef.child(user).child("id").getKey()
-//                                        , Toast.LENGTH_SHORT).show();
-//                            }
-
                         } else {
                             // If sign in fails, display a message to the user.
                             Toast.makeText(SignUpPage.this, "Authentication Failed.", Toast.LENGTH_SHORT).show();
@@ -282,11 +272,6 @@ public class SignUpPage extends AppCompatActivity {
                 mRootDatabase.child("payment").child(key).setValue(new PaymentObject(false, ""));
             }
         });
-//        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener(SignUpPage.this, new OnSuccessListener<InstanceIdResult>() {
-//            @Override
-//            public void onSuccess(InstanceIdResult instanceIdResult) {
-//            }
-//        });
     }
 
     public class pushDataInDatabase extends AsyncTask<Void, Void, Void> {

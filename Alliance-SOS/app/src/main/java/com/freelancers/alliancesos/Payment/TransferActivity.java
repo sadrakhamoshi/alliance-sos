@@ -115,9 +115,10 @@ public class TransferActivity extends AppCompatActivity {
             if (paymentObject.expired()) {
                 Toast.makeText(this, "You Can't Donate Credits because you don't have some", Toast.LENGTH_SHORT).show();
             }
-            Integer month = Integer.parseInt(mMonthCount.getText().toString().trim());
-            if (paymentObject.donateExpired(month) || month != 0)
-                Toast.makeText(this, "The input month is out of your range", Toast.LENGTH_SHORT).show();
+            String month_str = mMonthCount.getText().toString().trim();
+            Integer month = Integer.parseInt(month_str);
+            if (paymentObject.donateExpired(month) || month_str.contains("."))
+                Toast.makeText(this, "The input month is out of your range. Month must not contain '.'", Toast.LENGTH_SHORT).show();
             else
                 checkForTransfer(month);
         }

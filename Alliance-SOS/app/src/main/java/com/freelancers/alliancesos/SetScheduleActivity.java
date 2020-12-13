@@ -144,7 +144,6 @@ public class SetScheduleActivity extends AppCompatActivity {
                             }
                         }
                         if (upcome != null) {
-                            Toast.makeText(SetScheduleActivity.this, upcome + "", Toast.LENGTH_SHORT).show();
                             mGroupsRef.child(mGroupId).child("upComingEvent").setValue(new UpComingEvent(upcome.getScheduleObject().getTitle(),
                                     upcome.getScheduleObject().getDateTime())).addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
@@ -157,7 +156,7 @@ public class SetScheduleActivity extends AppCompatActivity {
                         }
 
                     } else {
-                        Toast.makeText(SetScheduleActivity.this, "Error Not Exist", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(SetScheduleActivity.this, "No Event Exist", Toast.LENGTH_SHORT).show();
                     }
                 }
 
@@ -298,7 +297,6 @@ public class SetScheduleActivity extends AppCompatActivity {
     }
 
     private void AddToLocalDatabase(final int finalId) {
-        Toast.makeText(this, mEvent.getEventId(), Toast.LENGTH_SHORT).show();
         new Thread(new Runnable() {
             @Override
             public void run() {

@@ -105,7 +105,7 @@ public class MemberActivity extends AppCompatActivity {
         mAddToGroup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String addition_member = mUsername.getText().toString();
+                String addition_member = mUsername.getText().toString().trim();
                 if (TextUtils.isEmpty(addition_member)) {
                     Toast.makeText(MemberActivity.this, "You Have to write Members Username....", Toast.LENGTH_LONG).show();
                 } else {
@@ -168,8 +168,13 @@ public class MemberActivity extends AppCompatActivity {
                         while (iterator.hasNext()) {
 
                             DataSnapshot dataSnapshot = ((DataSnapshot) iterator.next());
-                            String userName = dataSnapshot.child("userName").getValue().toString();
-
+                            Object username_child = dataSnapshot.child("userName").getValue();
+                            if (username_child == null) {
+                                String key = dataSnapshot.getKey();
+                                mUserRef.child(key).removeValue();
+                                continue;
+                            }
+                            String userName = username_child.toString();
                             if (userName.equals(addition_member)) {
                                 isFoundUsername = true;
                                 foundedUserId = dataSnapshot.getKey();
@@ -178,7 +183,6 @@ public class MemberActivity extends AppCompatActivity {
                         }
                         if (isFoundUsername) {
                             addMemberToGroups(addition_member, foundedUserId);
-
                         } else {
                             progressBar.setVisibility(View.GONE);
                             Toast.makeText(MemberActivity.this, addition_member + " not Valid Username", Toast.LENGTH_LONG).show();

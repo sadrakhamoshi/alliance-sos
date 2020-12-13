@@ -143,9 +143,10 @@ public class HelpActivity extends AppCompatActivity {
             final JSONObject tokenizationData = paymentMethodData.getJSONObject("tokenizationData");
             final String token = tokenizationData.getString("token");
             final JSONObject info = paymentMethodData.getJSONObject("info");
-            Toast.makeText(
-                    this, "getString(R.string.payments_show_name, billingName)",
-                    Toast.LENGTH_LONG).show();
+//            Toast.makeText(
+//                    this, "getString(R.string.payments_show_name, billingName)",
+//                    Toast.LENGTH_LONG).show();
+            ResultDialog(true, "Successfully done");
 
             // Logging token string.
             Log.d("Google Pay token: ", token);
@@ -170,9 +171,11 @@ public class HelpActivity extends AppCompatActivity {
         } else if (resultCode == RESULT_OK && requestCode == PAYMENT_REQ_PAYPAL) {
             PaymentConfirmation confirm = data.getParcelableExtra(com.paypal.android.sdk.payments.PaymentActivity.EXTRA_RESULT_CONFIRMATION);
             if (confirm != null) {
+                ResultDialog(true, "Successfully done");
                 Toast.makeText(this, "Thanks for Your Donation ...", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, "Something is wrong", Toast.LENGTH_SHORT).show();
+                ResultDialog(false, "Something was wrong");
+                Toast.makeText(this, "Something was wrong", Toast.LENGTH_SHORT).show();
             }
         } else if (requestCode == com.paypal.android.sdk.payments.PaymentActivity.RESULT_EXTRAS_INVALID) {
             Toast.makeText(this, "Invalid Code Try again", Toast.LENGTH_SHORT).show();
@@ -180,6 +183,17 @@ public class HelpActivity extends AppCompatActivity {
         }
     }
 
+    private void ResultDialog(boolean success, String msg) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialog);
+        builder.setTitle("Result");
+        builder.setIcon(R.drawable.check_icon);
+        String message = msg;
+        if (!success) {
+            builder.setIcon(R.drawable.close_icon);
+        }
+        builder.setMessage(message);
+        builder.create().show();
+    }
 
     @Override
     protected void onDestroy() {

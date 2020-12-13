@@ -54,8 +54,7 @@
             android:id="@+id/group_pattern_recycle"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layoutDirection="ltr"
-            android:onClick="clickOnRecycleView" />
+            android:layoutDirection="ltr" />
     </LinearLayout>
 
     <Button

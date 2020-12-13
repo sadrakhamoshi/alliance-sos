@@ -214,7 +214,6 @@ public class SpecificEventActivity extends AppCompatActivity {
                     Toast.makeText(SpecificEventActivity.this, "Error in show :" + error.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             };
-            Toast.makeText(this, mCurrentEvent.getEventId(), Toast.LENGTH_SHORT).show();
             mGroupRef.child("events").child(mCurrentEvent.getEventId()).child("members").addValueEventListener(mMemberListener);
         }
     }
@@ -286,7 +285,7 @@ public class SpecificEventActivity extends AppCompatActivity {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 if (calendar.getTime() > System.currentTimeMillis()) {
                     alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTime(), pendingIntent);
-//                    Toast.makeText(this, "set Successfully", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "set Successfully", Toast.LENGTH_SHORT).show();
                 }
             }
         } else {

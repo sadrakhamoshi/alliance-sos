@@ -131,7 +131,8 @@
             android:onClick="logInViaGoogle"
             android:text="Login via Google"
             android:textAllCaps="false"
-            android:textColor="#fff" />
+            android:textColor="#fff"
+            android:visibility="gone" />
 
         <LinearLayout
             android:layout_width="match_parent"
