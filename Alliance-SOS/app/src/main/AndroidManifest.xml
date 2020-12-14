@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.freelancers.alliancesos">
+    package="com.kaya.alliancesos">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -21,43 +21,43 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".SplashActivity">
+        <activity android:name="com.kaya.alliancesos.SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".HelpActivity" />
-        <activity android:name=".GroupSetting.GroupMemberActivity" />
-        <activity android:name=".Payment.TransferActivity" />
-        <activity android:name=".Payment.PaymentActivity" />
-        <activity android:name=".SpecificSOSActivity" />
-        <activity android:name=".SendNotificationPack.SOSLogActivity" />
-        <activity android:name=".SpecificEventActivity" />
-        <activity android:name=".DoNotDisturb.PickNotDisturbActivity" />
-        <activity android:name=".DoNotDisturb.NotDisturbActivity" />
-        <activity android:name=".GroupSetting.GroupProfileActivity" />
+        <activity android:name="com.kaya.alliancesos.HelpActivity" />
+        <activity android:name="com.kaya.alliancesos.GroupSetting.GroupMemberActivity" />
+        <activity android:name="com.kaya.alliancesos.Payment.TransferActivity" />
+        <activity android:name="com.kaya.alliancesos.Payment.PaymentActivity" />
+        <activity android:name="com.kaya.alliancesos.SpecificSOSActivity" />
+        <activity android:name="com.kaya.alliancesos.SendNotificationPack.SOSLogActivity" />
+        <activity android:name="com.kaya.alliancesos.SpecificEventActivity" />
+        <activity android:name="com.kaya.alliancesos.DoNotDisturb.PickNotDisturbActivity" />
+        <activity android:name="com.kaya.alliancesos.DoNotDisturb.NotDisturbActivity" />
+        <activity android:name="com.kaya.alliancesos.GroupSetting.GroupProfileActivity" />
         <activity
             android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
             android:theme="@style/Base.Theme.AppCompat" />
-        <activity android:name=".SendNotificationPack.InvitationResponseActivity" />
-        <activity android:name=".Setting.UserSettingActivity" />
-        <activity android:name=".SendNotificationPack.NotificationResponseActivity" />
-        <activity android:name=".SetScheduleActivity" />
-        <activity android:name=".MemberActivity" />
-        <activity android:name=".GroupActivity" />
-        <activity android:name=".SignUpPage" />
-        <activity android:name=".LogInPage">
+        <activity android:name="com.kaya.alliancesos.SendNotificationPack.InvitationResponseActivity" />
+        <activity android:name="com.kaya.alliancesos.Setting.UserSettingActivity" />
+        <activity android:name="com.kaya.alliancesos.SendNotificationPack.NotificationResponseActivity" />
+        <activity android:name="com.kaya.alliancesos.SetScheduleActivity" />
+        <activity android:name="com.kaya.alliancesos.MemberActivity" />
+        <activity android:name="com.kaya.alliancesos.GroupActivity" />
+        <activity android:name="com.kaya.alliancesos.SignUpPage" />
+        <activity android:name="com.kaya.alliancesos.LogInPage">
             <!--            <intent-filter>-->
             <!--                <action android:name="android.intent.action.MAIN" />-->
 
             <!--                <category android:name="android.intent.category.LAUNCHER" />-->
             <!--            </intent-filter>-->
         </activity>
-        <activity android:name=".MainActivity" />
+        <activity android:name="com.kaya.alliancesos.MainActivity" />
 
         <service
-            android:name=".SendNotificationPack.MyFirebaseMessagingService"
+            android:name="com.kaya.alliancesos.SendNotificationPack.MyFirebaseMessagingService"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
@@ -66,7 +66,7 @@
         </service>
 
         <receiver
-            android:name=".DeviceAlarm.MyAlarmReceiver"
+            android:name="com.kaya.alliancesos.DeviceAlarm.MyAlarmReceiver"
             android:enabled="true"
             android:exported="true" />
 
