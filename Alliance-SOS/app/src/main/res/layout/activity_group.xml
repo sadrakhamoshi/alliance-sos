@@ -43,11 +43,11 @@
             android:layout_height="100dp"
             android:layout_centerInParent="true"
             android:background="@drawable/sos_back_ground"
+            android:fontFamily="sans-serif-condensed"
             android:onClick="SosClick"
             android:text="SOS"
             android:textColor="#FFFFFF"
-            android:textSize="25sp"
-            android:textStyle="bold" />
+            android:textSize="25sp" />
     </com.skyfishjy.library.RippleBackground>
 
 
@@ -56,7 +56,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:text="Schedule Event"
+        android:background="@drawable/select_back"
+        android:padding="12dp"
+        android:text="Set Schedule Event"
         android:textColor="#FFFFFF"
         android:textSize="25sp"
         android:textStyle="bold" />
@@ -67,12 +69,13 @@
         android:layout_height="wrap_content"
         android:layout_above="@id/schedule_event"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="15dp"
+        android:background="@drawable/select_back"
+        android:fontFamily="sans-serif-condensed"
         android:onClick="goToSOSLog"
+        android:padding="12dp"
         android:text="SOS Log"
         android:textColor="@color/red"
-        android:textSize="25sp"
-        android:textStyle="italic" />
+        android:textSize="25sp" />
 
     <ProgressBar
         android:id="@+id/progress_group_activity"
@@ -94,7 +97,6 @@
         android:layout_height="match_parent"
         android:layout_above="@id/navigation"
         android:layout_below="@id/schedule_event"
-        android:layout_marginTop="10dp"
         android:layoutDirection="ltr"
         android:padding="9dp"
         android:textDirection="ltr" />

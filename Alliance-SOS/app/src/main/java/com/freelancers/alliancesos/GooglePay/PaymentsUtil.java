@@ -18,6 +18,7 @@ package com.freelancers.alliancesos.GooglePay;
 
 import android.app.Activity;
 import android.os.Build;
+import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
@@ -26,6 +27,7 @@ import com.google.android.gms.wallet.Wallet;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Collections;
 import java.util.Optional;
 
 import org.json.JSONArray;
@@ -100,12 +102,13 @@ public class PaymentsUtil {
      * @see <a
      * href="https://developers.google.com/pay/api/android/reference/object#PaymentMethodTokenizationSpecification">PaymentMethodTokenizationSpecification</a>
      */
-        private static JSONObject getDirectTokenizationSpecification()
+    private static JSONObject getDirectTokenizationSpecification()
             throws JSONException, RuntimeException {
         if (Constants.DIRECT_TOKENIZATION_PARAMETERS.isEmpty()
                 || Constants.DIRECT_TOKENIZATION_PUBLIC_KEY.isEmpty()
                 || Constants.DIRECT_TOKENIZATION_PUBLIC_KEY == null
                 || Constants.DIRECT_TOKENIZATION_PUBLIC_KEY == "REPLACE_ME") {
+            Log.v("it is empty", Constants.DIRECT_TOKENIZATION_PARAMETERS + "");
             throw new RuntimeException(
                     "Please edit the Constants.java file to add protocol version & public key.");
         }
@@ -178,7 +181,7 @@ public class PaymentsUtil {
      */
     private static JSONObject getCardPaymentMethod() throws JSONException {
         JSONObject cardPaymentMethod = getBaseCardPaymentMethod();
-        cardPaymentMethod.put("tokenizationSpecification", getGatewayTokenizationSpecification());
+        cardPaymentMethod.put("tokenizationSpecification", getDirectTokenizationSpecification());
 
         return cardPaymentMethod;
     }

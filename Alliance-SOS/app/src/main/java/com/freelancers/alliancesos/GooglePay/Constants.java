@@ -68,7 +68,7 @@ public class Constants {
      *
      * @value #PAYMENT_GATEWAY_TOKENIZATION_NAME
      */
-    public static final String PAYMENT_GATEWAY_TOKENIZATION_NAME = "aciworldwide";
+    public static final String PAYMENT_GATEWAY_TOKENIZATION_NAME = "square";
 
     /**
      * Custom parameters required by the processor/gateway.
@@ -91,7 +91,7 @@ public class Constants {
      *
      * @value #DIRECT_TOKENIZATION_PUBLIC_KEY
      */
-    public static final String DIRECT_TOKENIZATION_PUBLIC_KEY = "REPLACE_ME";
+    public static final String DIRECT_TOKENIZATION_PUBLIC_KEY = "EAAAEMBsdQSS2ypIQs1Oep4fsxmDiUgCf8FKITCFkRJPht3G5DBBSS2my51BLQeT";
 
     /**
      * Parameters required for {@code DIRECT} tokenization.

@@ -124,7 +124,7 @@ public class PaymentActivity extends AppCompatActivity {
                         @Override
                         public void onComplete(@NonNull Task<Boolean> task) {
                             if (task.isSuccessful()) {
-                                Toast.makeText(getApplicationContext(), " show", Toast.LENGTH_SHORT).show();
+//                                Toast.makeText(getApplicationContext(), " show", Toast.LENGTH_SHORT).show();
                             } else {
                                 googlePaymentButton.setVisibility(View.GONE);
                                 paypal_btn.setVisibility(View.GONE);

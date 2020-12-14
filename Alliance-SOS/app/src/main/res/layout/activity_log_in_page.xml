@@ -124,15 +124,14 @@
         </RelativeLayout>
 
         <Button
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_marginTop="16dp"
-            android:background="@drawable/signup_btn"
-            android:onClick="logInViaGoogle"
-            android:text="Login via Google"
-            android:textAllCaps="false"
-            android:textColor="#fff"
-            android:visibility="gone" />
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="16dp"
+                    android:background="@drawable/signup_btn"
+                    android:onClick="logInViaGoogle"
+                    android:text="Login via Google"
+                    android:textAllCaps="false"
+                    android:textColor="#fff" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -157,7 +156,6 @@
                 android:textStyle="bold" />
 
         </LinearLayout>
-
 
     </LinearLayout>
 
