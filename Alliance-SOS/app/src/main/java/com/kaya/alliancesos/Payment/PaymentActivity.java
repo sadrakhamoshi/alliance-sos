@@ -17,6 +17,7 @@ import android.widget.ProgressBar;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.kaya.alliancesos.Adapters.PriceAdapter;
 import com.kaya.alliancesos.GooglePay.PaymentsUtil;
 import com.kaya.alliancesos.R;
@@ -36,11 +37,14 @@ import com.google.firebase.database.ValueEventListener;
 import com.paypal.android.sdk.payments.PayPalPayment;
 import com.paypal.android.sdk.payments.PayPalService;
 import com.paypal.android.sdk.payments.PaymentConfirmation;
+import com.paypal.android.sdk.payments.ProofOfPayment;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 public class PaymentActivity extends AppCompatActivity {
@@ -74,8 +78,8 @@ public class PaymentActivity extends AppCompatActivity {
         StartPayPalService();
         Intent intent = getIntent();
         if (intent == null) {
-//            finish();
-//            return;
+            finish();
+            return;
         } else {
             mUserId = intent.getStringExtra("userId");
             mRoot = FirebaseDatabase.getInstance().getReference();
@@ -214,9 +218,14 @@ public class PaymentActivity extends AppCompatActivity {
         } else if (resultCode == RESULT_OK && requestCode == PAYMENT_REQ_PAYPAL) {
             PaymentConfirmation confirm = data.getParcelableExtra(com.paypal.android.sdk.payments.PaymentActivity.EXTRA_RESULT_CONFIRMATION);
             if (confirm != null) {
+                ProofOfPayment tmp = confirm.getProofOfPayment();
+                PaymentDialog(true, "Successfully done, Thanks for Donation :D \n" +
+                        "State : " + tmp.getState() + "\n" + "Time : " + tmp.getCreateTime() + "\n" + "TransactionId : " + tmp.getTransactionId() + "\n");
                 //add to database
                 if (mWhom == MINE)
                     attachToDatabase(mUserId);
+            } else {
+                PaymentDialog(false, "Something went wrong ...");
             }
         } else if (requestCode == com.paypal.android.sdk.payments.PaymentActivity.RESULT_EXTRAS_INVALID) {
             Toast.makeText(this, "Invalid Code Try again", Toast.LENGTH_SHORT).show();
@@ -227,8 +236,10 @@ public class PaymentActivity extends AppCompatActivity {
 
     private void handlePaymentSuccess(PaymentData paymentData) {
         // Token will be null if PaymentDataRequest was not constructed using fromJson(String).
-        if (paymentData == null)
+        if (paymentData == null) {
+            PaymentDialog(false, "Something went wrong ...");
             return;
+        }
 
         final String paymentInfo = paymentData.toJson();
         if (paymentInfo == null) {
@@ -243,11 +254,13 @@ public class PaymentActivity extends AppCompatActivity {
             final JSONObject tokenizationData = paymentMethodData.getJSONObject("tokenizationData");
             final String token = tokenizationData.getString("token");
             final JSONObject info = paymentMethodData.getJSONObject("info");
-            Toast.makeText(this, "getString(R.string.payments_show_name, billingName)", Toast.LENGTH_LONG).show();
-            // Logging token string.
-            Log.d("Google Pay token: ", token);
+            Map<String, Object> retMap = new Gson().fromJson(info.toString(), HashMap.class);
+//            Toast.makeText(this, "getString(R.string.payments_show_name, billingName)", Toast.LENGTH_LONG).show();
+            PaymentDialog(true, "Successfully done, Thanks for Donation :D\n" +
+                    "Your token is " + token + "\n" + retMap);
 
         } catch (JSONException e) {
+            PaymentDialog(false, "Something went wrong ...");
             throw new RuntimeException("The selected garment cannot be parsed from the list of elements");
         }
     }
@@ -359,5 +372,17 @@ public class PaymentActivity extends AppCompatActivity {
     public void goBackPayment(View view) {
         finish();
         return;
+    }
+
+    private void PaymentDialog(boolean success, String msg) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialog);
+        builder.setTitle("Result");
+        builder.setIcon(R.drawable.check_icon);
+        String message = msg;
+        if (!success) {
+            builder.setIcon(R.drawable.close_icon);
+        }
+        builder.setMessage(message);
+        builder.create().show();
     }
 }
