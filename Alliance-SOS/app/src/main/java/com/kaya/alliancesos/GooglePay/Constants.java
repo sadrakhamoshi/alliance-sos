@@ -91,7 +91,8 @@ public class Constants {
      *
      * @value #DIRECT_TOKENIZATION_PUBLIC_KEY
      */
-    public static final String DIRECT_TOKENIZATION_PUBLIC_KEY = "EAAAEMBsdQSS2ypIQs1Oep4fsxmDiUgCf8FKITCFkRJPht3G5DBBSS2my51BLQeT";
+//    EAAAEMBsdQSS2ypIQs1Oep4fsxmDiUgCf8FKITCFkRJPht3G5DBBSS2my51BLQeT
+    public static final String DIRECT_TOKENIZATION_PUBLIC_KEY = "EAAAEEM1TGiSDqUt_MNQ1SWYJGiYFSGP5rD5oEblmDgedqM9dIaqt87bNy0Y1Bwu";
 
     /**
      * Parameters required for {@code DIRECT} tokenization.
