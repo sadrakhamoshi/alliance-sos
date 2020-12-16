@@ -21,6 +21,7 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.kaya.alliancesos.GooglePay.PaymentsUtil;
+import com.kaya.alliancesos.GooglePay.SuccessfulActivity;
 import com.kaya.alliancesos.Payment.PayPalObject;
 import com.kaya.alliancesos.Utils.DonationOption;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -153,9 +154,9 @@ public class HelpActivity extends AppCompatActivity {
             final JSONObject info = paymentMethodData.getJSONObject("info");
             Map<String, Object> retMap = new Gson().fromJson(info.toString(), HashMap.class);
 //            Toast.makeText(this, "getString(R.string.payments_show_name, billingName)", Toast.LENGTH_LONG).show();
-            PaymentDialog(true, "Successfully done, Thanks for Donation :D\n" +
-                    "Your token is " + token + "\n" + retMap);
-
+//            PaymentDialog(true, "Successfully done, Thanks for Donation :D\n" +
+//                    "Your token is " + token + "\n" + retMap);
+            PaymentPage(info.toString());
         } catch (JSONException e) {
             PaymentDialog(false, "Something went wrong ...");
             throw new RuntimeException("The selected garment cannot be parsed from the list of elements");
@@ -198,6 +199,12 @@ public class HelpActivity extends AppCompatActivity {
         }
         builder.setMessage(message);
         builder.create().show();
+    }
+
+    private void PaymentPage(String info) {
+        Intent intent = new Intent(getApplicationContext(), SuccessfulActivity.class);
+        intent.putExtra("info", info);
+        startActivity(intent);
     }
 
     @Override

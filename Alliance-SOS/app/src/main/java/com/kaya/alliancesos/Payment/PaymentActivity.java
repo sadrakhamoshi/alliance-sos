@@ -20,6 +20,7 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 import com.kaya.alliancesos.Adapters.PriceAdapter;
 import com.kaya.alliancesos.GooglePay.PaymentsUtil;
+import com.kaya.alliancesos.GooglePay.SuccessfulActivity;
 import com.kaya.alliancesos.R;
 import com.kaya.alliancesos.Utils.MonthOption;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -256,8 +257,9 @@ public class PaymentActivity extends AppCompatActivity {
             final JSONObject info = paymentMethodData.getJSONObject("info");
             Map<String, Object> retMap = new Gson().fromJson(info.toString(), HashMap.class);
 //            Toast.makeText(this, "getString(R.string.payments_show_name, billingName)", Toast.LENGTH_LONG).show();
-            PaymentDialog(true, "Successfully done, Thanks for Donation :D\n" +
-                    "Your token is " + token + "\n" + retMap);
+//            PaymentDialog(true, "Successfully done, Thanks for Donation :D\n" +
+//                    "Your token is " + token + "\n" + retMap);
+            PaymentPage(info.toString());
 
         } catch (JSONException e) {
             PaymentDialog(false, "Something went wrong ...");
@@ -384,5 +386,11 @@ public class PaymentActivity extends AppCompatActivity {
         }
         builder.setMessage(message);
         builder.create().show();
+    }
+
+    private void PaymentPage(String info) {
+        Intent intent = new Intent(getApplicationContext(), SuccessfulActivity.class);
+        intent.putExtra("info", info);
+        startActivity(intent);
     }
 }

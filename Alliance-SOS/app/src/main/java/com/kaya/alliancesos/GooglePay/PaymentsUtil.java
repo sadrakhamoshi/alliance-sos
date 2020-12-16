@@ -84,7 +84,7 @@ public class PaymentsUtil {
             put("type", "PAYMENT_GATEWAY");
             put("parameters", new JSONObject() {{
                 put("gateway", "square");
-                put("gatewayMerchantId", "sq0idp-xgNS1AlHSlQKQGpAuHbBnA");
+                put("gatewayMerchantId", "BCR2DN6TWPV27FBP");
             }});
         }};
     }
@@ -180,10 +180,11 @@ public class PaymentsUtil {
      */
     private static JSONObject getCardPaymentMethod() throws JSONException {
         JSONObject cardPaymentMethod = getBaseCardPaymentMethod();
-        cardPaymentMethod.put("tokenizationSpecification", getDirectTokenizationSpecification());
+        cardPaymentMethod.put("tokenizationSpecification", getGatewayTokenizationSpecification());
 
         return cardPaymentMethod;
     }
+//05679669572808561515
 
     /**
      * An object describing accepted forms of payment by your app, used to determine a viewer's
