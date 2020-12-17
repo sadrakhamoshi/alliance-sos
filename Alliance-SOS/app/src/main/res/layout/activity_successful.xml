@@ -35,15 +35,26 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="20dp"
             android:gravity="center"
-            tools:text="dfasfdasdfa;fasdfasfsa" />
+            android:textSize="16sp"
+            android:textStyle="bold"
+            tools:text="Your Visa **** 1234 with Google Pay" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="20dp"
+            android:gravity="center"
+            android:text="was Successfully charged" />
+
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="25dp"
-            android:onClick="paymentCompleted"
             android:background="@drawable/select_back2"
+            android:onClick="paymentCompleted"
             android:text="ok" />
     </LinearLayout>
 

@@ -20,18 +20,12 @@ public class SuccessfulActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_successful);
         textView = findViewById(R.id.green_check_txt);
-        HashMap<String, Object> text;
-        String text_str;
+        String network, details;
         Intent intent = getIntent();
         if (intent != null) {
-//            text = (HashMap<String, Object>) intent.getSerializableExtra("info");
-//            StringBuilder builder = new StringBuilder();
-//            for (String key : text.keySet()) {
-//                builder.append(key + " : " + text.get(key) + " ,");
-//            }
-//            textView.setText(text + "" + "\n" + "\n" + builder.toString());
-            text_str = intent.getStringExtra("info");
-            textView.setText(text_str);
+            network = intent.getStringExtra("network");
+            details = intent.getStringExtra("details");
+            textView.setText("Your " + network + " **** " + details + " with Google Pay");
         } else {
             finish();
         }

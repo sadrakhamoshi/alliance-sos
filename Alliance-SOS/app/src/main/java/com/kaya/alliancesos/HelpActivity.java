@@ -156,7 +156,7 @@ public class HelpActivity extends AppCompatActivity {
 //            Toast.makeText(this, "getString(R.string.payments_show_name, billingName)", Toast.LENGTH_LONG).show();
 //            PaymentDialog(true, "Successfully done, Thanks for Donation :D\n" +
 //                    "Your token is " + token + "\n" + retMap);
-            PaymentPage(info.toString());
+            PaymentPage(info.getString("cardNetwork"),info.getString("cardDetails"));
         } catch (JSONException e) {
             PaymentDialog(false, "Something went wrong ...");
             throw new RuntimeException("The selected garment cannot be parsed from the list of elements");
@@ -201,9 +201,10 @@ public class HelpActivity extends AppCompatActivity {
         builder.create().show();
     }
 
-    private void PaymentPage(String info) {
+    private void PaymentPage(String cardNetwork, String cardDetails) {
         Intent intent = new Intent(getApplicationContext(), SuccessfulActivity.class);
-        intent.putExtra("info", info);
+        intent.putExtra("network", cardNetwork);
+        intent.putExtra("details", cardDetails);
         startActivity(intent);
     }
 
