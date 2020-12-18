@@ -19,6 +19,9 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class LogInPage extends AppCompatActivity {
 
     private ProgressBar progressBar;
@@ -108,7 +111,7 @@ public class LogInPage extends AppCompatActivity {
         startActivity(new Intent(getApplicationContext(), SignUpPage.class));
     }
 
-    public void logInViaGoogle(View view) {
+    public void logInViaGoogle(View view) throws JSONException {
         startActivity(new Intent(this, HelpActivity.class));
     }
 }

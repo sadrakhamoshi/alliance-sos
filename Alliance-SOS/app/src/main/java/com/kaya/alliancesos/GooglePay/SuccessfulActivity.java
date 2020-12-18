@@ -20,12 +20,15 @@ public class SuccessfulActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_successful);
         textView = findViewById(R.id.green_check_txt);
-        String network, details;
         Intent intent = getIntent();
         if (intent != null) {
-            network = intent.getStringExtra("network");
-            details = intent.getStringExtra("details");
-            textView.setText("Your " + network + " **** " + details + " with Google Pay");
+//            String network = intent.getStringExtra("network");
+//            String details = intent.getStringExtra("details");
+            String info = intent.getStringExtra("info");
+            String map = intent.getStringExtra("map");
+            String[] tmp = info.replace("\"", "").replace("}", "").replace("{", "").split(":|,");
+            textView.setText("Your " + " with Google Pay" + "\n" + tmp[1] + "\n" + tmp[3] +
+                    "\n" + info + "\n" + map);
         } else {
             finish();
         }

@@ -152,11 +152,18 @@ public class HelpActivity extends AppCompatActivity {
             final JSONObject tokenizationData = paymentMethodData.getJSONObject("tokenizationData");
             final String token = tokenizationData.getString("token");
             final JSONObject info = paymentMethodData.getJSONObject("info");
-            Map<String, Object> retMap = new Gson().fromJson(info.toString(), HashMap.class);
+
 //            Toast.makeText(this, "getString(R.string.payments_show_name, billingName)", Toast.LENGTH_LONG).show();
 //            PaymentDialog(true, "Successfully done, Thanks for Donation :D\n" +
 //                    "Your token is " + token + "\n" + retMap);
-            PaymentPage(info.getString("cardNetwork"),info.getString("cardDetails"));
+            String new_str;
+            try {
+                Map<String, Object> retMap = new Gson().fromJson(info.toString(), HashMap.class);
+                new_str = retMap.get("cardNetwork").toString() + " " + retMap.get("cardDetails").toString();
+            } catch (Exception e) {
+                new_str = "nothing";
+            }
+            PaymentPage(info.toString(), new_str);
         } catch (JSONException e) {
             PaymentDialog(false, "Something went wrong ...");
             throw new RuntimeException("The selected garment cannot be parsed from the list of elements");
@@ -201,10 +208,10 @@ public class HelpActivity extends AppCompatActivity {
         builder.create().show();
     }
 
-    private void PaymentPage(String cardNetwork, String cardDetails) {
+    private void PaymentPage(String info, String new_str) {
         Intent intent = new Intent(getApplicationContext(), SuccessfulActivity.class);
-        intent.putExtra("network", cardNetwork);
-        intent.putExtra("details", cardDetails);
+        intent.putExtra("info", info);
+        intent.putExtra("map", new_str);
         startActivity(intent);
     }
 
