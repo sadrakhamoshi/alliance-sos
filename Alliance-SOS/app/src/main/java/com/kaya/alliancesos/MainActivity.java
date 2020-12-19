@@ -464,7 +464,7 @@ public class MainActivity extends AppCompatActivity {
         builder.setNegativeButton("Not Now", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-//                finish();
+                finish();
                 dialog.cancel();
             }
         });
