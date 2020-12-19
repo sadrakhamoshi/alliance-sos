@@ -255,7 +255,6 @@ public class PaymentActivity extends AppCompatActivity {
             final JSONObject tokenizationData = paymentMethodData.getJSONObject("tokenizationData");
             final String token = tokenizationData.getString("token");
             final JSONObject info = paymentMethodData.getJSONObject("info");
-            Map<String, Object> retMap = new Gson().fromJson(info.toString(), HashMap.class);
 //            Toast.makeText(this, "getString(R.string.payments_show_name, billingName)", Toast.LENGTH_LONG).show();
 //            PaymentDialog(true, "Successfully done, Thanks for Donation :D\n" +
 //                    "Your token is " + token + "\n" + retMap);

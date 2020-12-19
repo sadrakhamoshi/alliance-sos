@@ -22,13 +22,9 @@ public class SuccessfulActivity extends AppCompatActivity {
         textView = findViewById(R.id.green_check_txt);
         Intent intent = getIntent();
         if (intent != null) {
-//            String network = intent.getStringExtra("network");
-//            String details = intent.getStringExtra("details");
             String info = intent.getStringExtra("info");
-            String map = intent.getStringExtra("map");
             String[] tmp = info.replace("\"", "").replace("}", "").replace("{", "").split(":|,");
-            textView.setText("Your " + " with Google Pay" + "\n" + tmp[1] + "\n" + tmp[3] +
-                    "\n" + info + "\n" + map);
+            textView.setText("Your " + tmp[1] + " **** " + tmp[3] + " with Google Pay");
         } else {
             finish();
         }

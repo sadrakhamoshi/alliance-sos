@@ -34,6 +34,7 @@ public class SplashActivity extends AppCompatActivity {
             @Override
             public void onAnimationEnd(Animation animation) {
                 startActivity(new Intent(getApplicationContext(), LogInPage.class));
+                finish();
                 // HomeActivity.class is the activity to go after showing the splash screen.
             }
 
