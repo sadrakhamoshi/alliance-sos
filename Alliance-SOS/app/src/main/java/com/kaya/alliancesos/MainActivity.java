@@ -45,8 +45,10 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.TimeZone;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -220,10 +222,23 @@ public class MainActivity extends AppCompatActivity {
                             DataSnapshot data = (DataSnapshot) iterator.next();
                             final String name = data.child("groupName").getValue().toString();
                             final String id = data.child("groupId").getValue().toString();
-                            mGroupsRef.child(id).addListenerForSingleValueEvent(new ValueEventListener() {
+                            mGroupsRef.child(id).child("events").addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                    UpComingEvent event = snapshot.child("upComingEvent").getValue(UpComingEvent.class);
+                                    Event event = null;
+                                    if (snapshot.exists()) {
+                                        long min = Long.MAX_VALUE;
+                                        Iterator iterator = snapshot.getChildren().iterator();
+                                        while (iterator.hasNext()) {
+                                            DataSnapshot dataSnapshot = (DataSnapshot) iterator.next();
+                                            Event curr_event = dataSnapshot.getValue(Event.class);
+                                            long milisecond = curr_event.getTimeInMillisecond() * -1;
+                                            if (checkIfPassedDate(curr_event) && milisecond < min) {
+                                                min = milisecond;
+                                                event = curr_event;
+                                            }
+                                        }
+                                    }
                                     mGroupAdapter.add(name, event, id);
                                     count[0]++;
                                     if (count[0] >= groupCount) {
@@ -546,6 +561,12 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private boolean checkIfPassedDate(Event event) {
+        Date now = new Date();
+        Date eventConversion = event.getScheduleObject().GetDate_DateFormat(event.getCreatedTimezoneId(), TimeZone.getDefault().getID());
+        return now.before(eventConversion);
     }
 
 }

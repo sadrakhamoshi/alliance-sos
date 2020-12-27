@@ -10,6 +10,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.kaya.alliancesos.Event;
 import com.kaya.alliancesos.GroupActivity;
 import com.kaya.alliancesos.R;
 import com.kaya.alliancesos.UpComingEvent;
@@ -101,7 +102,13 @@ public class ShowGroup extends RecyclerView.Adapter<ShowGroup.ViewHolder> {
         return converted_date;
     }
 
-    public void add(String name, UpComingEvent upComingEvent, String id) {
+    public void add(String name, Event event, String id) {
+        final UpComingEvent upComingEvent;
+        if (event == null) {
+            upComingEvent = new UpComingEvent("nothing", null);
+        } else {
+            upComingEvent = new UpComingEvent(event.getScheduleObject().getTitle(), event.getScheduleObject().getDateTime());
+        }
         mGroupNames.add(name);
         mGroupIds.add(id);
         mUpComingEventArrayList.add(upComingEvent);

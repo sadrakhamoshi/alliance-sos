@@ -68,7 +68,6 @@ public class Event implements Serializable, Comparable<Event> {
 
     @Override
     public int compareTo(Event o) {
-
         if (this.getTimeInMillisecond() - o.getTimeInMillisecond() < 0)
             return 1;
         if (this.getTimeInMillisecond() - o.getTimeInMillisecond() > 0)
