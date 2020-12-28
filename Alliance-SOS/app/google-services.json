@@ -8,17 +8,17 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:688735100332:android:3e9d815d81676a70b42e09",
+        "mobilesdk_app_id": "1:688735100332:android:793168e5974f9372b42e09",
         "android_client_info": {
-          "package_name": "com.example.alliancesos"
+          "package_name": "com.kaya.alliancesos"
         }
       },
       "oauth_client": [
         {
-          "client_id": "688735100332-8jokalq03612sskeejbl1n9vhi3segoo.apps.googleusercontent.com",
+          "client_id": "688735100332-j4um7u3plobcntgu6fo3csjarknu1pl4.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.alliancesos",
+            "package_name": "com.kaya.alliancesos",
             "certificate_hash": "2bcedd41afdf616e51822c6179f91a98dabb628a"
           }
         },
@@ -36,7 +36,7 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "688735100332-s6ol42obotk87kslh8umsvb272erk1i1.apps.googleusercontent.com",
+              "client_id": "688735100332-a5a9ipcij7nrj6ro104rditckhodedba.apps.googleusercontent.com",
               "client_type": 3
             },
             {

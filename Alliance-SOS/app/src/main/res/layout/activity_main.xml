@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/main_activity_back"
+    android:background="@drawable/alaa"
     tools:context=".MainActivity">
 
     <LinearLayout
@@ -22,12 +22,15 @@
             <TextView
                 android:id="@+id/main_username"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_centerInParent="true"
                 android:onClick="gotoPaymentPage"
                 android:textColor="#FFFFFF"
+                android:background="@drawable/select_back2"
                 android:textSize="24sp"
-                android:textStyle="bold"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                android:fontFamily="sans-serif-condensed-light"
                 tools:text="Kieren" />
 
             <ImageView
@@ -54,8 +57,7 @@
             android:id="@+id/group_pattern_recycle"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layoutDirection="ltr"
-            android:onClick="clickOnRecycleView" />
+            android:layoutDirection="ltr" />
     </LinearLayout>
 
     <Button

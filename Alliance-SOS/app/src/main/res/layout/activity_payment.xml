@@ -148,20 +148,6 @@
 
     </LinearLayout>
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/input_sign_up_back"
-        android:drawableLeft="@drawable/payment_icon"
-        android:drawablePadding="15dp"
-        android:padding="10dp"
-        android:text="Pay off"
-        android:textColor="#FFFFFF"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
     <ProgressBar
         android:id="@+id/progress_payment"
         android:layout_width="wrap_content"
