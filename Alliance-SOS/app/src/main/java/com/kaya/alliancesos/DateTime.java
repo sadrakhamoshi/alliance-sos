@@ -18,6 +18,13 @@ public class DateTime implements Serializable {
         minute = mi;
     }
 
+    public void decrease_month() {
+        String curr_month = this.getMonth();
+        int integer_month = Integer.parseInt(curr_month);
+        integer_month--;
+        this.setMonth(integer_month + "");
+    }
+
     public DateTime() {
     }
 
@@ -65,6 +72,7 @@ public class DateTime implements Serializable {
         String result = this.getYear() + "-" + this.getMonth() + "-" + this.getDay() + " " + this.getHour() + ":" + this.getMinute();
         return result;
     }
+
     public String ConvertTime(String mFrom_TimeZoneId, String mTo_TimezoneId) {
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.YEAR, Integer.parseInt(this.getYear()));
