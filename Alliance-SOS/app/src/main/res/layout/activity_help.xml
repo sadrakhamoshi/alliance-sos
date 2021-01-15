@@ -119,7 +119,7 @@
         <include
             android:id="@+id/googlePayButton"
             layout="@layout/googlepay_button"
-            android:visibility="visible" />
+            android:visibility="gone" />
 
     </LinearLayout>
 

@@ -3,6 +3,7 @@ package com.kaya.alliancesos.SendNotificationPack;
 import com.kaya.alliancesos.Utils.MessageType;
 
 public class DataToSend {
+    private String title, body;
     private String makeBy, groupName;
     private String toName, toId;
     private String groupId;
@@ -89,6 +90,7 @@ public class DataToSend {
         this.makeBy = makeBy;
         this.groupId = groupId;
         this.type = message_type;
+        this.title = this.body = "";
     }
 
     //for notification
@@ -98,6 +100,7 @@ public class DataToSend {
         this.makeBy = makeBy;
         this.groupName = groupName;
         type = MessageType.NOTIFICATION_TYPE;
+        this.title = this.body = "";
     }
 
     public DataToSend() {
