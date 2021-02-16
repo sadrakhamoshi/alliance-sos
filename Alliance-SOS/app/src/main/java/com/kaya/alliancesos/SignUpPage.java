@@ -84,14 +84,13 @@ public class SignUpPage extends AppCompatActivity {
                 .build();
 
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
-//        findViewById(R.id.google_sign_up_btn).setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-////                Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-////                startActivityForResult(signInIntent, RC_SIGN_IN);
-//                signOutFromGoogle();
-//            }
-//        });
+        findViewById(R.id.google_sign_up_btn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+                startActivityForResult(signInIntent, RC_SIGN_IN);
+            }
+        });
 
         InitializeComp();
     }
@@ -99,18 +98,23 @@ public class SignUpPage extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode != RESULT_OK)
+        if (requestCode != RC_SIGN_IN)
             Toast.makeText(this, "result code " + requestCode, Toast.LENGTH_SHORT).show();
 
-        else if (requestCode == RC_SIGN_IN && resultCode == RESULT_OK) {
+        else {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            try {
-                GoogleSignInAccount account = task.getResult(ApiException.class);
-                firebaseAuthWithGoogle(account);
 
-            } catch (Exception e) {
-                Toast.makeText(this, "error" + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+            if (task.isSuccessful()) {
+                try {
+                    GoogleSignInAccount account = task.getResult(ApiException.class);
+                    firebaseAuthWithGoogle(account);
 
+                } catch (Exception e) {
+                    Toast.makeText(this, "error" + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+
+                }
+            } else {
+                Toast.makeText(this, task.getException() + "", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -125,14 +129,15 @@ public class SignUpPage extends AppCompatActivity {
                             // Sign in success, update UI with the signed-in user's information
                             Toast.makeText(SignUpPage.this, "signInWithCredential:success", Toast.LENGTH_SHORT).show();
                             final String user = mFirebaseAuth.getCurrentUser().getUid();
+                            Toast.makeText(SignUpPage.this, account.getDisplayName(), Toast.LENGTH_SHORT).show();
                             mUserDatabaseRef.child(user).addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                                     if (snapshot.exists()) {
                                         gotoMainActivity();
-                                        Toast.makeText(SignUpPage.this, "exist", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(SignUpPage.this, "Login Successfully", Toast.LENGTH_SHORT).show();
                                     } else {
-                                        Toast.makeText(SignUpPage.this, "not exist", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(SignUpPage.this, "Created Successfully", Toast.LENGTH_SHORT).show();
                                         updateUi(account);
                                         pushDataInDatabase pushDataInDatabase = new pushDataInDatabase();
                                         pushDataInDatabase.execute();

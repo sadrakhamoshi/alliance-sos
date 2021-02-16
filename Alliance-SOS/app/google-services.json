@@ -8,7 +8,7 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:688735100332:android:793168e5974f9372b42e09",
+        "mobilesdk_app_id": "1:688735100332:android:106264560587fb9db42e09",
         "android_client_info": {
           "package_name": "com.kaya.alliancesos"
         }
@@ -20,6 +20,14 @@
           "android_info": {
             "package_name": "com.kaya.alliancesos",
             "certificate_hash": "2bcedd41afdf616e51822c6179f91a98dabb628a"
+          }
+        },
+        {
+          "client_id": "688735100332-pmn4vchb6jqrg22s08h4q5k6t6otk9bo.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.kaya.alliancesos",
+            "certificate_hash": "91041653b076d9cca5a1478dc70914b0370f5adf"
           }
         },
         {

@@ -26,6 +26,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.kaya.alliancesos.Adapters.ShowGroup;
 import com.kaya.alliancesos.Adapters.SwipeToDeleteCallback;
 import com.kaya.alliancesos.Payment.PaymentActivity;
@@ -401,9 +402,27 @@ public class MainActivity extends AppCompatActivity {
         if (mValueEventListenerGroup != null) {
             mGroupsRef.removeEventListener(mValueEventListenerGroup);
         }
+        signOutFromGoogle();
         FirebaseAuth.getInstance().signOut();
         gotToLoginPage();
         return;
+    }
+
+    private void signOutFromGoogle() {
+        GoogleSignInClient mGoogleSignInClient;
+        googleSignInClient tmp = new googleSignInClient(this);
+        mGoogleSignInClient = tmp.getmGoogleSignInClient();
+        mGoogleSignInClient.signOut().addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful())
+                    Toast.makeText(MainActivity.this, "sign out successfully", Toast.LENGTH_SHORT).show();
+                else {
+                    Toast.makeText(MainActivity.this, "" + task.getException(), Toast.LENGTH_SHORT).show();
+                    FirebaseAuth.getInstance().signOut();
+                }
+            }
+        });
     }
 
     private void gotToLoginPage() {

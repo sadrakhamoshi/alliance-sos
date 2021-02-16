@@ -2,6 +2,7 @@ package com.kaya.alliancesos.SendNotificationPack;
 
 import android.content.Context;
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -85,8 +86,15 @@ public class SendingNotification {
             public void onResponse(Call<MyResponse> call, Response<MyResponse> response) {
                 if (response.code() == 200) {
                     if (response.body().success != 1) {
-                        Toast.makeText(mContext, "Failed ", Toast.LENGTH_LONG).show();
+                        try {
+                            Log.e("nothing", response.message() + ' ' + response.isSuccessful() + ' ' + response.body().success);
+                            Log.e("nothing3", "msg" + response.toString());
+                        } catch (Exception e) {
+                            Log.e("nothing", response.message());
+                        }
                     } else {
+                        Log.e("nothing", response.message() + ' ' + response.isSuccessful() + ' ' + response.body().success);
+                        Log.e("nothing3", "msg" + response.toString());
                         Toast.makeText(mContext, "Send Successfully ... ", Toast.LENGTH_LONG).show();
                     }
                 }
@@ -165,7 +173,12 @@ public class SendingNotification {
             public void onResponse(Call<MyResponse> call, Response<MyResponse> response) {
                 if (response.code() == 200) {
                     if (response.body().success != 1) {
-                        Toast.makeText(mContext, "Failed ", Toast.LENGTH_LONG).show();
+                        try {
+                            String respo = response.body().toString() + ' ' + response.errorBody().string();
+
+                            Toast.makeText(mContext, respo + '\n' + response, Toast.LENGTH_LONG).show();
+                        } catch (Exception e) {
+                        }
                     } else {
                         Toast.makeText(mContext, "Send Successfully ... ", Toast.LENGTH_LONG).show();
                     }

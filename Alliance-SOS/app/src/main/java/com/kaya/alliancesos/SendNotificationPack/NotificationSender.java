@@ -1,17 +1,36 @@
 package com.kaya.alliancesos.SendNotificationPack;
 
+import com.google.gson.annotations.SerializedName;
+
+class Notification {
+    public String title;
+    public String body;
+
+    public Notification(String title, String body) {
+        this.title = title;
+        this.body = body;
+    }
+}
+
 public class NotificationSender {
-    private String title, body;
+    @SerializedName("to")
     private String to;
-    private boolean mutable_content;
+    //    private boolean mutable_content;
+    @SerializedName("data")
     private DataToSend data;
+
+    @SerializedName("priority")
+    public String priority;
+
+    @SerializedName("notification")
+    public Notification notification;
 
     public NotificationSender(DataToSend data, String to) {
         this.data = data;
         this.to = to;
-        this.mutable_content = true;
-        this.title = "";
-        this.body = "";
+        this.notification = new Notification("nothing", "nothing");
+        this.priority = "high";
+//        this.mutable_content = true;
     }
 
     public NotificationSender() {
