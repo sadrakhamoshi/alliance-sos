@@ -81,18 +81,19 @@ public class SendingNotification {
 
     private void Invite(String token) {
         NotificationSender sender = new NotificationSender(data, token);
+        sender.notification.title = "Alliance SOS";
+        sender.notification.body = "You have an invitation notification";
         mApiService.sendNotification(sender).enqueue(new Callback<MyResponse>() {
             @Override
             public void onResponse(Call<MyResponse> call, Response<MyResponse> response) {
                 if (response.code() == 200) {
                     if (response.body().success != 1) {
-                        try {
-                            Log.e("nothing", response.message() + ' ' + response.isSuccessful() + ' ' + response.body().success);
-                            Log.e("nothing3", "msg" + response.toString());
-                        } catch (Exception e) {
-                            Log.e("nothing", response.message());
-                        }
+                        Toast.makeText(mContext, "Failed please Try again later", Toast.LENGTH_SHORT).show();
+                        Log.e("nothing", response.headers() + " " + response.raw());
+                        Log.e("nothing", response.message() + ' ' + response.isSuccessful() + ' ' + response.body().success);
+                        Log.e("nothing3", "msg" + response.toString());
                     } else {
+                        Log.e("nothing", response.headers() + " " + response.raw());
                         Log.e("nothing", response.message() + ' ' + response.isSuccessful() + ' ' + response.body().success);
                         Log.e("nothing3", "msg" + response.toString());
                         Toast.makeText(mContext, "Send Successfully ... ", Toast.LENGTH_LONG).show();
@@ -168,6 +169,8 @@ public class SendingNotification {
         data.setToId(id);
         data.setToName(name);
         NotificationSender sender = new NotificationSender(data, target_token);
+        sender.notification.title = "Alliance SOS";
+        sender.notification.body = "You have a new notification";
         mApiService.sendNotification(sender).enqueue(new Callback<MyResponse>() {
             @Override
             public void onResponse(Call<MyResponse> call, Response<MyResponse> response) {
