@@ -2,6 +2,7 @@ package com.kaya.alliancesos.SendNotificationPack;
 
 import android.content.Context;
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -80,13 +81,21 @@ public class SendingNotification {
 
     private void Invite(String token) {
         NotificationSender sender = new NotificationSender(data, token);
+        sender.notification.title = "Alliance SOS";
+        sender.notification.body = "You have an invitation notification";
         mApiService.sendNotification(sender).enqueue(new Callback<MyResponse>() {
             @Override
             public void onResponse(Call<MyResponse> call, Response<MyResponse> response) {
                 if (response.code() == 200) {
                     if (response.body().success != 1) {
-                        Toast.makeText(mContext, "Failed ", Toast.LENGTH_LONG).show();
+                        Toast.makeText(mContext, "Failed please Try again later", Toast.LENGTH_SHORT).show();
+                        Log.e("nothing", response.headers() + " " + response.raw());
+                        Log.e("nothing", response.message() + ' ' + response.isSuccessful() + ' ' + response.body().success);
+                        Log.e("nothing3", "msg" + response.toString());
                     } else {
+                        Log.e("nothing", response.headers() + " " + response.raw());
+                        Log.e("nothing", response.message() + ' ' + response.isSuccessful() + ' ' + response.body().success);
+                        Log.e("nothing3", "msg" + response.toString());
                         Toast.makeText(mContext, "Send Successfully ... ", Toast.LENGTH_LONG).show();
                     }
                 }
@@ -160,12 +169,19 @@ public class SendingNotification {
         data.setToId(id);
         data.setToName(name);
         NotificationSender sender = new NotificationSender(data, target_token);
+        sender.notification.title = "Alliance SOS";
+        sender.notification.body = "You have a new notification";
         mApiService.sendNotification(sender).enqueue(new Callback<MyResponse>() {
             @Override
             public void onResponse(Call<MyResponse> call, Response<MyResponse> response) {
                 if (response.code() == 200) {
                     if (response.body().success != 1) {
-                        Toast.makeText(mContext, "Failed ", Toast.LENGTH_LONG).show();
+                        try {
+                            String respo = response.body().toString() + ' ' + response.errorBody().string();
+
+                            Toast.makeText(mContext, respo + '\n' + response, Toast.LENGTH_LONG).show();
+                        } catch (Exception e) {
+                        }
                     } else {
                         Toast.makeText(mContext, "Send Successfully ... ", Toast.LENGTH_LONG).show();
                     }
