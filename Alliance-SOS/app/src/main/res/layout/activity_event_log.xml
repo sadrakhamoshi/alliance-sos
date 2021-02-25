@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorAccent"
+    android:layoutDirection="ltr"
+    android:orientation="vertical"
+    android:textDirection="ltr"
+    tools:context=".EventLogActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layoutDirection="ltr"
+        android:padding="10dp"
+        android:textDirection="ltr">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="Events Log"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:onClick="exitFromEventLog"
+            android:src="@drawable/close_icon"
+            app:tint="#FFFFFF" />
+    </RelativeLayout>
+
+    <ListView
+        android:id="@+id/event_log_listView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginRight="5dp"
+        android:dividerHeight="10.0sp"
+        android:divider="@color/colorAccent"
+        android:layout_marginLeft="5dp" />
+
+
+</LinearLayout>
