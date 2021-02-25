@@ -108,6 +108,7 @@ public class ShowGroup extends RecyclerView.Adapter<ShowGroup.ViewHolder> {
             upComingEvent = new UpComingEvent("nothing", null);
         } else {
             upComingEvent = new UpComingEvent(event.getScheduleObject().getTitle(), event.getScheduleObject().getDateTime());
+
         }
         mGroupNames.add(name);
         mGroupIds.add(id);

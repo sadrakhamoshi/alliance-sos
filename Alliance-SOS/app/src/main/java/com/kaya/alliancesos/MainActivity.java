@@ -226,7 +226,7 @@ public class MainActivity extends AppCompatActivity {
                             mGroupsRef.child(id).child("events").addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                    Event event = null;
+                                    Event closest_event = null;
                                     if (snapshot.exists()) {
                                         long min = Long.MAX_VALUE;
                                         Iterator iterator = snapshot.getChildren().iterator();
@@ -236,11 +236,11 @@ public class MainActivity extends AppCompatActivity {
                                             long milisecond = curr_event.getTimeInMillisecond() * -1;
                                             if (checkIfPassedDate(curr_event) && milisecond < min) {
                                                 min = milisecond;
-                                                event = curr_event;
+                                                closest_event = curr_event;
                                             }
                                         }
                                     }
-                                    mGroupAdapter.add(name, event, id);
+                                    mGroupAdapter.add(name, closest_event, id);
                                     count[0]++;
                                     if (count[0] >= groupCount) {
                                         Log.v("progress", "end" + " " + count[0] + " " + snapshot.getChildrenCount());

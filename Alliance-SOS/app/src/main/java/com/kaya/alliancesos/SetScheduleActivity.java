@@ -123,51 +123,51 @@ public class SetScheduleActivity extends AppCompatActivity {
         InitializeTime_Date();
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        if (mEventListener == null) {
-            mEventListener = new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if (snapshot.exists()) {
-                        long min = Long.MAX_VALUE;
-                        Event upcome = null;
-                        Iterator iterator = snapshot.getChildren().iterator();
-                        while (iterator.hasNext()) {
-                            DataSnapshot dataSnapshot = (DataSnapshot) iterator.next();
-                            Event curr_event = dataSnapshot.getValue(Event.class);
-                            long milisecond = curr_event.getTimeInMillisecond() * -1;
-                            if (milisecond < min) {
-                                min = milisecond;
-                                upcome = curr_event;
-                            }
-                        }
-                        if (upcome != null) {
-                            mGroupsRef.child(mGroupId).child("upComingEvent").setValue(new UpComingEvent(upcome.getScheduleObject().getTitle(),
-                                    upcome.getScheduleObject().getDateTime())).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if (!task.isSuccessful()) {
-                                        Toast.makeText(SetScheduleActivity.this, task.getException() + "", Toast.LENGTH_SHORT).show();
-                                    }
-                                }
-                            });
-                        }
-
-                    } else {
-                        Toast.makeText(SetScheduleActivity.this, "No Event Exist", Toast.LENGTH_SHORT).show();
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    Toast.makeText(SetScheduleActivity.this, "Error " + error.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            };
-            mGroupsRef.child(mGroupId).child("events").addValueEventListener(mEventListener);
-        }
-    }
+//    @Override
+//    protected void onStart() {
+//        super.onStart();
+//        if (mEventListener == null) {
+////            mEventListener = new ValueEventListener() {
+////                @Override
+////                public void onDataChange(@NonNull DataSnapshot snapshot) {
+////                    if (snapshot.exists()) {
+////                        long min = Long.MAX_VALUE;
+////                        Event upcome = null;
+////                        Iterator iterator = snapshot.getChildren().iterator();
+////                        while (iterator.hasNext()) {
+////                            DataSnapshot dataSnapshot = (DataSnapshot) iterator.next();
+////                            Event curr_event = dataSnapshot.getValue(Event.class);
+////                            long milisecond = curr_event.getTimeInMillisecond() * -1;
+////                            if (milisecond < min) {
+////                                min = milisecond;
+////                                upcome = curr_event;
+////                            }
+////                        }
+////                        if (upcome != null) {
+////                            mGroupsRef.child(mGroupId).child("upComingEvent").setValue(new UpComingEvent(upcome.getScheduleObject().getTitle(),
+////                                    upcome.getScheduleObject().getDateTime())).addOnCompleteListener(new OnCompleteListener<Void>() {
+////                                @Override
+////                                public void onComplete(@NonNull Task<Void> task) {
+////                                    if (!task.isSuccessful()) {
+////                                        Toast.makeText(SetScheduleActivity.this, task.getException() + "", Toast.LENGTH_SHORT).show();
+////                                    }
+////                                }
+////                            });
+////                        }
+////
+////                    } else {
+////                        Toast.makeText(SetScheduleActivity.this, "No Event Exist", Toast.LENGTH_SHORT).show();
+////                    }
+////                }
+////
+////                @Override
+////                public void onCancelled(@NonNull DatabaseError error) {
+////                    Toast.makeText(SetScheduleActivity.this, "Error " + error.getMessage(), Toast.LENGTH_SHORT).show();
+////                }
+////            };
+////            mGroupsRef.child(mGroupId).child("events").addValueEventListener(mEventListener);
+//        }
+//    }
 
     private void setupButtons() {
         //time

@@ -15,7 +15,9 @@ class Notification {
 public class NotificationSender {
     @SerializedName("to")
     private String to;
-    //    private boolean mutable_content;
+
+    @SerializedName("mutable_content")
+    private boolean mutable_content;
     @SerializedName("data")
     private DataToSend data;
 
@@ -30,7 +32,7 @@ public class NotificationSender {
         this.to = to;
         this.notification = new Notification("nothing", "nothing");
         this.priority = "high";
-//        this.mutable_content = true;
+        this.mutable_content = true;
     }
 
     public NotificationSender() {

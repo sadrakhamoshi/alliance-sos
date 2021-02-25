@@ -36,5 +36,4 @@ public class UpComingEvent {
     public void setUpcomingTime(DateTime upcomingTime) {
         this.upcomingTime = upcomingTime;
     }
-
 }
