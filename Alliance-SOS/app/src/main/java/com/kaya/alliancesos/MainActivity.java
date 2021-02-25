@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
     private DatabaseReference mRoot, mGroupsRef, mUsersRef;
 
     private ArrayList<String> listOfGroupName, listOfGroupId;
-    private ArrayList<UpComingEvent> listOfUpcomingEvents;
+    private ArrayList<Event> listOfUpcomingEvents;
 
     private ShowGroup mGroupAdapter;
     private RecyclerView mGroup_rv;

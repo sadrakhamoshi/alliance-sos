@@ -26,10 +26,10 @@ public class ShowGroup extends RecyclerView.Adapter<ShowGroup.ViewHolder> {
 
     private Context mContext;
     private ArrayList<String> mGroupNames, mGroupIds;
-    private ArrayList<UpComingEvent> mUpComingEventArrayList;
+    private ArrayList<Event> mUpComingEventArrayList;
     private String mUserId, mUsername;
 
-    public ShowGroup(Context context, ArrayList<String> names, ArrayList<String> ids, ArrayList<UpComingEvent> upComeEvent, String userId) {
+    public ShowGroup(Context context, ArrayList<String> names, ArrayList<String> ids, ArrayList<Event> upComeEvent, String userId) {
         mContext = context;
         mUpComingEventArrayList = upComeEvent;
         mUserId = userId;
@@ -42,10 +42,6 @@ public class ShowGroup extends RecyclerView.Adapter<ShowGroup.ViewHolder> {
         item.put("id", mGroupIds.get(position));
         item.put("name", mGroupNames.get(position));
         return item;
-    }
-
-    public UpComingEvent getData_upcoming(int position) {
-        return mUpComingEventArrayList.get(position);
     }
 
     public void setUserName(String name) {
@@ -65,9 +61,14 @@ public class ShowGroup extends RecyclerView.Adapter<ShowGroup.ViewHolder> {
         String name = mGroupNames.get(position);
         holder.groupName.setText(name);
 
-        UpComingEvent currEvent = mUpComingEventArrayList.get(position);
+        Event currEvent = mUpComingEventArrayList.get(position);
 
-        String eventName = currEvent.getUpcomingName();
+        String eventName;
+        if ( currEvent == null){
+            eventName= "No Event";
+        }else{
+            eventName = currEvent.getScheduleObject().getTitle();
+        }
         if (eventName.length() > 10) {
             eventName = eventName.substring(0, 8);
             eventName += "...";
@@ -92,34 +93,19 @@ public class ShowGroup extends RecyclerView.Adapter<ShowGroup.ViewHolder> {
         });
     }
 
-    private String getUpcomingDate(UpComingEvent currEvent) {
-        if (currEvent.getUpcomingTime() == null) {
-            return "_____";
+    private String getUpcomingDate(Event currEvent) {
+        if (currEvent == null) {
+            return ".......";
         }
         String curr_zoneId = TimeZone.getDefault().getID();
-        String source_zoneId = currEvent.getSourceTimeZoneId();
-        String converted_date = currEvent.getUpcomingTime().ConvertTime(source_zoneId, curr_zoneId);
+        String converted_date = currEvent.getScheduleObject().GetDate(currEvent.getCreatedTimezoneId(),curr_zoneId);
         return converted_date;
     }
 
     public void add(String name, Event event, String id) {
-        final UpComingEvent upComingEvent;
-        if (event == null) {
-            upComingEvent = new UpComingEvent("nothing", null);
-        } else {
-            upComingEvent = new UpComingEvent(event.getScheduleObject().getTitle(), event.getScheduleObject().getDateTime());
-
-        }
         mGroupNames.add(name);
         mGroupIds.add(id);
-        mUpComingEventArrayList.add(upComingEvent);
-        notifyDataSetChanged();
-    }
-
-    public void remove(String name, UpComingEvent upComingEvent, String id) {
-        mGroupNames.remove(name);
-        mUpComingEventArrayList.remove(upComingEvent);
-        mGroupIds.remove(id);
+        mUpComingEventArrayList.add(event);
         notifyDataSetChanged();
     }
 
@@ -135,20 +121,7 @@ public class ShowGroup extends RecyclerView.Adapter<ShowGroup.ViewHolder> {
         return mGroupNames.size();
     }
 
-    public void removeItem(int position) {
-        mGroupNames.remove(position);
-        mGroupIds.remove(position);
-        notifyDataSetChanged();
-    }
-
-    public void restoreItem(String mUsername, String mUserId, int position) {
-        mGroupNames.add(position, mUsername);
-        mGroupIds.add(position, mUserId);
-        notifyItemInserted(position);
-    }
-
     public class ViewHolder extends RecyclerView.ViewHolder {
-        CircleImageView imageView;
         TextView groupName, groupEvent, groupTime;
 
         public ViewHolder(@NonNull View itemView) {
