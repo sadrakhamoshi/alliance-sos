@@ -165,6 +165,7 @@ public class GroupActivity extends AppCompatActivity {
         menu.add(0, 1, 1, menuIconWithText(getResources().getDrawable(R.drawable.members_vector, getApplicationContext().getTheme()), "Add Member"));
         menu.add(0, 2, 2, menuIconWithText(getResources().getDrawable(R.drawable.setting_vector, getApplicationContext().getTheme()), "Group Setting"));
         menu.add(0, 3, 3, menuIconWithText(getResources().getDrawable(R.drawable.help_vector, getApplicationContext().getTheme()), "Help Us"));
+        menu.add(0, 4, 4, menuIconWithText(getResources().getDrawable(R.drawable.ring_event_icon, getApplicationContext().getTheme()), "Events Log"));
         return true;
     }
 
@@ -180,6 +181,9 @@ public class GroupActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 
         switch (item.getItemId()) {
+            case 4:
+                goToEventLog();
+                break;
             case 3:
                 goToHelpPage();
                 break;
@@ -194,6 +198,12 @@ public class GroupActivity extends AppCompatActivity {
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void goToEventLog() {
+        Intent intent = new Intent(getApplicationContext(),EventLogActivity.class);
+        intent.putExtra("groupId",mCurrentGroupId);
+        startActivity(intent);
     }
 
     private void goToHelpPage() {
