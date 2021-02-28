@@ -201,8 +201,8 @@ public class GroupActivity extends AppCompatActivity {
     }
 
     private void goToEventLog() {
-        Intent intent = new Intent(getApplicationContext(),EventLogActivity.class);
-        intent.putExtra("groupId",mCurrentGroupId);
+        Intent intent = new Intent(getApplicationContext(), EventLogActivity.class);
+        intent.putExtra("groupId", mCurrentGroupId);
         startActivity(intent);
     }
 
@@ -482,7 +482,8 @@ public class GroupActivity extends AppCompatActivity {
                             Event event = dataSnapshot.getValue(Event.class);
                             Long value = event.getTimeInMillisecond() * -1;
 
-                            if (checkIfPassedDate(event)) {
+                            if (event != null && checkIfPassedDate(event)) {
+                                Log.e("Hellowwww", event + "");
                                 newEvents.add(event);
                             } else {
                                 //delete from database
