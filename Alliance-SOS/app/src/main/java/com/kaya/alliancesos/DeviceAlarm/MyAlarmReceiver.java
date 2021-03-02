@@ -60,7 +60,7 @@ public class MyAlarmReceiver extends BroadcastReceiver {
             }
         };
         Timer timer = new Timer();
-        timer.schedule(task, 4000);
+        timer.schedule(task, 60000);
     }
 
 
@@ -72,7 +72,7 @@ public class MyAlarmReceiver extends BroadcastReceiver {
                         .setAutoCancel(true)
                         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                         .setContentText("Please Check your App You Have event ...")
-                        .setVibrate(new long[]{500, 200, 300, 400, 500, 1000})
+                        .setVibrate(new long[]{500, 200, 300, 400, 500, 1000, 2000, 220, 1000, 2500})
                         .setStyle(new NotificationCompat.BigTextStyle().bigText("Please Check your App You Have event ..."));
 
         NotificationManager notificationManager = (NotificationManager) mContext.getSystemService(NOTIFICATION_SERVICE);

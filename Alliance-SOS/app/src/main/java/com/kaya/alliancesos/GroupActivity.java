@@ -480,9 +480,8 @@ public class GroupActivity extends AppCompatActivity {
                         while (iterator.hasNext()) {
                             DataSnapshot dataSnapshot = (DataSnapshot) iterator.next();
                             Event event = dataSnapshot.getValue(Event.class);
-                            Long value = event.getTimeInMillisecond() * -1;
 
-                            if (event != null && checkIfPassedDate(event)) {
+                            if (event.getScheduleObject() != null && checkIfPassedDate(event)) {
                                 Log.e("Hellowwww", event + "");
                                 newEvents.add(event);
                             } else {
@@ -507,6 +506,15 @@ public class GroupActivity extends AppCompatActivity {
 
     private boolean checkIfPassedDate(Event event) {
         Date now = new Date();
+        Log.e("fffdfdfdf", event + "");
+        Log.e("fffdfdfdf", event.getScheduleObject() + "");
+        Log.e("fffdfdfdf", event.getCreatedTimezoneId() + "");
+        if (event.getScheduleObject() == null || event.getScheduleObject().getDateTime() == null || event.getScheduleObject().getDateTime().getYear() == null)
+        {
+            Log.e("boolean   ", false + "");
+            return false;
+
+        }
         Date eventConversion = event.getScheduleObject().GetDate_DateFormat(event.getCreatedTimezoneId(), TimeZone.getDefault().getID());
         Log.v("diffrenec", now + "   " + eventConversion);
         return now.before(eventConversion);

@@ -69,6 +69,15 @@ public class ScheduleObject implements Serializable {
         return res;
     }
 
+    @Override
+    public String toString() {
+        return "ScheduleObject{" +
+                "title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", dateTime=" + dateTime +
+                '}';
+    }
+
     public Date GetDate_DateFormat(String mFrom_TimeZoneId, String mTo_TimezoneId) {
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.YEAR, Integer.parseInt(this.getDateTime().getYear()));

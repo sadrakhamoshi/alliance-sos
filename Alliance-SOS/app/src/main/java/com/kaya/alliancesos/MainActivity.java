@@ -303,6 +303,28 @@ public class MainActivity extends AppCompatActivity {
     private void CreateNewGroup(final String groupName, final String groupId) {
         progressBar.setVisibility(View.VISIBLE);
         final Groups groups = new Groups(groupName, groupId, mCurrentUserId);
+
+        mGroupsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (!snapshot.hasChild(groupId)) {
+                    addGroupStuffToDatabase(groupName, groupId, groups);
+                } else {
+                    progressBar.setVisibility(View.GONE);
+                    Toast.makeText(MainActivity.this, " Group Id " + groupId+" is taken already. Please Choose another one and try again !!!", Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                progressBar.setVisibility(View.GONE);
+                Toast.makeText(MainActivity.this, "Error : " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+    }
+
+    private void addGroupStuffToDatabase(final String groupName, final String groupId, Groups groups) {
         mGroupsRef.child(groupId).setValue(groups).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {

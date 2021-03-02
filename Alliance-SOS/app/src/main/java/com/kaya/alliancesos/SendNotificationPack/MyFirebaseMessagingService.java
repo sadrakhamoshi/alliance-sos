@@ -265,7 +265,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 }
             };
             Timer timer = new Timer();
-            timer.schedule(task, 9000);
+            timer.schedule(task, 60000);
         } else {
             throw new NullPointerException();
         }
