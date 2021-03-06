@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="5dp"
+    android:layout_marginTop="10dp"
+    android:layout_marginRight="5dp"
+    android:layoutDirection="ltr"
+    android:textDirection="ltr"
+    app:cardCornerRadius="10dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#DAD8D8"
+        android:layoutDirection="ltr"
+        android:paddingLeft="3dp"
+        android:paddingTop="15dp"
+        android:paddingRight="3dp"
+        android:paddingBottom="15dp"
+        android:textDirection="ltr">
+
+        <LinearLayout
+            android:id="@+id/title2_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="10dp"
+                android:text="Group ID : "
+                android:textColor="#2E2828"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/invite_pattern_groupId"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#9C9191"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                tools:text="Kearen" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/created2_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/title2_layout"
+            android:layout_marginBottom="20dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="10dp"
+                android:text="Invited by : "
+                android:textColor="#2E2828"
+                android:textSize="17sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/invite_pattern_invitedby"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-condensed-light"
+                android:textColor="#5C5656"
+                android:textSize="17sp"
+                tools:text="Kearen" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/date_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/created2_layout"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/invite_pattern_accept"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="3"
+                android:background="@drawable/join_back"
+                android:text="Accept"
+                android:textAllCaps="false"
+                android:textColor="#025305"
+                android:layout_marginRight="10dp"
+                android:textSize="20sp" />
+
+            <ImageButton
+                android:id="@+id/invite_pattern_decline"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:tint="#550000"
+                android:src="@drawable/close_icon"
+                android:background="@drawable/leave_back"
+                android:text="Accept"
+                android:layout_gravity="center_vertical"
+                android:textAllCaps="false"
+
+                android:textColor="#025305"
+                android:textSize="20sp" />
+
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</androidx.cardview.widget.CardView>
