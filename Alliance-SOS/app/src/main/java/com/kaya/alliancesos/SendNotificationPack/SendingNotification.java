@@ -89,13 +89,7 @@ public class SendingNotification {
                 if (response.code() == 200) {
                     if (response.body().success != 1) {
                         Toast.makeText(mContext, "Failed please Try again later", Toast.LENGTH_SHORT).show();
-                        Log.e("nothing", response.headers() + " " + response.raw());
-                        Log.e("nothing", response.message() + ' ' + response.isSuccessful() + ' ' + response.body().success);
-                        Log.e("nothing3", "msg" + response.toString());
                     } else {
-                        Log.e("nothing", response.headers() + " " + response.raw());
-                        Log.e("nothing", response.message() + ' ' + response.isSuccessful() + ' ' + response.body().success);
-                        Log.e("nothing3", "msg" + response.toString());
                         Toast.makeText(mContext, "Send Successfully ... ", Toast.LENGTH_LONG).show();
                     }
                 }

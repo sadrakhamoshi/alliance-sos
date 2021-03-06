@@ -134,8 +134,8 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
-                android:visibility="gone"
-                android:layout_marginTop="15dp">
+                android:layout_marginTop="15dp"
+                android:visibility="gone">
 
                 <EditText
                     android:id="@+id/password_setting"
@@ -228,8 +228,8 @@
                     android:layout_height="match_parent"
                     android:background="#00000000"
                     android:drawableLeft="@drawable/ring_event_icon"
-                    android:drawableTint="#807D7D"
                     android:drawablePadding="10dp"
+                    android:drawableTint="#807D7D"
                     android:gravity="center_vertical"
                     android:text="Ring Before Events"
                     android:textSize="17sp" />
@@ -273,7 +273,6 @@
 
             <RelativeLayout
                 android:layout_width="match_parent"
-
                 android:layout_height="60dp"
                 android:layout_marginTop="15dp"
                 android:onClick="choseCustomRingtone">
@@ -300,7 +299,7 @@
 
             <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="80dp"
+                android:layout_height="60dp"
                 android:layout_marginTop="15dp"
                 android:onClick="goToDonatePage">
 
@@ -318,6 +317,33 @@
                     android:textSize="17sp" />
 
                 <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/right_arrow" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:layout_marginTop="15dp"
+                android:onClick="invitePage">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#00000000"
+                    android:drawableLeft="@drawable/invite_icon"
+                    android:drawablePadding="10dp"
+                    android:drawableTint="#323131"
+                    android:gravity="center_vertical"
+                    android:text="Invitations"
+                    android:textSize="17sp" />
+
+                <ImageView
+                    android:id="@+id/invite_page_setting"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"

@@ -35,6 +35,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.kaya.alliancesos.DbForRingtone.ChoiceApplication;
 import com.kaya.alliancesos.DoNotDisturb.NotDisturbActivity;
+import com.kaya.alliancesos.InvitationActivity;
 import com.kaya.alliancesos.LogInPage;
 import com.kaya.alliancesos.Payment.TransferActivity;
 import com.kaya.alliancesos.R;
@@ -634,6 +635,12 @@ public class UserSettingActivity extends AppCompatActivity {
         startActivity(goToLogIn);
         finish();
         return;
+    }
+
+    public void invitePage(View view) {
+        Intent intent = new Intent(getApplicationContext(), InvitationActivity.class);
+        intent.putExtra("userId",mUserId);
+        startActivity(intent);
     }
 
     public class updateRingtoneTask extends AsyncTask<Void, Void, Void> {

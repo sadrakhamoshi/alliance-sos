@@ -29,6 +29,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.kaya.alliancesos.Payment.TransferActivity;
 import com.kaya.alliancesos.SendNotificationPack.DataToSend;
 import com.kaya.alliancesos.SendNotificationPack.SendingNotification;
@@ -58,7 +60,7 @@ public class MemberActivity extends AppCompatActivity {
     private ArrayAdapter<String> adapter;
 
     //database
-    private DatabaseReference mGroupRef, mUserRef;
+    private DatabaseReference mRoot, mGroupRef, mUserRef;
     private ChildEventListener mMembersEventListener;
 
     private Toolbar mToolbar;
@@ -82,8 +84,9 @@ public class MemberActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progress_add_member);
 
         //database
-        mGroupRef = FirebaseDatabase.getInstance().getReference().child("groups");
-        mUserRef = FirebaseDatabase.getInstance().getReference().child("users");
+        mRoot = FirebaseDatabase.getInstance().getReference();
+        mGroupRef = mRoot.child("groups");
+        mUserRef = mRoot.child("users");
 
         mMembersListView = findViewById(R.id.members_list_view);
         mMembersList = new ArrayList<>();
@@ -210,6 +213,18 @@ public class MemberActivity extends AppCompatActivity {
         data.setToName(foundedUsername);
         AddingMemberTask task = new AddingMemberTask(data, foundedUserId);
         task.execute();
+        String id = mRoot.child("invite").child(data.getToId()).push().getKey();
+        InviteObject object = new InviteObject(id, data.getMakeBy(), data.getToId(), data.getGroupName(), data.getGroupId());
+        mRoot.child("invite").child(data.getToId()).child(id).setValue(object).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    Toast.makeText(MemberActivity.this, "sent successful", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(MemberActivity.this, "error : " + task.getException(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
 //        SendingNotification sender = new SendingNotification(MemberActivity.this, foundedUserId, data);
 //        sender.sendInvitation();
     }

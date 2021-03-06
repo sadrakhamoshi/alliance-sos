@@ -32,6 +32,7 @@ import java.util.TimerTask;
 public class InvitationResponseActivity extends AppCompatActivity {
 
     private ProgressBar progressBar;
+    private String mInviteId;
     private EditText mName_edt;
     private String mCurrUserId;
     private String mGroupId, mGroupName;
@@ -67,6 +68,30 @@ public class InvitationResponseActivity extends AppCompatActivity {
     }
 
     public void addUserToGroup(View view) {
+        mUserRef.child(mCurrUserId).child("Groups").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    if (snapshot.hasChild(mGroupId)) {
+                        Toast.makeText(InvitationResponseActivity.this, "You have been in this group", Toast.LENGTH_LONG).show();
+                        finish();
+                    } else {
+                        addMember();
+                    }
+                } else {
+                    addMember();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(InvitationResponseActivity.this, "onCancle " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
+    private void addMember() {
         final String username = mName_edt.getText().toString();
 
         if (TextUtils.isEmpty(username)) {
