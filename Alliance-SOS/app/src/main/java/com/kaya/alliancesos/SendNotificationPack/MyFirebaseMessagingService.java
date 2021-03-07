@@ -47,6 +47,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     public static final String NOTIFICATION_CHANNEL_ID = "10001";
 
     private Bitmap notificationPhoto;
+    private String inviteId;
 
     private DatabaseReference mRootRef;
     private String mUserId;
@@ -174,7 +175,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         } else if (type == MessageType.INVITATION_TYPE) {
             title = "Invitation";
-            message = "You Added to " + groupName + " By " + makeBy + ". \n" + "Click Here to Set Your Name.";
+            inviteId = remoteMessage.getData().get("inviteId");
+            message = "You Added to " + groupName + " By " + makeBy + ". \n" + "Click Here to Set Your UserName";
             notificationColor = Color.RED;
             notificationIcon = R.drawable.add_group_icon;
         }
@@ -239,11 +241,12 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             intent.putExtra("time", sentTime);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             return PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        } else {
+        } else  {
             Intent intent = new Intent(context, InvitationResponseActivity.class);
             intent.putExtra("groupId", groupId);
             intent.putExtra("groupName", groupName);
             intent.putExtra("toId", toId);
+            intent.putExtra("inviteId", inviteId);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             return PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         }

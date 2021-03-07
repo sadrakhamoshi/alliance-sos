@@ -71,6 +71,7 @@ public class InvitePageAdapter extends ArrayAdapter<InviteObject> {
         intent.putExtra("groupId", inviteObject.getGroupId());
         intent.putExtra("groupName", inviteObject.getGroupName());
         intent.putExtra("toId", inviteObject.getUserId());
+        intent.putExtra("inviteId",inviteObject.getInviteId());
         mContext.startActivity(intent);
     }
 

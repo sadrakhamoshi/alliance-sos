@@ -6,11 +6,20 @@ public class DataToSend {
     private String title, body;
     private String makeBy, groupName;
     private String toName, toId;
+    private String inviteId;
     private String groupId;
     private String eventId;
     private int type;
     private String photoUrl;
     private String sosMessage, sosId;
+
+    public String getInviteId() {
+        return inviteId;
+    }
+
+    public void setInviteId(String inviteId) {
+        this.inviteId = inviteId;
+    }
 
     public String getSosId() {
         return sosId;

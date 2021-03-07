@@ -211,9 +211,11 @@ public class MemberActivity extends AppCompatActivity {
         DataToSend data = new DataToSend(mHostUsername, mGroupName, mGroupId, MessageType.INVITATION_TYPE);
         data.setToId(foundedUserId);
         data.setToName(foundedUsername);
-        AddingMemberTask task = new AddingMemberTask(data, foundedUserId);
-        task.execute();
         String id = mRoot.child("invite").child(data.getToId()).push().getKey();
+        data.setInviteId(id);
+        Toast.makeText(this, data.getInviteId(), Toast.LENGTH_SHORT).show();
+        SendingNotificationTask task = new SendingNotificationTask(data, foundedUserId);
+        task.execute();
         InviteObject object = new InviteObject(id, data.getMakeBy(), data.getToId(), data.getGroupName(), data.getGroupId());
         mRoot.child("invite").child(data.getToId()).child(id).setValue(object).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
@@ -288,12 +290,12 @@ public class MemberActivity extends AppCompatActivity {
         goToTransferPage();
     }
 
-    public class AddingMemberTask extends AsyncTask<Void, Void, Void> {
+    public class SendingNotificationTask extends AsyncTask<Void, Void, Void> {
 
         DataToSend dataToSend;
         String targetId;
 
-        public AddingMemberTask(DataToSend dataSnapshot, String id) {
+        public SendingNotificationTask(DataToSend dataSnapshot, String id) {
             this.dataToSend = dataSnapshot;
             targetId = id;
         }

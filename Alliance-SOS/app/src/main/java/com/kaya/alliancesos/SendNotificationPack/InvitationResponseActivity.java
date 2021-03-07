@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -55,6 +56,7 @@ public class InvitationResponseActivity extends AppCompatActivity {
             mGroupId = bundle.getString("groupId");
             mGroupName = bundle.getString("groupName");
             mCurrUserId = bundle.getString("toId");
+            mInviteId = bundle.getString("inviteId");
         } catch (Exception e) {
             Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
         }
@@ -136,7 +138,7 @@ public class InvitationResponseActivity extends AppCompatActivity {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
-                                MakeAlertDialog("Attention", "You Added to " + mGroupName);
+                                removeInvitationFromDB();
                             } else {
                                 Toast.makeText(InvitationResponseActivity.this, "error in second complete " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                             }
@@ -211,6 +213,19 @@ public class InvitationResponseActivity extends AppCompatActivity {
 
     public void notAddToGroup(View view) {
         MakeAlertDialog("Attention", "Okay Have Nice Day...");
+    }
+
+    private void removeInvitationFromDB() {
+        mRoot.child("invite").child(mCurrUserId).child(mInviteId).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    MakeAlertDialog("Attention", "You Added to " + mGroupName);
+                } else {
+                    Toast.makeText(InvitationResponseActivity.this, "error in second complete " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
     private void MakeAlertDialog(String title, String message) {

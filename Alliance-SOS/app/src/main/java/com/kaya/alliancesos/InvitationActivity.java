@@ -16,11 +16,15 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.kaya.alliancesos.Adapters.InvitePageAdapter;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 public class InvitationActivity extends AppCompatActivity {
 
@@ -48,37 +52,30 @@ public class InvitationActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        mRef.child("invite").child(mUserId).addChildEventListener(new ChildEventListener() {
+        mRef.child("invite").child(mUserId).addValueEventListener(new ValueEventListener() {
             @Override
-            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                InviteObject object = snapshot.getValue(InviteObject.class);
-                mAdapter.add(object);
-                mAdapter.notifyDataSetChanged();
-                if (textView.getVisibility() == View.VISIBLE) {
-                    textView.setVisibility(View.GONE);
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    Iterator iterator = snapshot.getChildren().iterator();
+                    ArrayList<InviteObject> objects = new ArrayList<>();
+                    while (iterator.hasNext()) {
+                        DataSnapshot data = (DataSnapshot) iterator.next();
+                        InviteObject objs = data.getValue(InviteObject.class);
+                        objects.add(objs);
+                    }
+                    mAdapter.clear();
+                    if (objects.size() == 0) {
+                        textView.setVisibility(View.VISIBLE);
+                    } else {
+                        textView.setVisibility(View.GONE);
+                    }
+                    mAdapter.addAll(objects);
                 }
-            }
-
-            @Override
-            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-            }
-
-            @Override
-            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-                if (mAdapter.getCount() == 1 && textView.getVisibility() == View.GONE) {
-                    textView.setVisibility(View.VISIBLE);
-                }
-            }
-
-            @Override
-            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(InvitationActivity.this, "Errors : " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(InvitationActivity.this, "Errors " + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
