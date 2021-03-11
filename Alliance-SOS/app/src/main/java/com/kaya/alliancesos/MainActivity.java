@@ -311,7 +311,7 @@ public class MainActivity extends AppCompatActivity {
                     addGroupStuffToDatabase(groupName, groupId, groups);
                 } else {
                     progressBar.setVisibility(View.GONE);
-                    Toast.makeText(MainActivity.this, " Group Id " + groupId+" is taken already. Please Choose another one and try again !!!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this, " Group Id " + groupId + " is taken already. Please Choose another one and try again !!!", Toast.LENGTH_LONG).show();
                 }
             }
 
@@ -562,22 +562,49 @@ public class MainActivity extends AppCompatActivity {
         SwipeToDeleteCallback swipeToDeleteCallback = new SwipeToDeleteCallback(this) {
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
-
                 final int position = viewHolder.getAdapterPosition();
                 final HashMap<String, String> item = mGroupAdapter.getData(position);
-                mGroupAdapter.clearAll();
-                clearGroupsForUser(item);
-
-                Snackbar snackbar = Snackbar.make(mLinearLayout, "Item was removed from the list.", Snackbar.LENGTH_LONG);
-
-                snackbar.setActionTextColor(Color.YELLOW);
-                snackbar.show();
+                SatisfiedDeleteGroupDialog(item);
+//                deleteGroupSwipe(viewHolder);
             }
         };
 
         ItemTouchHelper itemTouchhelper = new ItemTouchHelper(swipeToDeleteCallback);
         itemTouchhelper.attachToRecyclerView(mGroup_rv);
     }
+
+    private void SatisfiedDeleteGroupDialog(final HashMap<String, String> item) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this, R.style.AlertDialog);
+        builder.setTitle("IMPORTANT ");
+        builder.setCancelable(false);
+        builder.setIcon(R.drawable.close_icon);
+        builder.setMessage("Are You Sure You Want To Leave & Delete " + item.get("name") + " ?");
+        builder.setPositiveButton("I'm Sure", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                deleteGroupSwipe(item);
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                mGroupAdapter.clearAll();
+                detachmentValueListener();
+                attachValueListener();
+            }
+        });
+        builder.show();
+    }
+
+
+    private void deleteGroupSwipe(HashMap<String, String> item) {
+        mGroupAdapter.clearAll();
+        clearGroupsForUser(item);
+        Snackbar snackbar = Snackbar.make(mLinearLayout, "Item is removed from the list.", Snackbar.LENGTH_SHORT);
+        snackbar.setActionTextColor(Color.YELLOW);
+        snackbar.show();
+    }
+
 
     private void clearGroupsForUser(final HashMap<String, String> item) {
         final String id = item.get("id");
