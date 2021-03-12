@@ -6,7 +6,7 @@ class Notification {
     public String title;
     public String body;
 
-    public Notification(String title, String body) {
+    public Notification(String body, String title) {
         this.title = title;
         this.body = body;
     }
@@ -15,6 +15,9 @@ class Notification {
 public class NotificationSender {
     @SerializedName("to")
     private String to;
+
+    @SerializedName("content_available")
+    private boolean content_available;
 
     @SerializedName("mutable_content")
     private boolean mutable_content;
@@ -30,9 +33,10 @@ public class NotificationSender {
     public NotificationSender(DataToSend data, String to) {
         this.data = data;
         this.to = to;
-        this.notification = new Notification("nothing", "nothing");
+        this.notification = new Notification("body", "title");
         this.priority = "high";
         this.mutable_content = true;
+        this.content_available = true;
     }
 
     public NotificationSender() {

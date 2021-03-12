@@ -213,7 +213,6 @@ public class MemberActivity extends AppCompatActivity {
         data.setToName(foundedUsername);
         String id = mRoot.child("invite").child(data.getToId()).push().getKey();
         data.setInviteId(id);
-        Toast.makeText(this, data.getInviteId(), Toast.LENGTH_SHORT).show();
         SendingNotificationTask task = new SendingNotificationTask(data, foundedUserId);
         task.execute();
         InviteObject object = new InviteObject(id, data.getMakeBy(), data.getToId(), data.getGroupName(), data.getGroupId());

@@ -81,14 +81,14 @@ public class SendingNotification {
 
     private void Invite(String token) {
         NotificationSender sender = new NotificationSender(data, token);
-        sender.notification.title = "Alliance SOS";
-        sender.notification.body = "You have an invitation notification";
+//        sender.notification.title = "Alliance SOS";
+//        sender.notification.body = "You have an invitation notification";
         mApiService.sendNotification(sender).enqueue(new Callback<MyResponse>() {
             @Override
             public void onResponse(Call<MyResponse> call, Response<MyResponse> response) {
                 if (response.code() == 200) {
                     if (response.body().success != 1) {
-                        Toast.makeText(mContext, "Failed please Try again later", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(mContext, "Failed please Try again later" + response.message() + call.toString(), Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(mContext, "Send Successfully ... ", Toast.LENGTH_LONG).show();
                     }
@@ -163,8 +163,8 @@ public class SendingNotification {
         data.setToId(id);
         data.setToName(name);
         NotificationSender sender = new NotificationSender(data, target_token);
-        sender.notification.title = "Alliance SOS";
-        sender.notification.body = "You have a new notification";
+//        sender.notification.title = "Alliance SOS";
+//        sender.notification.body = "You have a new notification";
         mApiService.sendNotification(sender).enqueue(new Callback<MyResponse>() {
             @Override
             public void onResponse(Call<MyResponse> call, Response<MyResponse> response) {
