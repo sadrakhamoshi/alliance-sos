@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -299,6 +300,10 @@ public class SignUpPage extends AppCompatActivity {
             getTokenAndSignUp();
             ring = Uri.parse("android.resource://" + getPackageName() + "/raw/game");
             userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+            SharedPreferences sharedPreferences = getSharedPreferences("User_Ring", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString(userId, ring.toString());
+            editor.commit();
             if (mChoiceDB.appDatabase.dao().currentPath(userId) == null) {
                 ringtone ringtone = new ringtone(userId, ring.toString());
                 mChoiceDB.appDatabase.dao().insert(ringtone);

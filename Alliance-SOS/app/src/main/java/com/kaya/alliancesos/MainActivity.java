@@ -29,6 +29,7 @@ import android.widget.Toast;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.kaya.alliancesos.Adapters.ShowGroup;
 import com.kaya.alliancesos.Adapters.SwipeToDeleteCallback;
+import com.kaya.alliancesos.DeviceAlarm.MyAlarmReceiver;
 import com.kaya.alliancesos.Payment.PaymentActivity;
 import com.kaya.alliancesos.Payment.PaymentObject;
 import com.kaya.alliancesos.SendNotificationPack.Token;
@@ -77,6 +78,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        if (MyAlarmReceiver.ringtone != null) {
+            if (MyAlarmReceiver.ringtone.isPlaying()) {
+                MyAlarmReceiver.ringtone.stop();
+            }
+        }
         Initialize();
     }
 

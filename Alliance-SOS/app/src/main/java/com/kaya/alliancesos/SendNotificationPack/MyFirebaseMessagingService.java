@@ -15,6 +15,7 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
@@ -55,7 +56,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private Context mContext;
 
-    private Ringtone mRingtone;
+    public static Ringtone mRingtone;
 
     Integer type;
     Integer notificationIcon;
@@ -72,6 +73,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
+        if (mRingtone != null && mRingtone.isPlaying()) {
+            mRingtone.stop();
+        }
         type = Integer.valueOf(remoteMessage.getData().get("type"));
         sentTime = remoteMessage.getSentTime();
         isMissed = System.currentTimeMillis() - sentTime > DELAY_TIME;
@@ -199,9 +203,13 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                         .setContentIntent(pendingIntent)
                         .setStyle(new NotificationCompat.BigTextStyle().bigText(message));
 
+
         if (type == MessageType.NOTIFICATION_TYPE || type == MessageType.INVITATION_TYPE) {
             builder.setSound(alarmSound);
+        } else if (type == MessageType.SOS_TYPE) {
+            builder.setOngoing(true);
         }
+
         if (type == MessageType.SOS_TYPE && notificationPhoto != null) {
             builder.setLargeIcon(notificationPhoto);
             builder.setStyle(new NotificationCompat.BigPictureStyle()
@@ -240,6 +248,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             intent.putExtra("sosId", mSosId);
             intent.putExtra("groupId", groupId);
             intent.putExtra("time", sentTime);
+
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             return PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         } else {
@@ -262,9 +271,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
             mRingtone = RingtoneManager.getRingtone(getApplicationContext(), notification);
         }
-
-//        ringtone ring = mChoiceDB.appDatabase.dao().currentPath(toId);
-//        Uri alert = Uri.parse(ring.path);
         if (!mRingtone.isPlaying())
             mRingtone.play();
         TimerTask task = new TimerTask() {
@@ -276,7 +282,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             }
         };
         Timer timer = new Timer();
-        timer.schedule(task, 60000);
+        timer.schedule(task, 120000);
 
     }
 

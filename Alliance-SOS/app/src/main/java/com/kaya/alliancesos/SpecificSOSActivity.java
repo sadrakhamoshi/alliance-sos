@@ -12,6 +12,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.kaya.alliancesos.SendNotificationPack.DataToSend;
+import com.kaya.alliancesos.SendNotificationPack.MyFirebaseMessagingService;
 import com.kaya.alliancesos.Setting.ViewDialog;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -38,6 +39,12 @@ public class SpecificSOSActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_specific_s_o_s);
+
+        if (MyFirebaseMessagingService.mRingtone != null) {
+            if (MyFirebaseMessagingService.mRingtone.isPlaying()) {
+                MyFirebaseMessagingService.mRingtone.stop();
+            }
+        }
         getExtras();
         Init();
     }
