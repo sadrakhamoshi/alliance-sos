@@ -61,7 +61,6 @@ public class SignUpPage extends AppCompatActivity {
     private DatabaseReference mRootDatabase;
     private DatabaseReference mUserDatabaseRef;
 
-    private ChoiceApplication mChoiceDB;
     private Uri ring;
 
     private ProgressBar progressBar;
@@ -73,12 +72,7 @@ public class SignUpPage extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_up_page);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                mChoiceDB = new ChoiceApplication(SignUpPage.this);
-            }
-        }).start();
+
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(ClientID)
                 .requestEmail()
@@ -303,11 +297,7 @@ public class SignUpPage extends AppCompatActivity {
             SharedPreferences sharedPreferences = getSharedPreferences("User_Ring", Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putString(userId, ring.toString());
-            editor.commit();
-            if (mChoiceDB.appDatabase.dao().currentPath(userId) == null) {
-                ringtone ringtone = new ringtone(userId, ring.toString());
-                mChoiceDB.appDatabase.dao().insert(ringtone);
-            }
+            editor.apply();
             return null;
         }
     }

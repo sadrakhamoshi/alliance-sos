@@ -92,7 +92,6 @@ public class UserSettingActivity extends AppCompatActivity {
     private StorageReference mUserImageProfileRef;
 
     private ViewDialog loadingDialog;
-    private ChoiceApplication mChoiceDB;
 
     private FirebaseAuth mFirebaseAuth;
     private FirebaseAuth.AuthStateListener mAuthStateListener;
@@ -115,12 +114,6 @@ public class UserSettingActivity extends AppCompatActivity {
                     goToLogInPage();
             }
         };
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                mChoiceDB = new ChoiceApplication(UserSettingActivity.this);
-            }
-        }).start();
 
         loadingDialog = new ViewDialog(this);
 
@@ -533,9 +526,7 @@ public class UserSettingActivity extends AppCompatActivity {
             SharedPreferences sharedPreferences = getSharedPreferences("User_Ring", Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putString(mUserId, uri.toString());
-            editor.commit();
-            updateRingtoneTask updateRingtoneTask = new updateRingtoneTask(uri);
-            updateRingtoneTask.execute();
+            editor.apply();
         }
     }
 
@@ -647,34 +638,6 @@ public class UserSettingActivity extends AppCompatActivity {
         Intent intent = new Intent(getApplicationContext(), InvitationActivity.class);
         intent.putExtra("userId", mUserId);
         startActivity(intent);
-    }
-
-    public class updateRingtoneTask extends AsyncTask<Void, Void, Void> {
-
-        public Uri newRing;
-
-        public updateRingtoneTask(Uri ring) {
-            newRing = ring;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            Toast.makeText(UserSettingActivity.this, "start", Toast.LENGTH_SHORT).show();
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            Toast.makeText(UserSettingActivity.this, "finish", Toast.LENGTH_SHORT).show();
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            String newPath = newRing.toString();
-            mChoiceDB.appDatabase.dao().updateRingtonePath(mUserId, newPath);
-            return null;
-        }
     }
 
     private void NotAllowedUseSpace() {

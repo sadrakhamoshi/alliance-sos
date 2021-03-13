@@ -20,6 +20,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 
+import com.bumptech.glide.Priority;
 import com.kaya.alliancesos.DbForRingtone.ChoiceApplication;
 import com.kaya.alliancesos.DbForRingtone.ringtone;
 import com.kaya.alliancesos.R;
@@ -198,8 +199,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                         .setContentTitle(title)
                         .setSmallIcon(notificationIcon)
                         .setContentText(message)
+                        .setPriority(NotificationCompat.PRIORITY_MAX)
                         .setVibrate(new long[]{500, 200, 300, 400, 500, 200, 400, 300, 200, 400, 200})
-                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                         .setContentIntent(pendingIntent)
                         .setStyle(new NotificationCompat.BigTextStyle().bigText(message));
 

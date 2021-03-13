@@ -62,7 +62,7 @@ public class MyAlarmReceiver extends BroadcastReceiver {
             }
         };
         Timer timer = new Timer();
-        timer.schedule(task, 60000);
+        timer.schedule(task, 120000);
     }
 
 
