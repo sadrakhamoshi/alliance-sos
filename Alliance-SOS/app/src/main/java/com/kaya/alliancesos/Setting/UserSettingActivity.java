@@ -527,6 +527,7 @@ public class UserSettingActivity extends AppCompatActivity {
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putString(mUserId, uri.toString());
             editor.apply();
+            Toast.makeText(this, "Done.", Toast.LENGTH_LONG).show();
         }
     }
 
