@@ -3,7 +3,10 @@ package com.kaya.alliancesos;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -45,6 +48,14 @@ public class LogInPage extends AppCompatActivity {
         super.onStart();
         FirebaseUser currUser = mFirebaseAuth.getCurrentUser();
         if (currUser != null) {
+            SharedPreferences sharedPreferences = getSharedPreferences("User_Ring", Context.MODE_PRIVATE);
+            String path = sharedPreferences.getString(currUser.getUid(), null);
+            if (path == null) {
+                Uri ring = Uri.parse("android.resource://" + getPackageName() + "/raw/game");
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString(currUser.getUid(), ring.toString());
+                editor.apply();
+            }
             Toast.makeText(this, "You already logged in", Toast.LENGTH_SHORT).show();
             GoToMainPage();
         } else {

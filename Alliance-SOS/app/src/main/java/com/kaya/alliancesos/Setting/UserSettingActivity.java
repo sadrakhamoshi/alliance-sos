@@ -655,7 +655,6 @@ public class UserSettingActivity extends AppCompatActivity {
         };
         InputFilter[] filter1 = new InputFilter[]{filter};
         mEmail.setFilters(filter1);
-//        mUsername.setFilters(filter1);
     }
 
     public class GetBasicInfoTask extends AsyncTask<Void, Void, Void> {
