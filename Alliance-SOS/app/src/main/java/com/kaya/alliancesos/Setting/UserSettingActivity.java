@@ -6,8 +6,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AlertDialog;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -264,7 +266,7 @@ public class UserSettingActivity extends AppCompatActivity {
         userObject.setTimeZone(mTime.getText().toString());
         userObject.setLanguage(mLanguage.getText().toString());
         userObject.setRingEnable(mRingEnable.isChecked());
-
+        userObject.setDeviceType(UserObject.ANDROID);
         userObject.setToken(mCurrUserInfo.getToken());
         userObject.setId(mCurrUserInfo.getId());
         userObject.setNotDisturb(false);
@@ -528,6 +530,10 @@ public class UserSettingActivity extends AppCompatActivity {
             });
         } else if (requestCode == PICK_RING) {
             Uri uri = data.getData();
+            SharedPreferences sharedPreferences = getSharedPreferences("User_Ring", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString(mUserId, uri.toString());
+            editor.commit();
             updateRingtoneTask updateRingtoneTask = new updateRingtoneTask(uri);
             updateRingtoneTask.execute();
         }
@@ -639,7 +645,7 @@ public class UserSettingActivity extends AppCompatActivity {
 
     public void invitePage(View view) {
         Intent intent = new Intent(getApplicationContext(), InvitationActivity.class);
-        intent.putExtra("userId",mUserId);
+        intent.putExtra("userId", mUserId);
         startActivity(intent);
     }
 

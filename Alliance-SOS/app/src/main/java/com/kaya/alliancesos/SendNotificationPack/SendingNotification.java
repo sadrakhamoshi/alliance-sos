@@ -7,12 +7,14 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
+import com.firebase.ui.auth.data.model.User;
 import com.kaya.alliancesos.Member;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.kaya.alliancesos.UserObject;
 
 import java.util.Iterator;
 
@@ -25,6 +27,7 @@ public class SendingNotification {
     public boolean isInSendMode = false;
     private static final String BASE_URL = "https://fcm.googleapis.com/";
     private APIService mApiService;
+    private APIService2 mApiService2;
 
     private String targetUserId;
 
@@ -45,6 +48,7 @@ public class SendingNotification {
         data = dataToSendForSOS;
         mContext = context;
         mApiService = Client.getClient(BASE_URL).create(APIService.class);
+        mApiService2 = Client.getClient(BASE_URL).create(APIService2.class);
         DatabaseReference root = FirebaseDatabase.getInstance().getReference();
         mGroupRef = root.child("groups");
         mUserRef = root.child("users");
@@ -55,6 +59,7 @@ public class SendingNotification {
         this.data = dataToSend;
         this.targetUserId = targetUserId;
         mApiService = Client.getClient(BASE_URL).create(APIService.class);
+        mApiService2 = Client.getClient(BASE_URL).create(APIService2.class);
         mUserRef = FirebaseDatabase.getInstance().getReference().child("users");
     }
 
@@ -63,9 +68,9 @@ public class SendingNotification {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-
                     String token = snapshot.child("token").getValue().toString();
-                    Invite(token);
+                    String deviceType = snapshot.child("deviceType").getValue().toString();
+                    Invite(token, deviceType);
 
                 } else {
                     Toast.makeText(mContext, "Not exist this user for invite...", Toast.LENGTH_SHORT).show();
@@ -79,10 +84,35 @@ public class SendingNotification {
         });
     }
 
-    private void Invite(String token) {
-        NotificationSender sender = new NotificationSender(data, token);
-//        sender.notification.title = "Alliance SOS";
-//        sender.notification.body = "You have an invitation notification";
+    private void Invite(String token, String deviceType) {
+        if (deviceType.equals(UserObject.ANDROID)) {
+            NotificationSender sender = new NotificationSender(data, token);
+            sendingInvite(sender);
+        } else {
+            NotificationSenderIOS senderIOS = new NotificationSenderIOS(data, token);
+            senderIOS.notification = new Notification("Title", "Body");
+//            sendingInvite(senderIOS);
+            mApiService2.sendNotificationIos(senderIOS).enqueue(new Callback<MyResponse>() {
+                @Override
+                public void onResponse(Call<MyResponse> call, Response<MyResponse> response) {
+                    if (response.code() == 200) {
+                        if (response.body().success != 1) {
+                            Toast.makeText(mContext, "Failed please Try again later" + response.message() + call.toString(), Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(mContext, "Send Successfully ... ", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<MyResponse> call, Throwable t) {
+                    Toast.makeText(mContext, t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+    }
+
+    private void sendingInvite(NotificationSender sender) {
         mApiService.sendNotification(sender).enqueue(new Callback<MyResponse>() {
             @Override
             public void onResponse(Call<MyResponse> call, Response<MyResponse> response) {
@@ -145,8 +175,9 @@ public class SendingNotification {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
                     String token = snapshot.child("token").getValue().toString();
+                    String deviceType = snapshot.child("deviceType").getValue().toString();
                     if (!TextUtils.isEmpty(token))
-                        sendNotif(token, userNameForThisGroup, userId);
+                        sendNotif(token, userNameForThisGroup, userId, deviceType);
                 } else {
                     Toast.makeText(mContext, "not exist for sending notifi....", Toast.LENGTH_SHORT).show();
                 }
@@ -159,12 +190,40 @@ public class SendingNotification {
         });
     }
 
-    private void sendNotif(String target_token, String name, String id) {
+    private void sendNotif(String target_token, String name, String id, String deviceType) {
         data.setToId(id);
         data.setToName(name);
-        NotificationSender sender = new NotificationSender(data, target_token);
-//        sender.notification.title = "Alliance SOS";
-//        sender.notification.body = "You have a new notification";
+        if (deviceType.equals(UserObject.ANDROID)) {
+            NotificationSender sender = new NotificationSender(data, target_token);
+            sendingNotif(sender);
+
+        } else {
+            NotificationSenderIOS senderIOS = new NotificationSenderIOS(data, target_token);
+            senderIOS.notification = new Notification("title", "body");
+            mApiService2.sendNotificationIos(senderIOS).enqueue(new Callback<MyResponse>() {
+                @Override
+                public void onResponse(Call<MyResponse> call, Response<MyResponse> response) {
+                    if (response.code() == 200) {
+                        if (response.body().success != 1) {
+                            try  {
+                                String respo = response.body().toString() + ' ' + response.errorBody().string();
+                                Toast.makeText(mContext, respo + '\n' + response, Toast.LENGTH_LONG).show();
+                            } catch (Exception e) {
+                            }
+                        } else {
+                            Toast.makeText(mContext, "Send Successfully ... ", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                }
+                @Override
+                public void onFailure(Call<MyResponse> call, Throwable t) {
+                    Toast.makeText(mContext, t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+    }
+
+    private void sendingNotif(NotificationSender sender) {
         mApiService.sendNotification(sender).enqueue(new Callback<MyResponse>() {
             @Override
             public void onResponse(Call<MyResponse> call, Response<MyResponse> response) {

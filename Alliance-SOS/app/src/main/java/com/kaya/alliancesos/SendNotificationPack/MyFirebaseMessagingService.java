@@ -8,6 +8,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.media.Ringtone;
@@ -91,7 +92,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                     buildNotification(mContext);
                     if (type == MessageType.SOS_TYPE) {
                         if (!isMissed)
-                            playRingtone();
+                            playRingtone1();
                     }
                 } catch (Exception e) {
                     Log.v("Init", e.getMessage());
@@ -241,7 +242,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             intent.putExtra("time", sentTime);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             return PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        } else  {
+        } else {
             Intent intent = new Intent(context, InvitationResponseActivity.class);
             intent.putExtra("groupId", groupId);
             intent.putExtra("groupName", groupName);
@@ -250,6 +251,33 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
             return PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         }
+    }
+
+    private void playRingtone1() {
+        SharedPreferences sharedPreferences = getSharedPreferences("User_Ring", Context.MODE_PRIVATE);
+        String path = sharedPreferences.getString(toId, null);
+        if (path != null) {
+            mRingtone = RingtoneManager.getRingtone(mContext, Uri.parse(path));
+        } else {
+            Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+            mRingtone = RingtoneManager.getRingtone(getApplicationContext(), notification);
+        }
+
+//        ringtone ring = mChoiceDB.appDatabase.dao().currentPath(toId);
+//        Uri alert = Uri.parse(ring.path);
+        if (!mRingtone.isPlaying())
+            mRingtone.play();
+        TimerTask task = new TimerTask() {
+            @Override
+            public void run() {
+                if (mRingtone.isPlaying()) {
+                    mRingtone.stop();
+                }
+            }
+        };
+        Timer timer = new Timer();
+        timer.schedule(task, 60000);
+
     }
 
     private void playRingtone() {

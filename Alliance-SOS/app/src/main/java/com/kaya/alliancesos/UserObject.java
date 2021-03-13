@@ -13,6 +13,19 @@ public class UserObject {
     private String image;
     private boolean notDisturb;
     private boolean ringEnable;
+    private String deviceType;
+
+    public String getDeviceType() {
+        return deviceType;
+    }
+
+    public static final String ANDROID = "android";
+
+    public static final String IOS = "ios";
+
+    public void setDeviceType(String deviceType) {
+        this.deviceType = deviceType;
+    }
 
     public void setImage(String image) {
         this.image = image;
@@ -55,6 +68,7 @@ public class UserObject {
         ringEnable = true;
         language = "English";
         image = "";
+        this.deviceType = ANDROID;
     }
 
     public UserObject() {

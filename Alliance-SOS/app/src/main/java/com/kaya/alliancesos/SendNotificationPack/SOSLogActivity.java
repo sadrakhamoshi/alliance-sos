@@ -95,7 +95,8 @@ public class SOSLogActivity extends AppCompatActivity {
             @Override
             public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
                 View view = super.getView(position, convertView, parent);
-                TextView text = (TextView) view.findViewById(android.R.id.text1);
+                view.setBackgroundResource(R.drawable.select_back2);
+                TextView text = view.findViewById(android.R.id.text1);
                 text.setTextColor(Color.WHITE);
                 return view;
             }
@@ -105,7 +106,8 @@ public class SOSLogActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
 
-                DialogDetailSos(position);
+                int itm = (int) parent.getAdapter().getItemId(position);
+                DialogDetailSos(itm);
             }
         });
     }
@@ -195,6 +197,7 @@ public class SOSLogActivity extends AppCompatActivity {
                 mDataToSendList.add(dataSnapshot);
                 mSosList.add("Make By  :   " + dataSnapshot.getMakeBy());
             }
+            Collections.reverse(mDataToSendList);
             Collections.reverse(mDataToSendList);
             return null;
         }
