@@ -49,7 +49,7 @@ public class SignUpPage extends AppCompatActivity {
     private EditText mUsername;
     private Button mSignUp;
 
-    private String ClientID = "688735100332-a5a9ipcij7nrj6ro104rditckhodedba.apps.googleusercontent.com";
+    private String ClientID = "688533685851-8n0r119hnhl2hqj6vk8gbacd3947ajgm.apps.googleusercontent.com";
 
     private Token mToken;
     private String userId;

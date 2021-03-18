@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "688735100332",
-    "firebase_url": "https://alliance-sos.firebaseio.com",
-    "project_id": "alliance-sos",
-    "storage_bucket": "alliance-sos.appspot.com"
+    "project_number": "688533685851",
+    "firebase_url": "https://test-alliancesos-default-rtdb.firebaseio.com",
+    "project_id": "test-alliancesos",
+    "storage_bucket": "test-alliancesos.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:688735100332:android:106264560587fb9db42e09",
+        "mobilesdk_app_id": "1:688533685851:android:666263c40df34d887e217e",
         "android_client_info": {
           "package_name": "com.kaya.alliancesos"
         }
       },
       "oauth_client": [
         {
-          "client_id": "688735100332-j4um7u3plobcntgu6fo3csjarknu1pl4.apps.googleusercontent.com",
+          "client_id": "688533685851-3qitsmjigp1dukn5c7ampuccjdckbgus.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.kaya.alliancesos",
@@ -23,35 +23,27 @@
           }
         },
         {
-          "client_id": "688735100332-pmn4vchb6jqrg22s08h4q5k6t6otk9bo.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.kaya.alliancesos",
-            "certificate_hash": "91041653b076d9cca5a1478dc70914b0370f5adf"
-          }
-        },
-        {
-          "client_id": "688735100332-a5a9ipcij7nrj6ro104rditckhodedba.apps.googleusercontent.com",
+          "client_id": "688533685851-8n0r119hnhl2hqj6vk8gbacd3947ajgm.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBlLF1xUz6Dr7yE1VCaa9uPkq2VTgPgPcM"
+          "current_key": "AIzaSyB3yhhLHAl9rhBfBTKSBylOqNY-AJQ-nXc"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "688735100332-a5a9ipcij7nrj6ro104rditckhodedba.apps.googleusercontent.com",
+              "client_id": "688533685851-8n0r119hnhl2hqj6vk8gbacd3947ajgm.apps.googleusercontent.com",
               "client_type": 3
             },
             {
-              "client_id": "688735100332-8b44ac0om9k91ofv36a79mmcrcdq46qc.apps.googleusercontent.com",
+              "client_id": "688533685851-cpmsts7bvakk8fo5v8hnv9mrs7lvgojr.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.freelancer.Alliance-SOS"
+                "bundle_id": "com.future.alliancesos"
               }
             }
           ]
