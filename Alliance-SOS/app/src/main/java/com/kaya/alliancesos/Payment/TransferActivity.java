@@ -6,6 +6,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.text.InputFilter;
+import android.text.Spanned;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
@@ -51,6 +53,24 @@ public class TransferActivity extends AppCompatActivity {
         mAmount = findViewById(R.id.transfer_amount);
         mMonthCount = findViewById(R.id.transfer_month);
         mT_Email = findViewById(R.id.transfer_target_email);
+        NotAllowedUseSpace();
+    }
+
+    private void NotAllowedUseSpace() {
+        InputFilter filter = new InputFilter() {
+            public CharSequence filter(CharSequence source, int start, int end,
+                                       Spanned dest, int dstart, int dend) {
+                for (int i = start; i < end; i++) {
+                    if (Character.isWhitespace(source.charAt(i))) {
+                        Toast.makeText(getApplicationContext(), "Not Space For this Field", Toast.LENGTH_SHORT).show();
+                        return "";
+                    }
+                }
+                return null;
+            }
+        };
+        InputFilter[] filter1 = new InputFilter[]{filter};
+        mT_Email.setFilters(filter1);
     }
 
     @Override

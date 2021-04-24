@@ -12,6 +12,8 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.InputFilter;
+import android.text.Spanned;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
@@ -168,7 +170,7 @@ public class SignUpPage extends AppCompatActivity {
         if (account.getDisplayName().length() == 0)
             mUsername.setText("NoName");
         else
-            mUsername.setText(account.getDisplayName().trim());
+            mUsername.setText(account.getDisplayName().replace(" ", ""));
         mEmail.setText(account.getEmail());
         mPassword.setText("---");
     }
@@ -198,7 +200,7 @@ public class SignUpPage extends AppCompatActivity {
         mEmail = findViewById(R.id.email_sign_up_page_edt_text);
         mPassword = findViewById(R.id.pass_sign_up_page_edt_text);
         mConfirmPassword = findViewById(R.id.confirm_pass_sign_up_page_edt_text);
-        progressBar = ((ProgressBar) findViewById(R.id.progress_signUp_page));
+        progressBar = findViewById(R.id.progress_signUp_page);
 
         mUsername = findViewById(R.id.username_sign_up_page_edt_text);
         mSignUp = findViewById(R.id.sign_up_btn);
@@ -208,6 +210,26 @@ public class SignUpPage extends AppCompatActivity {
                 CreateAccount();
             }
         });
+
+        NotAllowedUseSpace();
+    }
+
+    private void NotAllowedUseSpace() {
+        InputFilter filter = new InputFilter() {
+            public CharSequence filter(CharSequence source, int start, int end,
+                                       Spanned dest, int dstart, int dend) {
+                for (int i = start; i < end; i++) {
+                    if (Character.isWhitespace(source.charAt(i))) {
+                        Toast.makeText(getApplicationContext(), "Not Space For this Field", Toast.LENGTH_SHORT).show();
+                        return "";
+                    }
+                }
+                return null;
+            }
+        };
+        InputFilter[] filter1 = new InputFilter[]{filter};
+        mEmail.setFilters(filter1);
+        mUsername.setFilters(filter1);
     }
 
     void CreateAccount() {
