@@ -12,9 +12,11 @@ import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
@@ -23,6 +25,7 @@ import android.widget.ProgressBar;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.kaya.alliancesos.AlarmRequest.RequestCode;
 import com.kaya.alliancesos.DbForRingtone.ChoiceApplication;
 import com.kaya.alliancesos.DeviceAlarm.MyAlarmReceiver;
@@ -123,52 +126,6 @@ public class SetScheduleActivity extends AppCompatActivity {
         InitializeTime_Date();
     }
 
-//    @Override
-//    protected void onStart() {
-//        super.onStart();
-//        if (mEventListener == null) {
-////            mEventListener = new ValueEventListener() {
-////                @Override
-////                public void onDataChange(@NonNull DataSnapshot snapshot) {
-////                    if (snapshot.exists()) {
-////                        long min = Long.MAX_VALUE;
-////                        Event upcome = null;
-////                        Iterator iterator = snapshot.getChildren().iterator();
-////                        while (iterator.hasNext()) {
-////                            DataSnapshot dataSnapshot = (DataSnapshot) iterator.next();
-////                            Event curr_event = dataSnapshot.getValue(Event.class);
-////                            long milisecond = curr_event.getTimeInMillisecond() * -1;
-////                            if (milisecond < min) {
-////                                min = milisecond;
-////                                upcome = curr_event;
-////                            }
-////                        }
-////                        if (upcome != null) {
-////                            mGroupsRef.child(mGroupId).child("upComingEvent").setValue(new UpComingEvent(upcome.getScheduleObject().getTitle(),
-////                                    upcome.getScheduleObject().getDateTime())).addOnCompleteListener(new OnCompleteListener<Void>() {
-////                                @Override
-////                                public void onComplete(@NonNull Task<Void> task) {
-////                                    if (!task.isSuccessful()) {
-////                                        Toast.makeText(SetScheduleActivity.this, task.getException() + "", Toast.LENGTH_SHORT).show();
-////                                    }
-////                                }
-////                            });
-////                        }
-////
-////                    } else {
-////                        Toast.makeText(SetScheduleActivity.this, "No Event Exist", Toast.LENGTH_SHORT).show();
-////                    }
-////                }
-////
-////                @Override
-////                public void onCancelled(@NonNull DatabaseError error) {
-////                    Toast.makeText(SetScheduleActivity.this, "Error " + error.getMessage(), Toast.LENGTH_SHORT).show();
-////                }
-////            };
-////            mGroupsRef.child(mGroupId).child("events").addValueEventListener(mEventListener);
-//        }
-//    }
-
     private void setupButtons() {
         //time
         mTime_edt.setOnClickListener(new View.OnClickListener() {
@@ -262,11 +219,12 @@ public class SetScheduleActivity extends AppCompatActivity {
         }
         final int finalId = id;
         Date calendar = convertSchToCalendar(mEvent.getScheduleObject().getDateTime());
-        SetAlarmForMySelf(finalId, calendar);
 
         mEvent.setCreatedBy(mAuthorUserName);
         final String key = mGroupsRef.child(mGroupId).child("events").push().getKey();
         mEvent.setEventId(key);
+        SetAlarmForMySelf(finalId, calendar);
+
 
         AddToLocalDatabase(finalId);
         mGroupsRef.child(mGroupId).child("events").child(key).setValue(mEvent).addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -326,7 +284,11 @@ public class SetScheduleActivity extends AppCompatActivity {
         SendingNotification sendingNotification = new SendingNotification(mGroupId, mGroupName
                 , mAuthorUserName, mAuthorId, getApplicationContext(), data);
         sendingNotification.isInSendMode = true;
-        sendingNotification.Send();
+
+        NotifyTask task = new NotifyTask(sendingNotification);
+        task.execute();
+
+//        sendingNotification.Send();
     }
 
     private void InitializeUI() {
@@ -382,15 +344,52 @@ public class SetScheduleActivity extends AppCompatActivity {
 
     private void SetAlarmForMySelf(Integer id, Date calendar) {
         AlarmManager alarmManager = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(getApplicationContext(), MyAlarmReceiver.class);
+        Intent intent = new Intent(this, MyAlarmReceiver.class);
+        Gson gson = new Gson();
+        String myJson = gson.toJson(mEvent);
+        intent.putExtra("myjson", myJson);
+        intent.putExtra("groupId", mGroupId);
         intent.putExtra("ringEnable", AlarmType.RING);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        Log.e("nothing", mGroupId + "  " + mEvent.getCreatedBy());
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, id, intent, PendingIntent.FLAG_CANCEL_CURRENT);
         Toast.makeText(this, id + " " + calendar, Toast.LENGTH_SHORT).show();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (calendar.getTime() > System.currentTimeMillis()) {
                 Toast.makeText(this, "set alarm", Toast.LENGTH_SHORT).show();
                 alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTime(), pendingIntent);
             }
+        }
+    }
+
+    private class NotifyTask extends AsyncTask<Void, Void, Void> {
+        SendingNotification object;
+
+        public NotifyTask(SendingNotification object) {
+            this.object = object;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            object.Send();
+            return null;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            findViewById(R.id.progress_set_schedule).setVisibility(View.VISIBLE);
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            findViewById(R.id.progress_set_schedule).setVisibility(View.GONE);
+            AlertDialog.Builder builder = new AlertDialog.Builder(SetScheduleActivity.this, R.style.AlertDialog);
+            builder.setTitle("Done");
+            builder.setMessage("Successfully sent ...");
+            builder.setIcon(R.drawable.check_icon);
+            builder.setNegativeButton("Ok", null);
+            builder.show();
         }
     }
 }

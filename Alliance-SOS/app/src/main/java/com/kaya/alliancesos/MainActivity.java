@@ -430,11 +430,28 @@ public class MainActivity extends AppCompatActivity {
         if (mValueEventListenerGroup != null) {
             mGroupsRef.removeEventListener(mValueEventListenerGroup);
         }
-        signOutFromGoogle();
-        FirebaseAuth.getInstance().signOut();
-        gotToLoginPage();
+        makeTokenNull();
+//        signOutFromGoogle();
+//        FirebaseAuth.getInstance().signOut();
+//        gotToLoginPage();
         return;
     }
+
+    private void makeTokenNull() {
+        mUsersRef.child(mCurrentUserId).child("token").setValue("").addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    signOutFromGoogle();
+                    FirebaseAuth.getInstance().signOut();
+                    gotToLoginPage();
+                } else {
+                    Toast.makeText(MainActivity.this, "Error " + task.getException(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
 
     private void signOutFromGoogle() {
         GoogleSignInClient mGoogleSignInClient;

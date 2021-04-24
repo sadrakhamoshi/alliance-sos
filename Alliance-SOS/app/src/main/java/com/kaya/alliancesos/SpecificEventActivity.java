@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -16,6 +17,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.kaya.alliancesos.AlarmRequest.RequestCode;
 import com.kaya.alliancesos.DbForRingtone.ChoiceApplication;
 import com.kaya.alliancesos.DeviceAlarm.MyAlarmReceiver;
@@ -61,8 +63,11 @@ public class SpecificEventActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_specific_event);
-
-
+        if (MyAlarmReceiver.ringtone != null) {
+            if (MyAlarmReceiver.ringtone.isPlaying()) {
+                MyAlarmReceiver.ringtone.stop();
+            }
+        }
         Intent fromGroup = getIntent();
         if (fromGroup != null) {
             mCurrentEvent = (Event) fromGroup.getSerializableExtra("event");
@@ -275,6 +280,10 @@ public class SpecificEventActivity extends AppCompatActivity {
         if (scheduleObject != null) {
             AlarmManager alarmManager = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
             Intent intent = new Intent(getApplicationContext(), MyAlarmReceiver.class);
+            Gson gson = new Gson();
+            String myJson = gson.toJson(mCurrentEvent);
+            intent.putExtra("myjson", myJson);
+            intent.putExtra("groupId", mGroupId);
             intent.putExtra("ringEnable", AlarmType.RING);
             Random r = new Random();
             Integer random = r.nextInt(1000);

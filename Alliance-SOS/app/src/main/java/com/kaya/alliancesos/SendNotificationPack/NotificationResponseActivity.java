@@ -14,6 +14,7 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -22,9 +23,11 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.kaya.alliancesos.AlarmRequest.RequestCode;
 import com.kaya.alliancesos.DbForRingtone.ChoiceApplication;
 import com.kaya.alliancesos.DeviceAlarm.MyAlarmReceiver;
+import com.kaya.alliancesos.Event;
 import com.kaya.alliancesos.MainActivity;
 import com.kaya.alliancesos.R;
 import com.kaya.alliancesos.ScheduleObject;
@@ -67,6 +70,8 @@ public class NotificationResponseActivity extends AppCompatActivity {
 
     private Date mConvertedDate;
 
+    private Event mCurrEvent;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -100,6 +105,23 @@ public class NotificationResponseActivity extends AppCompatActivity {
         setGroupId();
         mCurrUserId = bundle.getString("toId");
         getRingOrNotify();
+        getEvent();
+    }
+
+    public void getEvent() {
+        mRootRef.child("groups").child(mGroupId).child("events").child(mEventId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    mCurrEvent = snapshot.getValue(Event.class);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(NotificationResponseActivity.this, "error " + error, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void getRingOrNotify() {
@@ -154,7 +176,7 @@ public class NotificationResponseActivity extends AppCompatActivity {
                     try {
                         scheduleObject = snapshot.child("scheduleObject").getValue(ScheduleObject.class);
                         mFrom_TimeZoneId = snapshot.child("createdTimezoneId").getValue().toString();
-                        setTime();
+                        setTime_Detail(scheduleObject.getTitle(), scheduleObject.getDescription());
                         Toast.makeText(NotificationResponseActivity.this, "get schedule object", Toast.LENGTH_SHORT).show();
                     } catch (Exception e) {
                         Toast.makeText(NotificationResponseActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -169,9 +191,11 @@ public class NotificationResponseActivity extends AppCompatActivity {
         });
     }
 
-    private void setTime() {
+    private void setTime_Detail(String title, String description) {
         mConvertedDate = ConvertTime();
         ((TextView) findViewById(R.id.noti_response_group_time)).setText("Date : " + mConvertedDate);
+        ((TextView) findViewById(R.id.noti_response_title)).setText("Title : " + title);
+        ((TextView) findViewById(R.id.noti_response_description)).setText("Description : " + description);
     }
 
     private void showAttendingMembers() {
@@ -226,9 +250,13 @@ public class NotificationResponseActivity extends AppCompatActivity {
             AlarmManager alarmManager = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
             Random r = new Random();
             int random = (int) System.currentTimeMillis();
-            Intent intent = new Intent(getApplicationContext(), MyAlarmReceiver.class);
+            Intent intent = new Intent(this, MyAlarmReceiver.class);
+            Gson gson = new Gson();
+            String myJson = gson.toJson(mCurrEvent);
+            Log.e("nothing", mGroupId + "  " + mCurrEvent.getCreatedBy());
+            intent.putExtra("myjson", myJson);
+            intent.putExtra("groupId", mGroupId);
             intent.putExtra("ringEnable", mRingOrNotify);
-
             if (mRingOrNotify == AlarmType.NOTIFICATION) {
                 if (random % 2 == 1) {
                     random++;
@@ -240,7 +268,7 @@ public class NotificationResponseActivity extends AppCompatActivity {
 
             addRequestCodeToDb(random);
 
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), random, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, random, intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
             Toast.makeText(this, mConvertedDate + "", Toast.LENGTH_SHORT).show();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

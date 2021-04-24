@@ -12,11 +12,15 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
 
+import com.google.gson.Gson;
+import com.kaya.alliancesos.Event;
 import com.kaya.alliancesos.MainActivity;
 import com.kaya.alliancesos.R;
+import com.kaya.alliancesos.SpecificEventActivity;
 import com.kaya.alliancesos.Utils.AlarmType;
 
 import java.util.Timer;
@@ -29,10 +33,15 @@ public class MyAlarmReceiver extends BroadcastReceiver {
     public static final String NOTIFICATION_CHANNEL_ID = "10002";
     Context mContext;
     public static Ringtone ringtone;
+    private Event event;
+    private String groupId;
 
     @Override
     public void onReceive(Context context, Intent intent) {
         mContext = context;
+        Gson gson = new Gson();
+        event = gson.fromJson(intent.getStringExtra("myjson"), Event.class);
+        groupId = intent.getStringExtra("groupId");
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -62,22 +71,23 @@ public class MyAlarmReceiver extends BroadcastReceiver {
             }
         };
         Timer timer = new Timer();
-        timer.schedule(task, 120000);
+        timer.schedule(task, 100000);
     }
 
 
     private void makeNotification() {
+        String msg = "Please Check your App You Have event named " + event.getScheduleObject().getTitle() + " from " + groupId;
         NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(mContext, "CHANNEL_ID2")
                         .setContentTitle("You have Event...")
                         .setSmallIcon(R.drawable.sos_icon)
-                        .setAutoCancel(true)
                         .setOngoing(true)
-                        .setContentIntent(PendingIntent.getActivity(mContext, 1, new Intent(mContext, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT))
                         .setPriority(NotificationCompat.PRIORITY_MAX)
-                        .setContentText("Please Check your App You Have event ...")
-                        .setVibrate(new long[]{500, 200, 300, 400, 500, 1000, 2000, 220, 1000, 2500})
-                        .setStyle(new NotificationCompat.BigTextStyle().bigText("Please Check your App You Have event ..."));
+                .setContentIntent(PendingIntent.getActivity(mContext, 1, toSpecificEvent(), PendingIntent.FLAG_UPDATE_CURRENT))
+                .setPriority(NotificationCompat.PRIORITY_MAX)
+                .setContentText(msg)
+                .setVibrate(new long[]{500, 200, 300, 400, 500, 1000, 200, 220, 100, 250})
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(msg));
 
         NotificationManager notificationManager = (NotificationManager) mContext.getSystemService(NOTIFICATION_SERVICE);
 
@@ -93,7 +103,14 @@ public class MyAlarmReceiver extends BroadcastReceiver {
         }
         Notification notification = builder.build();
 
-        notification.flags = Notification.DEFAULT_LIGHTS | Notification.FLAG_AUTO_CANCEL;
+        notification.flags |= Notification.FLAG_AUTO_CANCEL;
         notificationManager.notify(0, notification);
+    }
+
+    private Intent toSpecificEvent() {
+        Intent intent = new Intent(mContext, SpecificEventActivity.class);
+        intent.putExtra("groupId", groupId);
+        intent.putExtra("event", event);
+        return intent;
     }
 }
