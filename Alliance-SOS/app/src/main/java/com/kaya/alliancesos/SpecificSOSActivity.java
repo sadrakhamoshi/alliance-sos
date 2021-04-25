@@ -22,9 +22,6 @@ import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 
 public class SpecificSOSActivity extends AppCompatActivity {
 
@@ -101,7 +98,7 @@ public class SpecificSOSActivity extends AppCompatActivity {
     public class showDetailTask extends AsyncTask<Void, Void, Void> {
 
         DataSnapshot snapshot;
-        DataToSend dataToSend;
+        SOSObj sosObj;
 
         public showDetailTask(DataSnapshot snapshot) {
             this.snapshot = snapshot;
@@ -117,14 +114,12 @@ public class SpecificSOSActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            Date date = new Date(sentTime);
-            SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy hh:mm", Locale.ENGLISH);
-            String sent = format.format(date);
-            time.setText("Created time :  " + sent);
-            group.setText("Group Name  : " + dataToSend.getGroupName());
-            name.setText("Make By  : " + dataToSend.getMakeBy());
-            if (dataToSend.getSosMessage() == null) {
-                Picasso.get().load(dataToSend.getPhotoUrl()).into(image, new Callback() {
+            String time_created = sosObj.getDateFromUTC();
+            time.setText("Created time :  " + time_created);
+            group.setText("Group Name  : " + sosObj.getGroupName());
+            name.setText("Make By  : " + sosObj.getMakeBy());
+            if (sosObj.getSosMessage() == null) {
+                Picasso.get().load(sosObj.getPhotoUrl()).into(image, new Callback() {
                     @Override
                     public void onSuccess() {
                         viewDialog.hideDialog();
@@ -137,14 +132,15 @@ public class SpecificSOSActivity extends AppCompatActivity {
                     }
                 });
             } else {
-                message.setText("Message  :  " + dataToSend.getSosMessage());
+                image.setVisibility(View.GONE);
+                message.setText("Message  :  " + sosObj.getSosMessage());
                 viewDialog.hideDialog();
             }
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
-            dataToSend = snapshot.getValue(DataToSend.class);
+            sosObj = snapshot.getValue(SOSObj.class);
             return null;
         }
     }

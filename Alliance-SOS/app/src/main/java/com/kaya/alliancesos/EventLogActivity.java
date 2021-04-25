@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -17,7 +18,9 @@ import com.google.firebase.database.ValueEventListener;
 import com.kaya.alliancesos.Adapters.EventLogAdapter;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
+import java.util.TimeZone;
 
 public class EventLogActivity extends AppCompatActivity {
 
@@ -42,7 +45,7 @@ public class EventLogActivity extends AppCompatActivity {
         mRef = FirebaseDatabase.getInstance().getReference().child("groups").child(mGroupId).child("events");
         listView = findViewById(R.id.event_log_listView);
         mLists = new ArrayList<>();
-        mAdapter = new EventLogAdapter(this, mLists);
+        mAdapter = new EventLogAdapter(this, mLists, mGroupId);
         listView.setAdapter(mAdapter);
     }
 
@@ -58,7 +61,9 @@ public class EventLogActivity extends AppCompatActivity {
                     while (iterator.hasNext()) {
                         DataSnapshot dataSnapshot = (DataSnapshot) iterator.next();
                         Event event = dataSnapshot.getValue(Event.class);
-                        mAdapter.add(event);
+                        assert event != null;
+                        if (!checkIfPassedDate(event))
+                            mAdapter.add(event);
                     }
                 } else {
                     Toast.makeText(EventLogActivity.this, "messages : No Events yet", Toast.LENGTH_SHORT).show();
@@ -70,6 +75,15 @@ public class EventLogActivity extends AppCompatActivity {
                 Toast.makeText(EventLogActivity.this, "messages:" + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private boolean checkIfPassedDate(Event event) {
+        Date now = new Date();
+        if (event.getScheduleObject() == null || event.getScheduleObject().getDateTime() == null || event.getScheduleObject().getDateTime().getYear() == null) {
+            return true;
+        }
+        Date eventConversion = event.getScheduleObject().GetDate_DateFormat(event.getCreatedTimezoneId(), TimeZone.getDefault().getID());
+        return now.before(eventConversion);
     }
 
     public void exitFromEventLog(View view) {

@@ -4,11 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layoutDirection="ltr"
-    android:textDirection="ltr"
+    android:layout_marginLeft="5dp"
     android:layout_marginTop="10dp"
     android:layout_marginRight="5dp"
-    android:layout_marginLeft="5dp"
+    android:layoutDirection="ltr"
+    android:textDirection="ltr"
     app:cardCornerRadius="10dp">
 
     <RelativeLayout
@@ -100,6 +100,16 @@
                 tools:text="Kearen" />
 
         </LinearLayout>
+
+        <ImageView
+            android:id="@+id/event_log_trash"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:padding="10dp"
+            android:src="@drawable/delete_icon"
+            app:tint="@color/white" />
 
     </RelativeLayout>
 

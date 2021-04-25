@@ -4,42 +4,42 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="15dp">
+    android:padding="3dp">
 
     <TextView
+        android:layout_marginTop="15dp"
         android:id="@+id/detail_group_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="5dp"
-        android:text="Group Name :"
-        android:textStyle="bold" />
+        android:layout_marginBottom="10dp"
+        android:fontFamily="sans-serif-condensed-light"
+        android:text="Group Name :" />
 
     <TextView
         android:id="@+id/detail_make_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="5dp"
-        android:text="Make by :"
-        android:textStyle="bold" />
+        android:layout_marginBottom="10dp"
+        android:fontFamily="sans-serif-condensed-light"
+        android:text="Make by :" />
 
     <TextView
         android:id="@+id/detail_message"
-
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="5dp"
-        android:text="Message  :"
-        android:textStyle="bold" />
+        android:layout_marginBottom="10dp"
+        android:fontFamily="sans-serif-condensed-light"
+        android:text="Message  :" />
 
 
-    <!--    <TextView-->
-    <!--        android:id="@+id/detail_time"-->
+    <TextView
+        android:id="@+id/detail_time"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:fontFamily="sans-serif-condensed-light"
+        android:text="Created time : " />
 
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:layout_marginBottom="5dp"-->
-    <!--        android:text="Created time :"-->
-    <!--        android:textStyle="bold" />-->
     <ProgressBar
         android:id="@+id/progress_sos_log"
         android:layout_width="wrap_content"
@@ -47,10 +47,11 @@
         android:layout_gravity="center_horizontal"
         android:visibility="gone" />
 
-        <ImageView
-            android:id="@+id/detail_image"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:scaleType="centerCrop" />
+    <ImageView
+        android:id="@+id/detail_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:scaleType="centerCrop" />
 
 </LinearLayout>

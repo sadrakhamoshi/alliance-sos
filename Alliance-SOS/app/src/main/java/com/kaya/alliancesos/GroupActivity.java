@@ -339,7 +339,6 @@ public class GroupActivity extends AppCompatActivity {
                                 @Override
                                 public void onComplete(@NonNull Task<Uri> task) {
                                     if (task.isSuccessful()) {
-                                        Log.v("taskk", "Successful");
                                         String key = mRootRef.child("sos").child(mCurrentGroupId).push().getKey();
                                         DataToSend dataToSend = new DataToSend(mCurrentUserName, mCurrentGroupName, mCurrentGroupId, MessageType.SOS_TYPE);
                                         dataToSend.setPhotoUrl(task.getResult().toString());
@@ -482,7 +481,6 @@ public class GroupActivity extends AppCompatActivity {
                             Event event = dataSnapshot.getValue(Event.class);
 
                             if (event.getScheduleObject() != null && checkIfPassedDate(event)) {
-                                Log.e("Hellowwww", event + "");
                                 newEvents.add(event);
                             } else {
                                 //delete from database
@@ -506,14 +504,9 @@ public class GroupActivity extends AppCompatActivity {
 
     private boolean checkIfPassedDate(Event event) {
         Date now = new Date();
-        Log.e("fffdfdfdf", event + "");
-        Log.e("fffdfdfdf", event.getScheduleObject() + "");
-        Log.e("fffdfdfdf", event.getCreatedTimezoneId() + "");
-        if (event.getScheduleObject() == null || event.getScheduleObject().getDateTime() == null || event.getScheduleObject().getDateTime().getYear() == null)
-        {
+        if (event.getScheduleObject() == null || event.getScheduleObject().getDateTime() == null || event.getScheduleObject().getDateTime().getYear() == null) {
             Log.e("boolean   ", false + "");
             return false;
-
         }
         Date eventConversion = event.getScheduleObject().GetDate_DateFormat(event.getCreatedTimezoneId(), TimeZone.getDefault().getID());
         Log.v("diffrenec", now + "   " + eventConversion);
@@ -572,7 +565,8 @@ public class GroupActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            mRootRef.child("sos").child(mCurrentGroupId).child(dataToSend.getSosId()).setValue(dataToSend).addOnCompleteListener(new OnCompleteListener<Void>() {
+            SOSObj sosObj = new SOSObj(dataToSend);
+            mRootRef.child("sos").child(mCurrentGroupId).child(sosObj.getSosId()).setValue(sosObj).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if (!task.isSuccessful()) {
