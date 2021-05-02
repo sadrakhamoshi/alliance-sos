@@ -3,6 +3,9 @@ package com.kaya.alliancesos;
 import android.text.TextUtils;
 
 import java.io.Serializable;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.TimeZone;
 
 public class Event implements Serializable, Comparable<Event> {
@@ -68,9 +71,31 @@ public class Event implements Serializable, Comparable<Event> {
 
     @Override
     public int compareTo(Event o) {
-        if (this.getTimeInMillisecond() - o.getTimeInMillisecond() < 0)
+        DateTime tmp = this.getScheduleObject().getDateTime();
+        Instant instant = Instant.now();
+        ZonedDateTime source = instant.atZone(ZoneId.of(this.getCreatedTimezoneId())).
+                withYear(Integer.parseInt(tmp.getYear())).
+                withMonth(Integer.parseInt(tmp.getMonth()) + 1).
+                withDayOfMonth(Integer.parseInt(tmp.getDay())).
+                withHour(Integer.parseInt(tmp.getHour())).
+                withMinute(Integer.parseInt(tmp.getMinute()))
+                .withSecond(0);
+        ZonedDateTime target = source.toInstant().atZone(ZoneId.of("GMT"));
+
+        Instant instant2 = Instant.now();
+        DateTime tmp2 = o.getScheduleObject().getDateTime();
+        ZonedDateTime source2 = instant2.atZone(ZoneId.of(o.getCreatedTimezoneId())).
+                withYear(Integer.parseInt(tmp2.getYear())).
+                withMonth(Integer.parseInt(tmp2.getMonth()) + 1).
+                withDayOfMonth(Integer.parseInt(tmp2.getDay())).
+                withHour(Integer.parseInt(tmp2.getHour())).
+                withMinute(Integer.parseInt(tmp2.getMinute()))
+                .withSecond(0);
+        ZonedDateTime target2 = source2.toInstant().atZone(ZoneId.of("GMT"));
+
+        if (target.isAfter(target2))
             return 1;
-        if (this.getTimeInMillisecond() - o.getTimeInMillisecond() > 0)
+        if (target2.isAfter(target))
             return -1;
         return 0;
     }

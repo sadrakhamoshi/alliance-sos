@@ -25,6 +25,7 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.kaya.alliancesos.AlarmRequest.RequestCode;
+import com.kaya.alliancesos.DateTime;
 import com.kaya.alliancesos.DbForRingtone.ChoiceApplication;
 import com.kaya.alliancesos.DeviceAlarm.MyAlarmReceiver;
 import com.kaya.alliancesos.Event;
@@ -40,6 +41,12 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import org.w3c.dom.Text;
+
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -68,7 +75,7 @@ public class NotificationResponseActivity extends AppCompatActivity {
     private DatabaseReference mGroupRef, mRootRef;
     private ChoiceApplication mChoiceDB;
 
-    private Date mConvertedDate;
+    private ZonedDateTime mConvertedDate;
 
     private Event mCurrEvent;
 
@@ -193,7 +200,6 @@ public class NotificationResponseActivity extends AppCompatActivity {
 
     private void setTime_Detail(String title, String description) {
         mConvertedDate = ConvertTime();
-        ((TextView) findViewById(R.id.noti_response_group_time)).setText("Date : " + mConvertedDate);
         ((TextView) findViewById(R.id.noti_response_title)).setText("Title : " + title);
         ((TextView) findViewById(R.id.noti_response_description)).setText("Description : " + description);
     }
@@ -253,7 +259,6 @@ public class NotificationResponseActivity extends AppCompatActivity {
             Intent intent = new Intent(this, MyAlarmReceiver.class);
             Gson gson = new Gson();
             String myJson = gson.toJson(mCurrEvent);
-            Log.e("nothing", mGroupId + "  " + mCurrEvent.getCreatedBy());
             intent.putExtra("myjson", myJson);
             intent.putExtra("groupId", mGroupId);
             intent.putExtra("ringEnable", mRingOrNotify);
@@ -265,16 +270,13 @@ public class NotificationResponseActivity extends AppCompatActivity {
                 if (random % 2 == 0)
                     random++;
             }
-
             addRequestCodeToDb(random);
-
             PendingIntent pendingIntent = PendingIntent.getBroadcast(this, random, intent, PendingIntent.FLAG_CANCEL_CURRENT);
-
             Toast.makeText(this, mConvertedDate + "", Toast.LENGTH_SHORT).show();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if (mConvertedDate.getTime() > new Date().getTime()) {
-                    Toast.makeText(this, "set Successfully", Toast.LENGTH_SHORT).show();
-                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, mConvertedDate.getTime(), pendingIntent);
+                if (mConvertedDate.isAfter(ZonedDateTime.now(ZoneId.systemDefault()))) {
+                    Toast.makeText(this, "set Successfully", Toast.LENGTH_LONG).show();
+                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, mConvertedDate.toEpochSecond() * 1000, pendingIntent);
                 }
             }
         } else {
@@ -299,26 +301,21 @@ public class NotificationResponseActivity extends AppCompatActivity {
         }).start();
     }
 
-    private Date ConvertTime() {
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.YEAR, Integer.parseInt(scheduleObject.getDateTime().getYear()));
-        calendar.set(Calendar.MONTH, Integer.parseInt(scheduleObject.getDateTime().getMonth()));
-        calendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(scheduleObject.getDateTime().getDay()));
-        calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(scheduleObject.getDateTime().getHour()));
-        calendar.set(Calendar.MINUTE, Integer.parseInt(scheduleObject.getDateTime().getMinute()));
-        calendar.set(Calendar.SECOND, 0);
-        String mCurrent_TimezoneId = TimeZone.getDefault().getID();
+    private ZonedDateTime ConvertTime() {
+        DateTime tmp = scheduleObject.getDateTime();
+        Instant instant = Instant.now();
+        ZonedDateTime source = instant.atZone(ZoneId.of(mFrom_TimeZoneId)).
+                withYear(Integer.parseInt(tmp.getYear())).
+                withMonth(Integer.parseInt(tmp.getMonth()) + 1).
+                withDayOfMonth(Integer.parseInt(tmp.getDay())).
+                withHour(Integer.parseInt(tmp.getHour())).
+                withMinute(Integer.parseInt(tmp.getMinute()))
+                .withSecond(0);
+        ZonedDateTime target = source.toInstant().atZone(ZoneId.systemDefault());
 
-        TimeZone from = TimeZone.getTimeZone(mFrom_TimeZoneId);
-        TimeZone to = TimeZone.getTimeZone(mCurrent_TimezoneId);
-        int from_offset = from.getOffset(Calendar.ZONE_OFFSET);
-        int to_offset = to.getOffset(Calendar.ZONE_OFFSET);
-
-        int diff = to_offset - from_offset;
-
-        long time = calendar.getTimeInMillis() + diff;
-        Date newDate = new Date(time);
-        return newDate;
+        String text = "Date : " + DateTimeFormatter.ofPattern("dd/MM/yyyy - HH:mm").format(target);
+        ((TextView) findViewById(R.id.noti_response_group_time)).setText(text);
+        return target;
     }
 
     private void InitUI() {

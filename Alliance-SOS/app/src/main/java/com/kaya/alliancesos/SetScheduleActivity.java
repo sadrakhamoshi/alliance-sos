@@ -42,6 +42,9 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -177,7 +180,7 @@ public class SetScheduleActivity extends AppCompatActivity {
                 ScheduleObject scheduleObject = new ScheduleObject(title, description);
                 scheduleObject.setDateTime(dateTime);
                 try {
-                    long milliSecond = computeScheduleInMilliSecond(scheduleObject.getDateTime());
+                    long milliSecond = computeScheduleInMilliSecond(scheduleObject.getDateTime(), mAuthorTimezone);
 
                     mEvent = new Event("", mAuthorUserName, milliSecond * (-1), scheduleObject, mAuthorTimezone);
                     sendMessage();
@@ -196,13 +199,17 @@ public class SetScheduleActivity extends AppCompatActivity {
         builder.show();
     }
 
-    private long computeScheduleInMilliSecond(DateTime dateTime) throws ParseException {
-        int Month = Integer.parseInt(dateTime.getMonth()) + 1;
-        String dt = dateTime.getYear() + "-" + Month + "-" + dateTime.getDay() + "T" + dateTime.getHour() + ":" + dateTime.getMinute() + ":0Z";
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-        int offset = TimeZone.getDefault().getOffset(Calendar.ZONE_OFFSET);
-        Date date = format.parse(dt);
-        return date.getTime() - offset;
+    private long computeScheduleInMilliSecond(DateTime tmp, String mFrom_TimeZoneId) throws ParseException {
+        Instant instant = Instant.now();
+        ZonedDateTime source = instant.atZone(ZoneId.of(mFrom_TimeZoneId)).
+                withYear(Integer.parseInt(tmp.getYear())).
+                withMonth(Integer.parseInt(tmp.getMonth()) + 1).
+                withDayOfMonth(Integer.parseInt(tmp.getDay())).
+                withHour(Integer.parseInt(tmp.getHour())).
+                withMinute(Integer.parseInt(tmp.getMinute()))
+                .withSecond(0);
+        ZonedDateTime target = source.toInstant().atZone(ZoneId.of("GMT"));
+        return target.toEpochSecond() * 1000;
     }
 
     private void sendMessage() {
@@ -218,10 +225,12 @@ public class SetScheduleActivity extends AppCompatActivity {
             id++;
         }
         final int finalId = id;
+
         Date calendar = convertSchToCalendar(mEvent.getScheduleObject().getDateTime());
 
         mEvent.setCreatedBy(mAuthorUserName);
         final String key = mGroupsRef.child(mGroupId).child("events").push().getKey();
+        Log.e("nothing", key + " : "+ mEvent.getTimeInMillisecond());
         mEvent.setEventId(key);
         SetAlarmForMySelf(finalId, calendar);
 
@@ -350,13 +359,23 @@ public class SetScheduleActivity extends AppCompatActivity {
         intent.putExtra("myjson", myJson);
         intent.putExtra("groupId", mGroupId);
         intent.putExtra("ringEnable", AlarmType.RING);
-        Log.e("nothing", mGroupId + "  " + mEvent.getCreatedBy());
+//        Log.e("nothing", mGroupId + "  " + mEvent.getCreatedBy());
+        DateTime tmp = mEvent.getScheduleObject().getDateTime();
+        Instant instant = Instant.now();
+        ZonedDateTime zonedDateTime = instant.atZone(ZoneId.systemDefault()).withYear(Integer.parseInt(tmp.getYear())).
+                withMonth(Integer.parseInt(tmp.getMonth()) + 1).
+                withDayOfMonth(Integer.parseInt(tmp.getDay())).
+                withHour(Integer.parseInt(tmp.getHour())).
+                withMinute(Integer.parseInt(tmp.getMinute()))
+                .withSecond(0);
+        Log.e("nothing", zonedDateTime + "");
+
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, id, intent, PendingIntent.FLAG_CANCEL_CURRENT);
         Toast.makeText(this, id + " " + calendar, Toast.LENGTH_SHORT).show();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (calendar.getTime() > System.currentTimeMillis()) {
+            if (zonedDateTime.isAfter(ZonedDateTime.now(ZoneId.systemDefault()))) {
                 Toast.makeText(this, "set alarm", Toast.LENGTH_SHORT).show();
-                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTime(), pendingIntent);
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, zonedDateTime.toEpochSecond() * 1000, pendingIntent);
             }
         }
     }

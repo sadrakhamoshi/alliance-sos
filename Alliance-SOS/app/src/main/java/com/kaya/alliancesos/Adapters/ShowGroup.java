@@ -98,7 +98,7 @@ public class ShowGroup extends RecyclerView.Adapter<ShowGroup.ViewHolder> {
             return ".......";
         }
         String curr_zoneId = TimeZone.getDefault().getID();
-        String converted_date = currEvent.getScheduleObject().GetDate(currEvent.getCreatedTimezoneId(),curr_zoneId);
+        String converted_date = currEvent.getScheduleObject().GetDate(currEvent.getCreatedTimezoneId());
         return converted_date;
     }
 

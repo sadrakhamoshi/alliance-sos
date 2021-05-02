@@ -51,6 +51,9 @@ import com.skyfishjy.library.RippleBackground;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -503,14 +506,23 @@ public class GroupActivity extends AppCompatActivity {
     }
 
     private boolean checkIfPassedDate(Event event) {
-        Date now = new Date();
+//        Date now = new Date();
         if (event.getScheduleObject() == null || event.getScheduleObject().getDateTime() == null || event.getScheduleObject().getDateTime().getYear() == null) {
             Log.e("boolean   ", false + "");
             return false;
         }
-        Date eventConversion = event.getScheduleObject().GetDate_DateFormat(event.getCreatedTimezoneId(), TimeZone.getDefault().getID());
-        Log.v("diffrenec", now + "   " + eventConversion);
-        return now.before(eventConversion);
+        DateTime tmp = event.getScheduleObject().getDateTime();
+        Instant instant = Instant.now();
+        ZonedDateTime source = instant.atZone(ZoneId.of(event.getCreatedTimezoneId())).
+                withYear(Integer.parseInt(tmp.getYear())).
+                withMonth(Integer.parseInt(tmp.getMonth()) + 1).
+                withDayOfMonth(Integer.parseInt(tmp.getDay())).
+                withHour(Integer.parseInt(tmp.getHour())).
+                withMinute(Integer.parseInt(tmp.getMinute()))
+                .withSecond(0);
+        ZonedDateTime target = source.toInstant().atZone(ZoneId.systemDefault());
+
+        return target.isAfter(ZonedDateTime.now(ZoneId.systemDefault()));
     }
 
     private void showAllEvent() {

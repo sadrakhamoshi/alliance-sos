@@ -25,51 +25,49 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="15dp"
+        android:fontFamily="sans-serif-condensed-light"
         android:layoutDirection="ltr"
         android:text="Group Name :"
         android:textColor="#FFFFFF"
         android:textDirection="ltr"
-        android:textSize="20sp"
-        android:textStyle="bold" />
+        android:textSize="20sp" />
 
     <TextView
         android:id="@+id/specific_make_by"
-
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="15dp"
+        android:fontFamily="sans-serif-condensed-light"
         android:layoutDirection="ltr"
         android:text="Make by :"
         android:textColor="#FFFFFF"
         android:textDirection="ltr"
-        android:textSize="20sp"
-        android:textStyle="bold" />
+        android:textSize="20sp" />
 
     <TextView
         android:id="@+id/specific_message"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="15dp"
+        android:fontFamily="sans-serif-condensed-light"
         android:layoutDirection="ltr"
         android:text="Message  :  -----"
         android:textColor="#FFFFFF"
         android:textDirection="ltr"
-        android:textSize="20sp"
-        android:textStyle="bold" />
+        android:textSize="20sp" />
 
 
     <TextView
         android:id="@+id/specific_time"
-
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="45dp"
+        android:fontFamily="sans-serif-condensed-light"
         android:layoutDirection="ltr"
         android:text="Created time :"
         android:textColor="#FFFFFF"
         android:textDirection="ltr"
-        android:textSize="20sp"
-        android:textStyle="bold" />
+        android:textSize="20sp" />
 
     <ProgressBar
         android:layout_width="wrap_content"
@@ -81,9 +79,9 @@
         android:id="@+id/specific_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone"
         android:background="@drawable/layout_border"
-        android:scaleType="fitCenter" />
+        android:scaleType="fitCenter"
+        android:visibility="gone" />
 
 
 </LinearLayout>

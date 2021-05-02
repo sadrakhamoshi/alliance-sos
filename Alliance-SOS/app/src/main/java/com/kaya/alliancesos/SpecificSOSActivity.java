@@ -11,7 +11,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.kaya.alliancesos.SendNotificationPack.DataToSend;
 import com.kaya.alliancesos.SendNotificationPack.MyFirebaseMessagingService;
 import com.kaya.alliancesos.Setting.ViewDialog;
 import com.google.firebase.database.DataSnapshot;
@@ -114,7 +113,7 @@ public class SpecificSOSActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            String time_created = sosObj.getDateFromUTC();
+            String time_created = sosObj.DateFromUTC();
             time.setText("Created time :  " + time_created);
             group.setText("Group Name  : " + sosObj.getGroupName());
             name.setText("Make By  : " + sosObj.getMakeBy());

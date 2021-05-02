@@ -31,6 +31,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -95,7 +99,7 @@ public class SpecificEventActivity extends AppCompatActivity {
         mCreated.setText(mCurrentEvent.getCreatedBy());
         mDescribe.setText(mCurrentEvent.getScheduleObject().getDescription());
         try {
-            mDate.setText(mCurrentEvent.getScheduleObject().GetDate(mCurrentEvent.getCreatedTimezoneId(), TimeZone.getDefault().getID()));
+            mDate.setText(mCurrentEvent.getScheduleObject().GetDate(mCurrentEvent.getCreatedTimezoneId()));
         } catch (Exception e) {
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
         }
@@ -131,8 +135,7 @@ public class SpecificEventActivity extends AppCompatActivity {
                     RequestCode rq = mChoiceDB.appDatabase.requestDao().getById(mCurrentEvent.getEventId());
                     if (rq == null) {
                         setAlarmOn();
-                    }
-                    else{
+                    } else {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -276,7 +279,6 @@ public class SpecificEventActivity extends AppCompatActivity {
     }
 
     public void setAlarm(ScheduleObject scheduleObject, String createdZoneId) {
-
         if (scheduleObject != null) {
             AlarmManager alarmManager = (AlarmManager) getApplicationContext().getSystemService(Context.ALARM_SERVICE);
             Intent intent = new Intent(getApplicationContext(), MyAlarmReceiver.class);
@@ -286,14 +288,14 @@ public class SpecificEventActivity extends AppCompatActivity {
             intent.putExtra("groupId", mGroupId);
             intent.putExtra("ringEnable", AlarmType.RING);
             Random r = new Random();
-            Integer random = r.nextInt(1000);
+            int random = r.nextInt(1000);
             addRequestCodeToDb(random);
             PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), random, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-            Date calendar = ConvertTime(scheduleObject, createdZoneId, TimeZone.getDefault().getID());
-            Toast.makeText(this, calendar + "", Toast.LENGTH_SHORT).show();
+            ZonedDateTime zonedDateTime = ConvertTime(scheduleObject, createdZoneId);
+//            Toast.makeText(this, calendar + "", Toast.LENGTH_SHORT).show();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if (calendar.getTime() > System.currentTimeMillis()) {
-                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTime(), pendingIntent);
+                if (zonedDateTime.isAfter(ZonedDateTime.now(ZoneId.systemDefault()))) {
+                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, zonedDateTime.toEpochSecond() * 1000, pendingIntent);
                     Toast.makeText(this, "set Successfully", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -317,25 +319,36 @@ public class SpecificEventActivity extends AppCompatActivity {
         }).start();
     }
 
-    private Date ConvertTime(ScheduleObject scheduleObject, String mFrom_TimeZoneId, String mTo_TimezoneId) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.YEAR, Integer.parseInt(scheduleObject.getDateTime().getYear()));
-        calendar.set(Calendar.MONTH, Integer.parseInt(scheduleObject.getDateTime().getMonth()));
-        calendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(scheduleObject.getDateTime().getDay()));
-        calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(scheduleObject.getDateTime().getHour()));
-        calendar.set(Calendar.MINUTE, Integer.parseInt(scheduleObject.getDateTime().getMinute()));
-        calendar.set(Calendar.SECOND, 0);
-
-        TimeZone from = TimeZone.getTimeZone(mFrom_TimeZoneId);
-        TimeZone to = TimeZone.getTimeZone(mTo_TimezoneId);
-        int from_offset = from.getOffset(Calendar.ZONE_OFFSET);
-        int to_offset = to.getOffset(Calendar.ZONE_OFFSET);
-
-        int diff = to_offset - from_offset;
-
-        long time = calendar.getTimeInMillis() + diff;
-        Date newDate = new Date(time);
-        return newDate;
+    private ZonedDateTime ConvertTime(ScheduleObject scheduleObject, String mFrom_TimeZoneId) {
+        DateTime tmp = scheduleObject.getDateTime();
+        Instant instant = Instant.now();
+        ZonedDateTime source = instant.atZone(ZoneId.of(mFrom_TimeZoneId)).
+                withYear(Integer.parseInt(tmp.getYear())).
+                withMonth(Integer.parseInt(tmp.getMonth()) + 1).
+                withDayOfMonth(Integer.parseInt(tmp.getDay())).
+                withHour(Integer.parseInt(tmp.getHour())).
+                withMinute(Integer.parseInt(tmp.getMinute()))
+                .withSecond(0);
+        ZonedDateTime target = source.toInstant().atZone(ZoneId.systemDefault());
+        return target;
+//        Calendar calendar = Calendar.getInstance();
+//        calendar.set(Calendar.YEAR, Integer.parseInt(scheduleObject.getDateTime().getYear()));
+//        calendar.set(Calendar.MONTH, Integer.parseInt(scheduleObject.getDateTime().getMonth()));
+//        calendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(scheduleObject.getDateTime().getDay()));
+//        calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(scheduleObject.getDateTime().getHour()));
+//        calendar.set(Calendar.MINUTE, Integer.parseInt(scheduleObject.getDateTime().getMinute()));
+//        calendar.set(Calendar.SECOND, 0);
+//
+//        TimeZone from = TimeZone.getTimeZone(mFrom_TimeZoneId);
+//        TimeZone to = TimeZone.getTimeZone(mTo_TimezoneId);
+//        int from_offset = from.getOffset(Calendar.ZONE_OFFSET);
+//        int to_offset = to.getOffset(Calendar.ZONE_OFFSET);
+//
+//        int diff = to_offset - from_offset;
+//
+//        long time = calendar.getTimeInMillis() + diff;
+//        Date newDate = new Date(time);
+//        return newDate;
     }
 
     private void setAlarmOff() {

@@ -46,10 +46,15 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessaging;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.TimeZone;
 
 public class MainActivity extends AppCompatActivity {
@@ -232,24 +237,26 @@ public class MainActivity extends AppCompatActivity {
                             mGroupsRef.child(id).child("events").addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                    Event closest_event = null;
                                     if (snapshot.exists()) {
-                                        long min = Long.MAX_VALUE;
+                                        List<Event> newEvents = new ArrayList<>();
+                                        Event closest_event = null;
                                         Iterator iterator = snapshot.getChildren().iterator();
                                         while (iterator.hasNext()) {
                                             DataSnapshot dataSnapshot = (DataSnapshot) iterator.next();
                                             Event curr_event = dataSnapshot.getValue(Event.class);
-                                            long milisecond = curr_event.getTimeInMillisecond() * -1;
-                                            if (checkIfPassedDate(curr_event) && milisecond < min) {
-                                                min = milisecond;
-                                                closest_event = curr_event;
+                                            if (curr_event.getScheduleObject() != null && checkIfPassedDate(curr_event)) {
+                                                newEvents.add(curr_event);
                                             }
                                         }
+                                        Collections.sort(newEvents);
+                                        if (newEvents.size() > 0) {
+                                            closest_event = newEvents.get(0);
+                                        }
+                                        mGroupAdapter.add(name, closest_event, id);
                                     }
-                                    mGroupAdapter.add(name, closest_event, id);
+
                                     count[0]++;
                                     if (count[0] >= groupCount) {
-                                        Log.v("progress", "end" + " " + count[0] + " " + snapshot.getChildrenCount());
                                         progressBar_group_show.setVisibility(View.GONE);
                                     }
                                 }
@@ -655,9 +662,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean checkIfPassedDate(Event event) {
-        Date now = new Date();
-        Date eventConversion = event.getScheduleObject().GetDate_DateFormat(event.getCreatedTimezoneId(), TimeZone.getDefault().getID());
-        return now.before(eventConversion);
+//        Date now = new Date();
+        if (event.getScheduleObject() == null || event.getScheduleObject().getDateTime() == null || event.getScheduleObject().getDateTime().getYear() == null) {
+            Log.e("boolean   ", false + "");
+            return false;
+        }
+        DateTime tmp = event.getScheduleObject().getDateTime();
+        Instant instant = Instant.now();
+        ZonedDateTime source = instant.atZone(ZoneId.of(event.getCreatedTimezoneId())).
+                withYear(Integer.parseInt(tmp.getYear())).
+                withMonth(Integer.parseInt(tmp.getMonth()) + 1).
+                withDayOfMonth(Integer.parseInt(tmp.getDay())).
+                withHour(Integer.parseInt(tmp.getHour())).
+                withMinute(Integer.parseInt(tmp.getMinute()))
+                .withSecond(0);
+        ZonedDateTime target = source.toInstant().atZone(ZoneId.systemDefault());
+
+        return target.isAfter(ZonedDateTime.now(ZoneId.systemDefault()));
     }
+
 
 }

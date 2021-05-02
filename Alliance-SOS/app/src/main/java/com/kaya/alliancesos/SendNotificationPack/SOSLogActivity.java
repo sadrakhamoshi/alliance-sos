@@ -22,6 +22,8 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.kaya.alliancesos.EventLogActivity;
 import com.kaya.alliancesos.R;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -47,6 +49,7 @@ public class SOSLogActivity extends AppCompatActivity {
 
     private DatabaseReference mSosRef;
     private ValueEventListener mSosListener;
+    private boolean isAdmin;
 
 
     @Override
@@ -56,6 +59,28 @@ public class SOSLogActivity extends AppCompatActivity {
         getExtras();
         InitUi();
         Initialize();
+        CheckIsAdmin();
+    }
+
+    private void CheckIsAdmin() {
+        String current_user_id = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        FirebaseDatabase.getInstance().getReference().child("groups").child(mGroupId).child("members").child(current_user_id)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.exists()) {
+                            isAdmin = snapshot.child("canChangeGroupImage").getValue(Boolean.class);
+                        } else {
+                            isAdmin = false;
+                            Toast.makeText(SOSLogActivity.this, "Not Exist", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Toast.makeText(SOSLogActivity.this, "Error : " + error.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                });
     }
 
     private void Initialize() {
@@ -130,18 +155,27 @@ public class SOSLogActivity extends AppCompatActivity {
         builder.setPositiveButton("Delete it !!!", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                AlertDialog.Builder builderCooking = new AlertDialog.Builder(builder.getContext());
-                builderCooking.setTitle("Attention")
-                        .setIcon(R.drawable.delete_icon)
-                        .setMessage("Are You Sure You Want to Delete ?")
-                        .setNegativeButton("Cancel", null)
-                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                remove_sos_database(mSOSObjectList.get(position));
-                            }
-                        });
-                builderCooking.show();
+                if (!isAdmin) {
+                    AlertDialog.Builder builderCooking = new AlertDialog.Builder(builder.getContext());
+                    builderCooking.setIcon(R.drawable.close_icon)
+                            .setMessage("Sorry Only Admin can Edit SOS's log ...")
+                            .setNegativeButton("Ok", null);
+                    builderCooking.show();
+                } else {
+                    AlertDialog.Builder builderCooking = new AlertDialog.Builder(builder.getContext());
+                    builderCooking.setTitle("Attention")
+                            .setTitle("Note")
+                            .setIcon(R.drawable.delete_icon)
+                            .setMessage("Are You Sure You Want to Delete ?")
+                            .setNegativeButton("Cancel", null)
+                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    remove_sos_database(mSOSObjectList.get(position));
+                                }
+                            });
+                    builderCooking.show();
+                }
             }
         });
         builder.show();
@@ -200,7 +234,7 @@ public class SOSLogActivity extends AppCompatActivity {
     }
 
     private void setTimeCreated(TextView time_created, SOSObj sosObj) {
-        String current_local_time = sosObj.getDateFromUTC();
+        String current_local_time = sosObj.DateFromUTC();
         time_created.setText("Created time : " + current_local_time);
     }
 

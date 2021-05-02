@@ -1,5 +1,7 @@
 package com.kaya.alliancesos;
+
 import com.kaya.alliancesos.SendNotificationPack.DataToSend;
+
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -13,6 +15,14 @@ public class SOSObj {
     private String sosMessage;
     private String timeZone;
     private long timeStamp;
+
+    public String getTimeZone() {
+        return timeZone;
+    }
+
+    public void setTimeZone(String timeZone) {
+        this.timeZone = timeZone;
+    }
 
     public long getTimeStamp() {
         return timeStamp;
@@ -45,14 +55,13 @@ public class SOSObj {
         }
         this.sosId = obj.getSosId();
         this.timeZone = TimeZone.getDefault().getID();
-        this.timeStamp = Instant.now().getEpochSecond();
+        this.timeStamp = Instant.now().getEpochSecond() * 1000;
     }
 
-    public String getDateFromUTC() {
-        Instant instant = Instant.ofEpochSecond(this.timeStamp);
+    public String DateFromUTC() {
+        Instant instant = Instant.ofEpochMilli(this.timeStamp);
         ZonedDateTime ztd = instant.atZone(ZoneId.systemDefault());
-        String format = DateTimeFormatter.ofPattern("dd/MM/yyyy - HH:mm").format(ztd);
-        return format;
+        return DateTimeFormatter.ofPattern("dd/MM/yyyy - HH:mm").format(ztd);
     }
 
     public String getGroupName() {

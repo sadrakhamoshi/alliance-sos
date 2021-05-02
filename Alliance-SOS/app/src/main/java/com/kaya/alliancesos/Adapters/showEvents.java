@@ -44,7 +44,7 @@ public class showEvents extends RecyclerView.Adapter<showEvents.ViewHolder> {
         final Event curr = mEventList.get(position);
         holder.mTitle.setText(curr.getScheduleObject().getTitle());
         holder.mCreated.setText(curr.getCreatedBy());
-        String date = curr.getScheduleObject().GetDate(curr.getCreatedTimezoneId(), TimeZone.getDefault().getID());
+        String date = curr.getScheduleObject().GetDate(curr.getCreatedTimezoneId());
         holder.mDate.setText(date);
         holder.mRight.setOnClickListener(new View.OnClickListener() {
             @Override
