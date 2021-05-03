@@ -237,9 +237,9 @@ public class MainActivity extends AppCompatActivity {
                             mGroupsRef.child(id).child("events").addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    Event closest_event = null;
                                     if (snapshot.exists()) {
                                         List<Event> newEvents = new ArrayList<>();
-                                        Event closest_event = null;
                                         Iterator iterator = snapshot.getChildren().iterator();
                                         while (iterator.hasNext()) {
                                             DataSnapshot dataSnapshot = (DataSnapshot) iterator.next();
@@ -252,8 +252,8 @@ public class MainActivity extends AppCompatActivity {
                                         if (newEvents.size() > 0) {
                                             closest_event = newEvents.get(0);
                                         }
-                                        mGroupAdapter.add(name, closest_event, id);
                                     }
+                                    mGroupAdapter.add(name, closest_event, id);
 
                                     count[0]++;
                                     if (count[0] >= groupCount) {
