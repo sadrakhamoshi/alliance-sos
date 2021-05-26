@@ -22,9 +22,11 @@ public class SuccessfulActivity extends AppCompatActivity {
         textView = findViewById(R.id.green_check_txt);
         Intent intent = getIntent();
         if (intent != null) {
-            String info = intent.getStringExtra("info");
-            String[] tmp = info.replace("\"", "").replace("}", "").replace("{", "").split(":|,");
-            textView.setText("Your " + tmp[1] + " **** " + tmp[3] + " with Google Pay");
+            String last4 = intent.getStringExtra("last4");
+            String brand = intent.getStringExtra("brand");
+//            String info = intent.getStringExtra("info");
+//            String[] tmp = info.replace("\"", "").replace("}", "").replace("{", "").split(":|,");
+            textView.setText("Your " + brand + " **** " + last4);
         } else {
             finish();
         }

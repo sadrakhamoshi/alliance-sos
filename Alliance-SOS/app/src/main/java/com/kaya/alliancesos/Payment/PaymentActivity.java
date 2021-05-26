@@ -8,20 +8,32 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.ktx.Firebase;
 import com.kaya.alliancesos.Adapters.PriceAdapter;
 import com.kaya.alliancesos.GooglePay.PaymentsUtil;
 import com.kaya.alliancesos.GooglePay.SuccessfulActivity;
 import com.kaya.alliancesos.R;
+import com.kaya.alliancesos.Setting.ViewDialog;
+import com.kaya.alliancesos.StripePayment.FirebaseEphemeralKeyProvider;
 import com.kaya.alliancesos.Utils.MonthOption;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -39,16 +51,39 @@ import com.paypal.android.sdk.payments.PayPalPayment;
 import com.paypal.android.sdk.payments.PayPalService;
 import com.paypal.android.sdk.payments.PaymentConfirmation;
 import com.paypal.android.sdk.payments.ProofOfPayment;
+import com.stripe.android.CustomerSession;
+import com.stripe.android.PaymentConfiguration;
+import com.stripe.android.PaymentSession;
+import com.stripe.android.PaymentSessionConfig;
+import com.stripe.android.PaymentSessionData;
+import com.stripe.android.Stripe;
+import com.stripe.android.model.ConfirmPaymentIntentParams;
+import com.stripe.android.model.PaymentMethod;
+import com.stripe.android.view.BillingAddressFields;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 public class PaymentActivity extends AppCompatActivity {
+
+    public static HashMap<String, Integer> brandICON;
+
+    static {
+        brandICON = new HashMap<>();
+        brandICON.put("jbc", R.drawable.jbc);
+        brandICON.put("visa", R.drawable.visa);
+        brandICON.put("mastercard", R.drawable.mastercard);
+        brandICON.put("amex", R.drawable.amex);
+        brandICON.put("discover", R.drawable.discover);
+    }
 
     private String mUserId;
     private DatabaseReference mRoot;
@@ -63,19 +98,27 @@ public class PaymentActivity extends AppCompatActivity {
 
     private static final int PAY_WITH_PAYPAL = 615;
     private static final int PAY_WITH_GPAY = 250;
+    private static final int PAY_WITH_STRIPE = 254;
     private RadioGroup mMonthOption;
 
     private String[] mMonth_Option;
     private String mWhom;
     public static int mMonthIdx;
     private ProgressBar progressBar;
+    private String published_key = "pk_test_51IeaIzJ2RimLDeZyxbjwloO88VSIa19gq05m6eh7bygLxyjgnDtowM3aj7TVQ450k0wTNo81Nd1MZPyzNk3KewDn00iZqixZNk";
 
+
+    private PaymentSession mPaymentSession;
+    private PaymentMethod selectedPaymentMethod;
+    private Stripe mStripe;
+    private Button payButton, payment_selection;
+    private ViewDialog loadingDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment);
-
+        PaymentConfiguration.init(getApplicationContext(), published_key);
         StartPayPalService();
         Intent intent = getIntent();
         if (intent == null) {
@@ -87,7 +130,15 @@ public class PaymentActivity extends AppCompatActivity {
         }
         mWhom = MINE;
         mMonthIdx = 1;
+        InitializePaymentStuff();
         InitUI();
+        SetupPaymentSession();
+        payment_selection.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mPaymentSession.presentPaymentMethodSelection(null);
+            }
+        });
 
         mMonthOption.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
@@ -154,7 +205,7 @@ public class PaymentActivity extends AppCompatActivity {
 
         intent.putExtra(PayPalService.EXTRA_PAYPAL_CONFIGURATION, PayPalObject.config);
         intent.putExtra(com.paypal.android.sdk.payments.PaymentActivity.EXTRA_PAYMENT, payment);
-        startActivityForResult(intent, PAYMENT_REQ_PAYPAL);
+//        startActivityForResult(intent, PAYMENT_REQ_PAYPAL);
     }
 
     @Override
@@ -180,6 +231,9 @@ public class PaymentActivity extends AppCompatActivity {
     }
 
     private void InitUI() {
+        loadingDialog = new ViewDialog(this);
+        payment_selection = findViewById(R.id.payment_selection);
+        payButton = findViewById(R.id.payment_button);
         paypal_btn = findViewById(R.id.paypal_button);
         googlePaymentButton = findViewById(R.id.google_button);
 
@@ -194,7 +248,7 @@ public class PaymentActivity extends AppCompatActivity {
         mMonthOption = findViewById(R.id.radio_group_which);
         mMonth_Option = new String[13];
         for (int i = 0; i < mMonth_Option.length; i++) {
-            mMonth_Option[i] = MonthOption.months[i] + " Month , " + MonthOption.prices[i] + " $";
+            mMonth_Option[i] = MonthOption.months[i] + " Month , " + MonthOption.discount[i] + " $";
         }
     }
 
@@ -207,32 +261,33 @@ public class PaymentActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode != RESULT_OK) {
-            Toast.makeText(this, "not Okay " + resultCode, Toast.LENGTH_SHORT).show();
-            return;
-        }
-        if (requestCode == LOAD_PAYMENT_DATA_REQUEST_CODE) {
-            Toast.makeText(this, "Make ....", Toast.LENGTH_SHORT).show();
-            PaymentData paymentData = PaymentData.getFromIntent(data);
-            handlePaymentSuccess(paymentData);
-
-        } else if (resultCode == RESULT_OK && requestCode == PAYMENT_REQ_PAYPAL) {
-            PaymentConfirmation confirm = data.getParcelableExtra(com.paypal.android.sdk.payments.PaymentActivity.EXTRA_RESULT_CONFIRMATION);
-            if (confirm != null) {
-                ProofOfPayment tmp = confirm.getProofOfPayment();
-                PaymentDialog(true, "Successfully done, Thanks for Donation :D \n" +
-                        "State : " + tmp.getState() + "\n" + "Time : " + tmp.getCreateTime() + "\n" + "TransactionId : " + tmp.getTransactionId() + "\n");
-                //add to database
-                if (mWhom == MINE)
-                    attachToDatabase(mUserId);
-            } else {
-                PaymentDialog(false, "Something went wrong ...");
-            }
-        } else if (requestCode == com.paypal.android.sdk.payments.PaymentActivity.RESULT_EXTRAS_INVALID) {
-            Toast.makeText(this, "Invalid Code Try again", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(this, "Not Code " + requestCode + " " + resultCode, Toast.LENGTH_SHORT).show();
-        }
+        mPaymentSession.handlePaymentData(requestCode, resultCode, data);
+//        if (resultCode != RESULT_OK) {
+//            Toast.makeText(this, "not Okay " + resultCode, Toast.LENGTH_SHORT).show();
+//            return;
+//        }
+//        if (requestCode == LOAD_PAYMENT_DATA_REQUEST_CODE) {
+//            Toast.makeText(this, "Make ....", Toast.LENGTH_SHORT).show();
+//            PaymentData paymentData = PaymentData.getFromIntent(data);
+//            handlePaymentSuccess(paymentData);
+//
+//        } else if (resultCode == RESULT_OK && requestCode == PAYMENT_REQ_PAYPAL) {
+//            PaymentConfirmation confirm = data.getParcelableExtra(com.paypal.android.sdk.payments.PaymentActivity.EXTRA_RESULT_CONFIRMATION);
+//            if (confirm != null) {
+//                ProofOfPayment tmp = confirm.getProofOfPayment();
+//                PaymentDialog(true, "Successfully done, Thanks for Donation :D \n" +
+//                        "State : " + tmp.getState() + "\n" + "Time : " + tmp.getCreateTime() + "\n" + "TransactionId : " + tmp.getTransactionId() + "\n");
+//                //add to database
+//                if (mWhom == MINE)
+//                    attachToDatabase(mUserId);
+//            } else {
+//                PaymentDialog(false, "Something went wrong ...");
+//            }
+//        } else if (requestCode == com.paypal.android.sdk.payments.PaymentActivity.RESULT_EXTRAS_INVALID) {
+//            Toast.makeText(this, "Invalid Code Try again", Toast.LENGTH_SHORT).show();
+//        } else {
+//            Toast.makeText(this, "Not Code " + requestCode + " " + resultCode, Toast.LENGTH_SHORT).show();
+//        }
     }
 
     private void handlePaymentSuccess(PaymentData paymentData) {
@@ -273,12 +328,14 @@ public class PaymentActivity extends AppCompatActivity {
         builder.setCancelable(false);
         String message = "Option : " + MonthOption.months[mMonthIdx] + " Month" + "\n";
         message += ("Price : " + mMonth_Option[mMonthIdx] + "\n");
-        message += ("For : " + mWhom + "\n");
+//        message += ("For : " + mWhom + "\n");
+        assert selectedPaymentMethod.card != null;
+        message += ("Card  :  **** " + selectedPaymentMethod.card.last4 + "  " + selectedPaymentMethod.card.brand + "\n");
+        message += ("Card Expired  :  " + selectedPaymentMethod.card.expiryMonth + "\\" + selectedPaymentMethod.card.expiryYear + "\n");
         builder.setMessage(message);
         builder.setPositiveButton("Let's PAY", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                //ExpiredFunc(mWhom, code);
                 checkIfExpired(mUserId, code);
             }
         });
@@ -293,17 +350,19 @@ public class PaymentActivity extends AppCompatActivity {
 
 
     private void checkIfExpired(final String uId, final int code) {
-        progressBar.setVisibility(View.VISIBLE);
+//        progressBar.setVisibility(View.VISIBLE);
+        loadingDialog.showDialog();
         mRoot.child("payment").child(uId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
                     PaymentObject paymentObject = snapshot.getValue(PaymentObject.class);
                     if (!paymentObject.expired()) {
-                        progressBar.setVisibility(View.GONE);
+//                        progressBar.setVisibility(View.GONE);
+                        loadingDialog.hideDialog();
                         Toast.makeText(PaymentActivity.this, "Your Charge Has not Finished Yet!!!", Toast.LENGTH_SHORT).show();
                     } else {
-                        progressBar.setVisibility(View.GONE);
+//                        progressBar.setVisibility(View.GONE);
                         if (code == PAY_WITH_PAYPAL)
                             PayingWithPayPalFunc();
                         else if (code == PAY_WITH_GPAY) {
@@ -311,17 +370,21 @@ public class PaymentActivity extends AppCompatActivity {
                                 requestPayment();
                                 Toast.makeText(PaymentActivity.this, "Pay by GPay", Toast.LENGTH_SHORT).show();
                             }
+                        } else if (code == PAY_WITH_STRIPE) {
+                            confirmPayment(selectedPaymentMethod.id);
                         }
                     }
                 } else {
-                    progressBar.setVisibility(View.GONE);
+//                    progressBar.setVisibility(View.GONE);
+                    loadingDialog.hideDialog();
                     Toast.makeText(PaymentActivity.this, "User Not Valid", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                progressBar.setVisibility(View.GONE);
+//                progressBar.setVisibility(View.GONE);
+                loadingDialog.hideDialog();
                 Toast.makeText(PaymentActivity.this, "Error on CheckExpired: " + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
@@ -392,4 +455,119 @@ public class PaymentActivity extends AppCompatActivity {
         intent.putExtra("info", info);
         startActivity(intent);
     }
+
+    private void InitializePaymentStuff() {
+        mStripe = new Stripe(getApplicationContext(), published_key);
+    }
+
+    public void Handle_Payment(View view) {
+        if (selectedPaymentMethod != null) {
+            DialogForSubmit(PAY_WITH_STRIPE);
+        }
+    }
+
+    private void SetupPaymentSession() {
+        CustomerSession.initCustomerSession(getApplicationContext(), new FirebaseEphemeralKeyProvider());
+        mPaymentSession = new PaymentSession(this, new PaymentSessionConfig.Builder().setShippingInfoRequired(false)
+                .setShippingMethodsRequired(false)
+                .setBillingAddressFields(BillingAddressFields.None)
+                .setShouldShowGooglePay(true)
+                .build());
+        mPaymentSession.init(new PaymentSession.PaymentSessionListener() {
+            @Override
+            public void onCommunicatingStateChanged(boolean b) {
+                Log.e("striperror", "is communicating  : " + b);
+            }
+
+            @Override
+            public void onError(int i, @NotNull String s) {
+                Log.e("striperror", s);
+            }
+
+            @Override
+            public void onPaymentSessionDataChanged(@NotNull PaymentSessionData paymentSessionData) {
+                Log.e("striperror", "On PaymentSession DataChange");
+                if (paymentSessionData.isPaymentReadyToCharge()) {
+                    Toast.makeText(PaymentActivity.this, "Enabled ", Toast.LENGTH_SHORT).show();
+                    Log.e("striperror", "On PaymentSession DataChange : ready to charge");
+                    payButton.setEnabled(true);
+                    if (paymentSessionData.getPaymentMethod() != null) {
+                        selectedPaymentMethod = paymentSessionData.getPaymentMethod();
+                        assert selectedPaymentMethod.card != null;
+                        Log.e("striperror", selectedPaymentMethod.card + "\n" + selectedPaymentMethod);
+                        String card = "**** " + selectedPaymentMethod.card.last4;
+                        payment_selection.setText(card);
+                        Drawable img = getApplicationContext().getResources().getDrawable(brandICON.
+                                get(selectedPaymentMethod.card.brand.toLowerCase()), null);
+                        img.setBounds(0, 0, 150, 150);
+                        payment_selection.setCompoundDrawables(img, null, null, null);
+                    } else {
+                        Log.e("striperror", "On PaymentSession DataChange : Error : paymentMethod is null");
+                    }
+                } else {
+                    payButton.setEnabled(false);
+                    Toast.makeText(PaymentActivity.this, "Not Enabled + " + paymentSessionData.getPaymentMethod(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    private void confirmPayment(String selectedPaymentMethodId) {
+        String price = MonthOption.discount[mMonthIdx];
+        double priceCents = Double.parseDouble(price);
+
+        payButton.setEnabled(false);
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        CollectionReference paymentCollection = db.collection("stripe_customers").document(mUserId).collection("payments");
+        HashMap<String, Object> object = new HashMap<>();
+        object.put("amount", (int) (priceCents * 100));
+        object.put("currency", "usd");
+        paymentCollection.add(object).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+            @Override
+            public void onSuccess(DocumentReference documentReference) {
+                documentReference.addSnapshotListener(new EventListener<DocumentSnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
+                        if (error != null) {
+//                            progressBar.setVisibility(View.GONE);
+                            loadingDialog.hideDialog();
+                            payButton.setEnabled(true);
+                            Toast.makeText(PaymentActivity.this, "Firebase_Firestoree Error " + error, Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        if (value != null && value.exists()) {
+                            if (value.getData().get("client_secret") != null) {
+                                String client_secret = Objects.requireNonNull(value.getData().get("client_secret")).toString();
+                                mStripe.confirmPayment(PaymentActivity.this, ConfirmPaymentIntentParams.createWithPaymentMethodId(
+                                        selectedPaymentMethodId, client_secret
+                                ));
+//                                progressBar.setVisibility(View.GONE);
+                                Intent toSuccess = new Intent(getApplicationContext(), SuccessfulActivity.class);
+                                toSuccess.putExtra("last4", selectedPaymentMethod.card.last4);
+                                toSuccess.putExtra("brand", selectedPaymentMethod.card.brand);
+                                startActivity(toSuccess);
+//                                PaymentDialog(true, "Successfully Done, Thanks for Donation :D \n");
+                            }
+                            payButton.setEnabled(true);
+                            loadingDialog.hideDialog();
+                        } else {
+//                            progressBar.setVisibility(View.GONE);
+                            loadingDialog.hideDialog();
+                            payButton.setEnabled(true);
+                            Toast.makeText(PaymentActivity.this, "Current payment intent : null", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                payButton.setEnabled(true);
+//                progressBar.setVisibility(View.GONE);
+                loadingDialog.hideDialog();
+                Toast.makeText(PaymentActivity.this, "ON Failure " + e, Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
 }

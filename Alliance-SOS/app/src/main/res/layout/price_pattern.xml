@@ -24,12 +24,12 @@
 
     <TextView
         android:id="@+id/month_transfer"
+        android:fontFamily="sans-serif-condensed-light"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:textDirection="ltr"
         android:textSize="20sp"
-        android:textStyle="bold"
         tools:text="dffdfdf" />
 
     <TextView

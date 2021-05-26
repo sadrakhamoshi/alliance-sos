@@ -1,46 +1,35 @@
 {
   "project_info": {
-    "project_number": "688533685851",
-    "firebase_url": "https://test-alliancesos-default-rtdb.firebaseio.com",
-    "project_id": "test-alliancesos",
-    "storage_bucket": "test-alliancesos.appspot.com"
+    "project_number": "688414675407",
+    "firebase_url": "https://alliance-sos-e6e06-default-rtdb.firebaseio.com",
+    "project_id": "alliance-sos-e6e06",
+    "storage_bucket": "alliance-sos-e6e06.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:688533685851:android:666263c40df34d887e217e",
+        "mobilesdk_app_id": "1:688414675407:android:81039665bb0b2f5f2002ba",
         "android_client_info": {
           "package_name": "com.kaya.alliancesos"
         }
       },
       "oauth_client": [
         {
-          "client_id": "688533685851-3qitsmjigp1dukn5c7ampuccjdckbgus.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.kaya.alliancesos",
-            "certificate_hash": "2bcedd41afdf616e51822c6179f91a98dabb628a"
-          }
+          "client_id": "688414675407-qjaff1ojdpj87v4a4f0na6s4p1tilmnf.apps.googleusercontent.com",
+          "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyB3yhhLHAl9rhBfBTKSBylOqNY-AJQ-nXc"
+          "current_key": "AIzaSyDAd6tMZeZE_R8ML_bXhzbdRDMnrQVsrgI"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "688533685851-8n0r119hnhl2hqj6vk8gbacd3947ajgm.apps.googleusercontent.com",
+              "client_id": "688414675407-qjaff1ojdpj87v4a4f0na6s4p1tilmnf.apps.googleusercontent.com",
               "client_type": 3
-            },
-            {
-              "client_id": "688533685851-cpmsts7bvakk8fo5v8hnv9mrs7lvgojr.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.future.alliancesos"
-              }
             }
           ]
         }

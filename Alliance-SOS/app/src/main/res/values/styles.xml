@@ -9,9 +9,8 @@
 
     <style name="AlertDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
         <item name="android:layoutDirection">ltr</item>
-        <item name="android:textStyle">italic</item>
-
-        <item name="android:colorBackground">@color/gray</item>
+        <item name="android:fontFamily">sans-serif-condensed-light</item>
+        <item name="android:colorBackground">#CCFFF7F7</item>
     </style>
 
     <style name="ToolbarTheme" parent="@style/ThemeOverlay.AppCompat.Dark.ActionBar">

@@ -69,7 +69,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="15dp"
-                android:buttonTint="@color/colorAccent"
+                android:buttonTint="@color/white"
                 android:text="1 Month ($ 2.69)"
                 android:textColor="#FFFFFF"
                 android:textSize="22sp"
@@ -81,7 +81,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="15dp"
-                android:buttonTint="@color/colorAccent"
+                android:buttonTint="@color/white"
                 android:text="@string/six_month_strik"
                 android:textColor="#FFFFFF"
                 android:textSize="22sp"
@@ -93,7 +93,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="15dp"
-                android:buttonTint="@color/colorAccent"
+                android:buttonTint="@color/white"
                 android:text="@string/tweleve_month_strik"
                 android:textColor="#FFFFFF"
                 android:textSize="22sp"
@@ -105,7 +105,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
-                android:buttonTint="@color/colorAccent"
+                android:buttonTint="@color/white"
                 android:onClick="clickOnOtherOption"
                 android:text="Other Options "
                 android:textColor="#FFFFFF"
@@ -139,12 +139,48 @@
             android:src="@drawable/paypal"
             android:textColor="#FFF7F7"
             android:textStyle="bold"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/payment_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="50dp"
+            android:layout_marginBottom="20dp"
+            android:background="@drawable/payment_select"
+            android:drawableRight="@drawable/payment_icon"
+            android:drawablePadding="15dp"
+            android:fontFamily="sans-serif-condensed"
+            android:onClick="Handle_Payment"
+            android:paddingLeft="60dp"
+            android:paddingRight="60dp"
+            android:text="Pay"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
             android:visibility="visible" />
+
+        <Button
+            android:id="@+id/payment_selection"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/method_select"
+            android:drawablePadding="15dp"
+            android:fontFamily="sans-serif-condensed-light"
+            android:paddingLeft="60dp"
+            android:paddingRight="60dp"
+            android:text="Payment Selection"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="19sp"
+            android:visibility="visible" />
+
 
         <include
             android:id="@+id/google_button"
             layout="@layout/googlepay_button"
-            android:visibility="visible" />
+            android:visibility="gone" />
 
     </LinearLayout>
 
