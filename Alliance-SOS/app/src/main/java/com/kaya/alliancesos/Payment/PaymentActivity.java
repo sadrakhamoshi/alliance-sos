@@ -105,7 +105,7 @@ public class PaymentActivity extends AppCompatActivity {
     private String mWhom;
     public static int mMonthIdx;
     private ProgressBar progressBar;
-    private String published_key = "pk_test_51IeaIzJ2RimLDeZyxbjwloO88VSIa19gq05m6eh7bygLxyjgnDtowM3aj7TVQ450k0wTNo81Nd1MZPyzNk3KewDn00iZqixZNk";
+    private String published_key = "pk_test_51IPF0AJZo4v0lsceC3kPlSHhiEnykkh32b3ezO0ldM4R4kEdtvvKTgZGyDBqAyrLW7IQeeh6M7Uq60JqaLbiS3AL00QrGwAv4P";
 
 
     private PaymentSession mPaymentSession;
@@ -413,18 +413,21 @@ public class PaymentActivity extends AppCompatActivity {
         }
     }
 
-    private void attachToDatabase(String uId) {
-        progressBar.setVisibility(View.VISIBLE);
+    private void attachToDatabase() {
         PaymentObject object = new PaymentObject(true, MonthOption.months[mMonthIdx] + "");
-        mRoot.child("payment").child(uId).setValue(object).addOnCompleteListener(new OnCompleteListener<Void>() {
+        mRoot.child("payment").child(mUserId).setValue(object).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
 
-                if (task.isSuccessful())
-                    Toast.makeText(PaymentActivity.this, "Payment Was Successful", Toast.LENGTH_SHORT).show();
-                else
+                if (task.isSuccessful()) {
+                    Intent toSuccess = new Intent(getApplicationContext(), SuccessfulActivity.class);
+                    toSuccess.putExtra("last4", selectedPaymentMethod.card.last4);
+                    toSuccess.putExtra("brand", selectedPaymentMethod.card.brand);
+                    startActivity(toSuccess);
+                } else
                     Toast.makeText(PaymentActivity.this, "Error " + task.getException(), Toast.LENGTH_SHORT).show();
-                progressBar.setVisibility(View.GONE);
+                payButton.setEnabled(true);
+                loadingDialog.hideDialog();
             }
         });
     }
@@ -541,15 +544,10 @@ public class PaymentActivity extends AppCompatActivity {
                                 mStripe.confirmPayment(PaymentActivity.this, ConfirmPaymentIntentParams.createWithPaymentMethodId(
                                         selectedPaymentMethodId, client_secret
                                 ));
-//                                progressBar.setVisibility(View.GONE);
-                                Intent toSuccess = new Intent(getApplicationContext(), SuccessfulActivity.class);
-                                toSuccess.putExtra("last4", selectedPaymentMethod.card.last4);
-                                toSuccess.putExtra("brand", selectedPaymentMethod.card.brand);
-                                startActivity(toSuccess);
-//                                PaymentDialog(true, "Successfully Done, Thanks for Donation :D \n");
+                                attachToDatabase();
                             }
-                            payButton.setEnabled(true);
-                            loadingDialog.hideDialog();
+//                            payButton.setEnabled(true);
+//                            loadingDialog.hideDialog();
                         } else {
 //                            progressBar.setVisibility(View.GONE);
                             loadingDialog.hideDialog();
