@@ -360,7 +360,23 @@ public class PaymentActivity extends AppCompatActivity {
                     if (!paymentObject.expired()) {
 //                        progressBar.setVisibility(View.GONE);
                         loadingDialog.hideDialog();
-                        Toast.makeText(PaymentActivity.this, "Your Charge Has not Finished Yet!!!", Toast.LENGTH_SHORT).show();
+                        AlertDialog.Builder builder = new AlertDialog.Builder(PaymentActivity.this, R.style.AlertDialog);
+                        builder.setTitle("Attention!!!");
+                        builder.setIcon(R.drawable.close_icon);
+                        builder.setMessage("Your Charge Has not Finished Yet. Are You Sure You Want to Recharge Your Account ?");
+                        builder.setNegativeButton("Cancel", null);
+                        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                loadingDialog.showDialog();
+                                if (code == PAY_WITH_STRIPE) {
+                                    confirmPayment(selectedPaymentMethod.id);
+                                }
+                            }
+                        });
+                        builder.create().show();
+//                        loadingDialog.hideDialog();
+//                        Toast.makeText(PaymentActivity.this, "Your Charge Has not Finished Yet!!!", Toast.LENGTH_LONG).show();
                     } else {
 //                        progressBar.setVisibility(View.GONE);
                         if (code == PAY_WITH_PAYPAL)
