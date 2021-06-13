@@ -105,7 +105,7 @@ public class PaymentActivity extends AppCompatActivity {
     private String mWhom;
     public static int mMonthIdx;
     private ProgressBar progressBar;
-    private String published_key = "pk_test_51IPF0AJZo4v0lsceC3kPlSHhiEnykkh32b3ezO0ldM4R4kEdtvvKTgZGyDBqAyrLW7IQeeh6M7Uq60JqaLbiS3AL00QrGwAv4P";
+    private String published_key = "pk_live_51IPF0AJZo4v0lsceuBXoC3FdOjfxC50XQxUj5l8SHuqUPRscxJoZrS1tChxm5j9UGaCUCAgKG5gz5On6nFgsdUHz0006OtASXx";
 
 
     private PaymentSession mPaymentSession;
